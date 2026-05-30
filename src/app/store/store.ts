@@ -1,16 +1,11 @@
-import { configureStore } from "@reduxjs/toolkit";
-import { baseApi } from "@/shared/api/baseApi";
+import { configureStore } from '@reduxjs/toolkit';
+import { cartReducer } from '@/entities/cart';
 
-export const makeStore = () => {
-  return configureStore({
-    reducer: {
-      [baseApi.reducerPath]: baseApi.reducer,
-    },
-    middleware: (getDefaultMiddleware) =>
-      getDefaultMiddleware().concat(baseApi.middleware),
-  });
-};
+export const store = configureStore({
+  reducer: {
+    cart: cartReducer,
+  },
+});
 
-export type AppStore = ReturnType<typeof makeStore>;
-export type RootState = ReturnType<AppStore["getState"]>;
-export type AppDispatch = AppStore["dispatch"];
+export type RootState = ReturnType<typeof store.getState>;
+export type AppDispatch = typeof store.dispatch;
