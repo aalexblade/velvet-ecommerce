@@ -39,7 +39,7 @@ export function Header() {
         "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
         isScrolled
           ? "bg-background text-foreground shadow-sm border-b border-border py-3"
-          : "bg-neutral-400/40 text-white py-5"
+          : "bg-transparent text-white py-5"
       )}
     >
       <div className="container mx-auto px-4">

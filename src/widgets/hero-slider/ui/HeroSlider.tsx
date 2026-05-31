@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import Autoplay from "embla-carousel-autoplay"
 import {
   Carousel,
   CarouselContent,
@@ -32,6 +33,11 @@ export const HeroSlider = () => {
   const [api, setApi] = React.useState<CarouselApi>()
   const [current, setCurrent] = React.useState(0)
 
+  // Autoplay plugin initialization
+  const autoplayPlugin = React.useRef(
+    Autoplay({ delay: 4000, stopOnInteraction: true })
+  )
+
   React.useEffect(() => {
     if (!api) return
 
@@ -43,12 +49,17 @@ export const HeroSlider = () => {
   }, [api])
 
   return (
-    <section className="relative w-full overflow-hidden">
-      <Carousel setApi={setApi} className="w-full" opts={{ loop: true }}>
-        <CarouselContent className="ml-0">
+    <section className="relative w-full h-screen overflow-hidden">
+      <Carousel 
+        setApi={setApi} 
+        className="w-full h-full" 
+        opts={{ loop: true }}
+        plugins={[autoplayPlugin.current]}
+      >
+        <CarouselContent className="ml-0 h-full">
           {slides.map((slide, index) => (
-            <CarouselItem key={index} className="pl-0">
-              <div className="relative h-[calc(100vh-5rem)] min-h-[600px] w-full bg-stone-800 flex items-center">
+            <CarouselItem key={index} className="pl-0 h-full">
+              <div className="relative h-screen w-full bg-stone-800 flex items-center pt-24 md:pt-32">
                 {/* Aesthetic Radial Gradient Overlay */}
                 <div 
                   className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-stone-800/20 via-stone-900/60 to-stone-950/90 z-0" 
