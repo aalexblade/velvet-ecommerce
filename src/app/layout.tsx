@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Manrope } from "next/font/google";
 import StoreProvider from "./providers/StoreProvider";
+import { Header } from "@/widgets/header";
 import "./globals.css";
 
 const fontSans = Manrope({
@@ -21,7 +22,10 @@ export default function RootLayout({
   return (
     <html lang="uk" suppressHydrationWarning>
       <body className={`${fontSans.variable} antialiased`}>
-        <StoreProvider>{children}</StoreProvider>
+        <StoreProvider>
+          <Header />
+          {children}
+        </StoreProvider>
       </body>
     </html>
   );

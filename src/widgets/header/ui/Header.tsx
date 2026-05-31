@@ -2,8 +2,10 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useSelector } from "react-redux";
 import { Search, Heart, ShoppingBag, User, Menu, X } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
+import { RootState } from "@/app/store/store";
 
 const NAV_LINKS = [
   { label: "Новинки", href: "/catalog/new" },
@@ -17,6 +19,7 @@ const NAV_LINKS = [
 export function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const cartItemsCount = useSelector((state: RootState) => state.cart.items.length);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -103,6 +106,11 @@ export function Header() {
               aria-label="Cart"
             >
               <ShoppingBag size={20} />
+              {cartItemsCount > 0 && (
+                <span className="bg-accent text-white rounded-full text-[10px] w-4 h-4 flex items-center justify-center absolute top-0 right-0">
+                  {cartItemsCount}
+                </span>
+              )}
             </Link>
           </div>
         </div>
