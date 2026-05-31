@@ -1,16 +1,11 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Manrope } from "next/font/google";
 import StoreProvider from "./providers/StoreProvider";
 import "./globals.css";
 
-const fontSans = Geist({
-  subsets: ["latin"],
+const fontSans = Manrope({
+  subsets: ["latin", "cyrillic"],
   variable: "--font-sans",
-});
-
-const fontMono = Geist_Mono({
-  subsets: ["latin"],
-  variable: "--font-mono",
 });
 
 export const metadata: Metadata = {
@@ -25,7 +20,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="uk" suppressHydrationWarning>
-      <body className={`${fontSans.variable} ${fontMono.variable} antialiased`}>
+      <body className={`${fontSans.variable} antialiased`}>
         <StoreProvider>{children}</StoreProvider>
       </body>
     </html>
