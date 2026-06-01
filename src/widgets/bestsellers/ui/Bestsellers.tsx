@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { StaticImageData } from "next/image"
 import { ProductCard } from "@/entities/product"
 import {
   Carousel,
@@ -10,7 +11,14 @@ import {
 } from "@/shared/ui/carousel"
 import { cn } from "@/shared/lib/utils"
 
-const BESTSELLERS_DATA = [
+interface BestsellerProduct {
+  id: string;
+  title: string;
+  price: number;
+  imageUrl: string | StaticImageData;
+}
+
+const BESTSELLERS_DATA: BestsellerProduct[] = [
   {
     id: "1",
     title: "Бюстгальтер бежевий, push-up",
@@ -42,18 +50,28 @@ export const Bestsellers = () => {
   const [current, setCurrent] = React.useState(0)
 
   React.useEffect(() => {
-    if (!api) return
-    setCurrent(api.selectedScrollSnap())
-    api.on("select", () => {
-      setCurrent(api.selectedScrollSnap())
-    })
+    if (!api) return;
+
+    const onSelect = () => {
+      setCurrent(api.selectedScrollSnap());
+    };
+
+    // Sync initial state and attach listeners safely
+    onSelect();
+    api.on("select", onSelect);
+    api.on("init", onSelect);
+
+    return () => {
+      api.off("select", onSelect);
+      api.off("init", onSelect);
+    };
   }, [api])
 
   return (
     <section className="w-full max-w-7xl mx-auto px-4 py-16 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-stretch">
       
       {/* Left side column (Promo banner box) - Hidden on mobile/tablet */}
-      <div className="relative w-full h-full min-h-[450px] rounded-lg overflow-hidden bg-stone-100 hidden lg:block">
+      <div className="relative w-full h-full min-h-112 rounded-lg overflow-hidden bg-stone-100 hidden lg:block">
         <div className="absolute inset-0 flex items-center justify-center text-stone-400 font-sans uppercase tracking-[0.2em]">
           Promo Banner
         </div>

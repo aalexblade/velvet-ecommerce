@@ -1,11 +1,11 @@
 import React, { ReactNode } from 'react';
-import Image from 'next/image';
+import Image, { StaticImageData } from 'next/image';
 import { cn } from '@/shared/lib/utils';
 
 interface ProductCardProps {
   title: ReactNode;
   price: string;
-  image: any;
+  image: string | StaticImageData;
   className?: string;
 }
 
