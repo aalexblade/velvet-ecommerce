@@ -1,5 +1,6 @@
 import { HeroSlider } from "@/widgets/hero-slider";
 import { Bestsellers } from "@/widgets/bestsellers";
+import { PromoLook } from "@/widgets/promo-look";
 
 export default async function HomePage() {
   return (
@@ -8,6 +9,7 @@ export default async function HomePage() {
 
       <div className="w-full">
         <Bestsellers />
+        <PromoLook />
       </div>
     </main>
   );
