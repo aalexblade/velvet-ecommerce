@@ -1,8 +1,37 @@
+export type ProductColor =
+  | "White"
+  | "Smoky White"
+  | "Lavender"
+  | "Creamy Yellow"
+  | "Cream"
+  | "Creamy Velvet"
+  | "Peach"
+  | "Cotton Candy"
+  | "Pale Purple"
+  | "Eggplant"
+  | "Cherry"
+  | "Dark Violet"
+  | "Plum"
+  | "Ruby"
+  | "Wine Red"
+  | "Magenta"
+  | "Red"
+  | "Mahogany Brown"
+  | "Magic Mint"
+  | "Emerald"
+  | "Pearl Green"
+  | "Azure Blue"
+  | "Denim Blue"
+  | "Midnight Blue"
+  | "Raw Umber"
+  | "Dark"
+  | "Black";
+
 export interface ProductVariant {
   id: string;
   product_id: string;
   sku: string;
-  color: string;
+  color: ProductColor;
   size: string;
   price: number;
   old_price: number | null;
