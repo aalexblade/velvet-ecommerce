@@ -1,7 +1,9 @@
 import { HeroSlider } from "@/widgets/hero-slider";
 import { Bestsellers } from "@/widgets/bestsellers";
+import { DiscountBanner } from "@/widgets/discount-banner";
 import { PromoLook } from "@/widgets/promo-look";
 import { SizeCalculator } from "@/widgets/size-calculator";
+
 
 export default async function HomePage() {
   return (
@@ -10,9 +12,11 @@ export default async function HomePage() {
 
       <div className="w-full flex flex-col">
         <Bestsellers />
+        <DiscountBanner />
         <PromoLook />
         <SizeCalculator />
       </div>
     </main>
   );
 }
+
