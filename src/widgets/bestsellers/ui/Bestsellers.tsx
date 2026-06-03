@@ -1,8 +1,8 @@
 "use client"
 
 import * as React from "react"
-import { StaticImageData } from "next/image"
 import { ProductCard } from "@/entities/product"
+import { Product } from "@/entities/product/model/types"
 import {
   Carousel,
   CarouselContent,
@@ -11,37 +11,66 @@ import {
 } from "@/shared/ui/carousel"
 import { cn } from "@/shared/lib/utils"
 
-interface BestsellerProduct {
-  id: string;
-  title: string;
-  price: number;
-  imageUrl: string | StaticImageData;
-}
-
-const BESTSELLERS_DATA: BestsellerProduct[] = [
+const BESTSELLERS_DATA: Product[] = [
   {
     id: "1",
     title: "Бюстгальтер бежевий, push-up",
-    price: 1249,
-    imageUrl: "/next.svg",
+    slug: "bra-beige-push-up",
+    description: "Бюстгальтер бежевий, push-up",
+    category_id: 1,
+    is_active: true,
+    created_at: new Date().toISOString(),
+    images: [
+      { id: 1, product_id: "1", variant_id: null, url: "/next.svg", is_main: true, sort_order: 1 }
+    ],
+    variants: [
+      { id: "v1", product_id: "1", sku: "BBP-001", color: "Black", size: "M", price: 1249, old_price: null, stock: 10 }
+    ]
   },
   {
     id: "2",
     title: "Бюстгальтер бралет, чорний push-up",
-    price: 1700,
-    imageUrl: "/next.svg",
+    slug: "bra-bralet-black-push-up",
+    description: "Бюстгальтер бралет, чорний push-up",
+    category_id: 1,
+    is_active: true,
+    created_at: new Date().toISOString(),
+    images: [
+      { id: 2, product_id: "2", variant_id: null, url: "/next.svg", is_main: true, sort_order: 1 }
+    ],
+    variants: [
+      { id: "v2", product_id: "2", sku: "BBB-002", color: "Black", size: "M", price: 1700, old_price: null, stock: 10 }
+    ]
   },
   {
     id: "3",
     title: "Бюстгальтер бралет, чорний",
-    price: 1349,
-    imageUrl: "/next.svg",
+    slug: "bra-bralet-black",
+    description: "Бюстгальтер бралет, чорний",
+    category_id: 1,
+    is_active: true,
+    created_at: new Date().toISOString(),
+    images: [
+      { id: 3, product_id: "3", variant_id: null, url: "/next.svg", is_main: true, sort_order: 1 }
+    ],
+    variants: [
+      { id: "v3", product_id: "3", sku: "BB-003", color: "Black", size: "M", price: 1349, old_price: null, stock: 10 }
+    ]
   },
   {
     id: "4",
     title: "Бюстгальтер бежевий, базовий",
-    price: 1100,
-    imageUrl: "/next.svg",
+    slug: "bra-beige-basic",
+    description: "Бюстгальтер бежевий, базовий",
+    category_id: 1,
+    is_active: true,
+    created_at: new Date().toISOString(),
+    images: [
+      { id: 4, product_id: "4", variant_id: null, url: "/next.svg", is_main: true, sort_order: 1 }
+    ],
+    variants: [
+      { id: "v4", product_id: "4", sku: "BBB-004", color: "Black", size: "M", price: 1100, old_price: null, stock: 10 }
+    ]
   },
 ]
 
@@ -56,7 +85,6 @@ export const Bestsellers = () => {
       setCurrent(api.selectedScrollSnap());
     };
 
-    // Sync initial state and attach listeners safely
     onSelect();
     api.on("select", onSelect);
     api.on("init", onSelect);
@@ -96,9 +124,7 @@ export const Bestsellers = () => {
             {BESTSELLERS_DATA.map((product) => (
               <ProductCard 
                 key={product.id} 
-                title={product.title} 
-                price={`${product.price} UAH`} 
-                image={product.imageUrl}
+                product={product}
                 className="h-full"
               />
             ))}
@@ -111,9 +137,7 @@ export const Bestsellers = () => {
                 {BESTSELLERS_DATA.map((product) => (
                   <CarouselItem key={product.id} className="pl-4 basis-[70%] sm:basis-[45%] md:basis-[40%] lg:basis-full">
                     <ProductCard 
-                      title={product.title} 
-                      price={`${product.price} UAH`} 
-                      image={product.imageUrl}
+                      product={product}
                       className="h-full"
                     />
                   </CarouselItem>
