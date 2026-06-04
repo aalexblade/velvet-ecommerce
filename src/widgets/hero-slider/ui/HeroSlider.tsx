@@ -33,19 +33,32 @@ export const HeroSlider = () => {
   const [api, setApi] = React.useState<CarouselApi>()
   const [current, setCurrent] = React.useState(0)
 
-  // Autoplay plugin initialization
-  const autoplayPlugin = React.useRef(
+  // Initialize autoplay plugin directly to avoid accessing ref during layout render
+  const plugins = React.useMemo(() => [
     Autoplay({ delay: 4000, stopOnInteraction: true })
-  )
+  ], [])
 
   React.useEffect(() => {
     if (!api) return
 
-    setCurrent(api.selectedScrollSnap())
-
-    api.on("select", () => {
+    // Event handler to safely synchronize Embla state with React state
+    const updateActiveIndex = () => {
       setCurrent(api.selectedScrollSnap())
-    })
+    }
+
+    // Subscribe to Embla carousel lifecycle actions safely
+    api.on("init", updateActiveIndex)
+    api.on("select", updateActiveIndex)
+
+    // Initial update if API is already instantiated and ready
+    if (api.scrollSnapList().length > 0) {
+      updateActiveIndex()
+    }
+
+    return () => {
+      api.off("init", updateActiveIndex)
+      api.off("select", updateActiveIndex)
+    }
   }, [api])
 
   return (
@@ -54,15 +67,15 @@ export const HeroSlider = () => {
         setApi={setApi} 
         className="w-full h-full" 
         opts={{ loop: true }}
-        plugins={[autoplayPlugin.current]}
+        plugins={plugins}
       >
         <CarouselContent className="ml-0 h-full">
           {slides.map((slide, index) => (
             <CarouselItem key={index} className="pl-0 h-full">
               <div className="relative h-screen w-full bg-stone-800 flex items-center pt-24 md:pt-32">
-                {/* Aesthetic Radial Gradient Overlay */}
+                {/* Aesthetic Radial Gradient Overlay - Formatted for Tailwind v4 compiler */}
                 <div 
-                  className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-stone-800/20 via-stone-900/60 to-stone-950/90 z-0" 
+                  className="absolute inset-0 bg-[radial-gradient(circle_at_center,var(--tw-gradient-stops))] from-stone-800/20 via-stone-900/60 to-stone-950/90 z-0" 
                   aria-hidden="true"
                 />
                 
@@ -88,14 +101,14 @@ export const HeroSlider = () => {
           ))}
         </CarouselContent>
         
-        {/* Horizontal Line Indicators (Dots) */}
+        {/* Horizontal Line Indicators (Dots) using strict Tailwind v4 height tokens */}
         <div className="absolute bottom-12 left-1/2 -translate-x-1/2 flex gap-3 z-20">
           {slides.map((_, index) => (
             <button
               key={index}
               onClick={() => api?.scrollTo(index)}
               className={cn(
-                "h-[3px] transition-all duration-500 ease-in-out",
+                "h-0.75 transition-all duration-500 ease-in-out",
                 current === index 
                   ? "w-16 bg-white" 
                   : "w-8 bg-white/30 hover:bg-white/60"

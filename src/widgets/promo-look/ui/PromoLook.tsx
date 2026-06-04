@@ -92,6 +92,7 @@ export const PromoLook = () => {
                         src="/next.svg"
                         alt={`Lingerie Set ${item}`}
                         fill
+                        priority
                         className="object-contain opacity-20 p-16 transition-transform duration-700 group-hover/item:scale-110"
                       />
                       
