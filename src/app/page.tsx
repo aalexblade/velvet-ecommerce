@@ -3,6 +3,7 @@ import { Bestsellers } from "@/widgets/bestsellers";
 import { PromoLook } from "@/widgets/promo-look";
 import { DiscountBanner } from "@/widgets/discount-banner";
 import { SizeCalculator } from "@/widgets/size-calculator";
+import { SizeHowTo } from "@/widgets/size-howto";
 
 
 export default async function HomePage() {
@@ -15,6 +16,7 @@ export default async function HomePage() {
         <PromoLook />
         <DiscountBanner />
         <SizeCalculator />
+        <SizeHowTo />
       </div>
     </main>
   );
