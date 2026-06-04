@@ -12,8 +12,8 @@ export default async function HomePage() {
 
       <div className="w-full flex flex-col">
         <Bestsellers />
-        <DiscountBanner />
         <PromoLook />
+        <DiscountBanner />
         <SizeCalculator />
       </div>
     </main>
