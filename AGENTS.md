@@ -25,11 +25,13 @@ This project strictly follows the **Feature-Sliced Design (FSD)** methodology. A
 
 ---
 
-## 🎨 Design Tokens & Styling (Tailwind v4)
+## 🎨 Design Tokens & Styling (Tailwind v4 Strict Standards)
 
-We use **Tailwind v4** with a central `@theme` directive inside `src/app/globals.css`. 
-* **NO HARDCODED COLORS:** Never use utility classes like `bg-black`, `text-pink-600`, or raw hex codes inside components. 
-* Always use our semantic CSS variable abstractions linked to the theme tokens.
+We use **Tailwind v4** with a central CSS-only configuration directive inside `src/app/globals.css`.
+* **NO LEGACY CONFIGS:** Do not generate or look for `tailwind.config.js` or `postcss.config.js`. Tailwind v4 does not use them.
+* **NO HARDCODED COLORS OR RAW HEX:** Never use utility classes like `bg-black`, `text-pink-600`, or explicit hex strings like `bg-[#C31F5C]` inside components. Always use our semantic tokens.
+* **NO ILLEGAL HEIGHT ARBITRARY VALUES:** Never use invalid syntax like `min-h-[400px]` or `min-h-400px` which fail in v4 compiler. Always use spacing-scale tokens (e.g., `min-h-112`, `min-h-128`) or valid arbitrary layouts `min-h-[400px]`.
+* **V4 GRADIENTS SYNTAX:** Use pure v4 syntax for background gradients: `bg-linear-to-r` or `bg-linear-to-br` instead of legacy `bg-gradient-to-r`.
 
 ### Core Semantic Tokens
 * `--color-background` — Base viewport canvas (White `#ffffff`).
@@ -48,7 +50,7 @@ We use **Tailwind v4** with a central `@theme` directive inside `src/app/globals
 * **Framework:** Next.js 15 (App Router, Turbopack default builder).
 * **State Management:** Redux Toolkit (`src/app/store/store.ts`). Use decoupled layout client providers.
 * **Backend Integration:** Native Supabase SSR JavaScript SDK clients (`@/shared/api/supabase`).
-* **Dynamic Routing:** Next.js 15 dynamic segments are asynchronous. Always unwrap `params` or `searchParams` via async/await or React's `use()` hook (e.g., `const { id } = await params;`).
+* **Dynamic Routing Parameters:** Next.js 15 dynamic segments are asynchronous. Always unwrap `params` or `searchParams` via async/await or React's `use()` hook before accessing properties (e.g., `const { id } = await params;`).
 
 ---
 
@@ -57,3 +59,4 @@ We use **Tailwind v4** with a central `@theme` directive inside `src/app/globals
 1. Do not reinstall or roll back Tailwind to v3 configuration files.
 2. Do not bypass the `suppressHydrationWarning` on the root `<html>` layer.
 3. Do not modify global layout wrappers without validating state provider nesting boundaries.
+4. Do not use legacy arbitrary utility syntaxes that are deprecated or unsupported in the Tailwind v4 compilation pipeline.

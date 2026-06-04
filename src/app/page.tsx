@@ -1,7 +1,7 @@
 import { HeroSlider } from "@/widgets/hero-slider";
 import { Bestsellers } from "@/widgets/bestsellers";
-import { DiscountBanner } from "@/widgets/discount-banner";
 import { PromoLook } from "@/widgets/promo-look";
+import { DiscountBanner } from "@/widgets/discount-banner";
 import { SizeCalculator } from "@/widgets/size-calculator";
 
 
