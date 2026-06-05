@@ -10,58 +10,19 @@ import {
   CarouselPrevious,
 } from "@/shared/ui/carousel";
 import { Button } from "@/shared/ui";
-import { cn } from "@/shared/lib/utils";
-
-/**
- * Premium Glassmorphism Discount Badge
- * Implements the brand fill token #F9BBD2 with specific opacity and blur requirements.
- */
-const DiscountBadge = ({ className }: { className?: string }) => (
-  <div className={cn("relative flex items-center justify-center select-none", className)}>
-    {/* Glassmorphic SVG Background */}
-    <svg
-      width="100%"
-      height="100%"
-      viewBox="0 0 100 100"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className="absolute inset-0 drop-shadow-lg"
-    >
-      <circle 
-        cx="50" 
-        cy="50" 
-        r="48" 
-        fill="#F9BBD2" 
-        fillOpacity="0.2" 
-        className="stroke-white/30"
-        strokeWidth="0.5"
-      />
-    </svg>
-    
-    {/* Content with Backdrop Blur */}
-    <div className="relative z-10 w-full h-full flex items-center justify-center backdrop-blur-md rounded-full border border-white/20">
-      <div className="flex flex-col items-center justify-center text-center">
-        <span className="text-accent font-bold text-xl md:text-2xl lg:text-3xl tracking-tighter leading-none">
-          -10%
-        </span>
-      </div>
-    </div>
-  </div>
-);
 
 /**
  * PromoLook Widget
- * 
- * A high-end promotional section following FSD standards.
- * Combines editorial visual assets with an interactive product showcase.
- * Optimized for Next.js 15, Tailwind v4, and White-Label standards.
+ * * Editorial promotional section following strict FSD standards.
+ * Combines lookbook brand assets with an interactive collection showcase.
+ * Configured with strict Tailwind v4 compliance.
  */
 export const PromoLook = () => {
   return (
     <section className="w-full bg-background overflow-hidden selection:bg-accent/10">
       <div className="container mx-auto px-4 py-16 md:py-24 lg:py-32 grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24 items-center">
         
-        {/* Editorial Content & Interactive Carousel Section */}
+        {/* Left Column: Editorial Content & Interactive Carousel Section */}
         <div className="flex flex-col gap-10 md:gap-14 w-full max-w-2xl mx-auto lg:mx-0 order-2 lg:order-1">
           
           {/* Header Typography Group */}
@@ -92,7 +53,6 @@ export const PromoLook = () => {
                         src="/next.svg"
                         alt={`Lingerie Set ${item}`}
                         fill
-                        priority
                         className="object-contain opacity-20 p-16 transition-transform duration-700 group-hover/item:scale-110"
                       />
                       
@@ -129,7 +89,7 @@ export const PromoLook = () => {
           </div>
         </div>
 
-        {/* Right Column: Hero Lookbook Visual with Glass Badge */}
+        {/* Right Column: Hero Lookbook Visual (Completely removed the -10% DiscountBadge) */}
         <div className="relative w-full aspect-4/5 rounded-[2.5rem] overflow-hidden shadow-2xl group order-1 lg:order-2 animate-in fade-in slide-in-from-right-8 duration-1000 ease-out">
           {/* Editorial Asset Placeholder Container */}
           <div className="absolute inset-0 bg-stone-100 flex flex-col items-center justify-center gap-6 text-stone-300 transition-transform duration-1000 group-hover:scale-105">
@@ -141,20 +101,7 @@ export const PromoLook = () => {
             <div className="w-16 h-px bg-stone-200" />
           </div>
           
-          {/* Interactive Glassmorphism Badge */}
-          <DiscountBadge className="absolute top-8 right-8 md:top-12 md:right-12 w-28 h-28 md:w-36 md:h-36 z-20 animate-in zoom-in-50 duration-1000 delay-700 ease-out" />
-          
-          {/* Production Image Implementation Hook:
-          <Image 
-            src="/editorial-lookbook.jpg" 
-            alt="Editorial Model" 
-            fill 
-            className="object-cover object-top"
-            priority
-          /> 
-          */}
-          
-          {/* Gradient Gloss Overlay for Depth */}
+          {/* Gradient Gloss Overlay for Depth (Using strict Tailwind v4 bg-linear syntax) */}
           <div className="absolute inset-0 bg-linear-to-tr from-black/5 via-transparent to-white/10 pointer-events-none group-hover:opacity-0 transition-opacity duration-700" />
           <div className="absolute inset-0 ring-1 ring-inset ring-black/5 rounded-[2.5rem] pointer-events-none" />
         </div>
