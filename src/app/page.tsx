@@ -4,7 +4,7 @@ import { PromoLook } from "@/widgets/promo-look";
 import { DiscountBanner } from "@/widgets/discount-banner";
 import { SizeCalculator } from "@/widgets/size-calculator";
 import { SizeHowTo } from "@/widgets/size-howto";
-
+import { Reviews } from "@/widgets/reviews";
 
 export default async function HomePage() {
   return (
@@ -17,8 +17,8 @@ export default async function HomePage() {
         <DiscountBanner />
         <SizeCalculator />
         <SizeHowTo />
+        <Reviews />
       </div>
     </main>
   );
 }
-

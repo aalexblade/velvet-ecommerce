@@ -11,12 +11,6 @@ import {
 } from "@/shared/ui/carousel";
 import { Button } from "@/shared/ui";
 
-/**
- * PromoLook Widget
- * * Editorial promotional section following strict FSD standards.
- * Combines lookbook brand assets with an interactive collection showcase.
- * Configured with strict Tailwind v4 compliance.
- */
 export const PromoLook = () => {
   return (
     <section className="w-full bg-background overflow-hidden selection:bg-accent/10">
