@@ -136,7 +136,6 @@ export const Reviews = () => {
                 key={index}
                 className="pl-6 basis-[85%] sm:basis-[45%] md:basis-[40%] lg:basis-1/4"
               >
-                {/* Updated: Swapped out legacy hardcoded min-h-[220px] for native Tailwind v4 dynamic step class */}
                 <div className="flex flex-col gap-5 h-full min-h-55 justify-between">
                   <div className="flex flex-col gap-4">
                     <div className="flex items-center gap-3">
@@ -167,7 +166,6 @@ export const Reviews = () => {
             ))}
           </CarouselContent>
 
-          {/* Dash Indicators - Rendered strictly on mobile and tablet layout views only */}
           <div className="flex lg:hidden justify-center gap-2 pt-10">
             {REVIEWS_DATA.map((_, index) => (
               <button
