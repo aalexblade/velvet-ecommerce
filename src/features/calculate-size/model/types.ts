@@ -1,6 +1,6 @@
 import { StaticImageData } from 'next/image';
 
-export type MeasurementKey = 'underbust' | 'overbust';
+export type MeasurementKey = 'underbust' | 'overbust' | 'hips';
 
 export interface MeasurementField {
   key: MeasurementKey;
