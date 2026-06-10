@@ -8,7 +8,7 @@ import {
   CarouselItem,
   type CarouselApi,
 } from "@/shared/ui/carousel"
-import { cn } from "@/shared/lib/utils"
+import { cn } from "@/shared/lib"
 
 const BESTSELLERS_DATA: Product[] = [
   {
