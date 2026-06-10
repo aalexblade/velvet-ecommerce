@@ -11,7 +11,7 @@ import { SizeCalculatorForm } from "@/features/product-size-calculator";
  * Mobile/Tablet (<lg): Header (1) -> Image (2) -> Form (3) in a single column.
  * Desktop (>=lg): Balanced two-column grid.
  */
-export const SizeCalculator: React.FC = () => {
+export const SizeCalculator: React.FC = () => {      
   const modelImageUrl =
     "https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=1200";
 
@@ -28,7 +28,7 @@ export const SizeCalculator: React.FC = () => {
           </p>
           <a
             href="#instruction"
-            className="text-accent font-semibold underline underline-offset-4 text-base mb-8 inline-block hover:opacity-80 transition-opacity"
+            className="text-primary font-semibold underline underline-offset-4 text-base mb-8 inline-block hover:opacity-80 transition-opacity"
           >
             Інструкція
           </a>

@@ -27,17 +27,14 @@ export const AddToCartButton: React.FC<AddToCartButtonProps> = ({
     e.preventDefault();
     e.stopPropagation();
 
-    // Dispatching with required fields. 
-    // Note: In a production environment, product details would be resolved 
-    // via a selector or passed through a more complex state management flow.
     dispatch(
       addToCart({
         variantId,
-        productId: "pending", // Placeholder as per strict prop requirements
-        title: "Product",    // Placeholder as per strict prop requirements
-        price: 0,            // Placeholder as per strict prop requirements
+        productId: "pending", 
+        title: "Product",    
+        price: 0,            
         quantity: 1,
-        image: "",           // Placeholder as per strict prop requirements
+        image: "",           
       })
     );
   };

@@ -25,9 +25,8 @@ const StepItem: React.FC<StepItemProps> = ({ number, title, children }) => (
 
 export const SizeHowTo = () => {
   return (
-    <section className="w-full px-4 py-16 md:py-24 bg-accent/5">
+    <section className="w-full px-4 py-16 md:py-24 bg-muted/30">
       <div className="container mx-auto max-w-7xl flex justify-center lg:justify-start">
-        {/* Adheres to premium UI specs with 100% width fields and clear result labeling. */}
         <div className="w-full max-w-3xl flex flex-col gap-12">
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground tracking-tight">
             Як заміряти свої параметри?
@@ -44,7 +43,7 @@ export const SizeHowTo = () => {
                   "Обхват стегон — по найширшій частині сідниць."
                 ].map((text, idx) => (
                   <div key={idx} className="flex items-start gap-3">
-                    <span className="text-accent font-bold mt-1 shrink-0 text-lg">•</span>
+                    <span className="text-primary font-bold mt-1 shrink-0 text-lg">•</span>
                     <p className="text-foreground/90">{text}</p>
                   </div>
                 ))}
@@ -60,7 +59,7 @@ export const SizeHowTo = () => {
                   "Коли розмір визначений, натисніть кнопку \"Знайти мій розмір в каталозі\"."
                 ].map((text, idx) => (
                   <div key={idx} className="flex items-start gap-3">
-                    <span className="text-accent font-bold mt-1 shrink-0 text-lg">•</span>
+                    <span className="text-primary font-bold mt-1 shrink-0 text-lg">•</span>
                     <p className="text-foreground/90">{text}</p>
                   </div>
                 ))}
@@ -82,7 +81,7 @@ export const SizeHowTo = () => {
                     "Американська (US)"
                   ].map((sys, idx) => (
                     <div key={idx} className="flex items-start gap-3">
-                      <span className="text-accent font-bold mt-1 shrink-0 text-lg">•</span>
+                      <span className="text-primary font-bold mt-1 shrink-0 text-lg">•</span>
                       <p className="text-foreground/90">{sys}</p>
                     </div>
                   ))}
@@ -90,7 +89,7 @@ export const SizeHowTo = () => {
 
                 <div className="p-6 rounded-2xl bg-background border border-border mt-2 shadow-sm">
                   <p className="text-foreground/80 italic text-base">
-                    <span className="font-bold text-accent not-italic mr-2">Порада:</span>
+                    <span className="font-bold text-primary not-italic mr-2">Порада:</span>
                     Мірки краще знімати в тонкій білизні або без неї, стоячи рівно перед дзеркалом. Для білизни — наприклад, 75B, 80C тощо.
                   </p>
                 </div>

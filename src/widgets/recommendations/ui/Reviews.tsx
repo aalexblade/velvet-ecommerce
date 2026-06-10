@@ -10,7 +10,7 @@ import {
   type CarouselApi,
 } from "@/shared/ui/carousel";
 import { Button } from "@/shared/ui/button";
-import { cn } from "@/shared/lib/utils";
+import { cn } from "@/shared/lib";
 
 interface ReviewItem {
   name: string;
@@ -44,7 +44,7 @@ const REVIEWS_DATA: ReviewItem[] = [
   {
     name: "Валентина",
     city: "Київ",
-    text: "Дуже задоволена своїм замовленням! Білизна ніжна, зручна й справді якісна. Усе гарно запаковано, з приємним ароматом тканини. Відчується любов до деталей 💕 Дякую за сервіс — вже чекаю нову колекцію!",
+    text: "Дуже задоволена своїм замовленням! Білизна ніжна, зручна й справді якісна. Усе гарно запаковане, з приємним ароматом тканини. Відчується любов до деталей 💕 Дякую за сервіс — вже чекаю нову колекцію!",
     avatar:
       "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?q=80&w=150&h=150&fit=crop",
   },
@@ -79,7 +79,7 @@ const StarRating = () => (
         <path
           d="M21.2836 8.27559L15.3328 7.41075L12.6726 2.01778C12.6 1.87013 12.4805 1.75059 12.3328 1.67794C11.9625 1.49513 11.5125 1.64747 11.3273 2.01778L8.66717 7.41075L2.71639 8.27559C2.55233 8.29903 2.40233 8.37638 2.28748 8.49356C2.14864 8.63627 2.07214 8.82825 2.07477 9.02733C2.07741 9.22642 2.15897 9.41631 2.30155 9.55528L6.60701 13.7529L5.58983 19.6803C5.56597 19.8182 5.58123 19.96 5.63387 20.0896C5.68651 20.2193 5.77442 20.3316 5.88764 20.4138C6.00086 20.496 6.13486 20.5449 6.27444 20.5549C6.41401 20.5648 6.55359 20.5355 6.67733 20.4701L12 17.6717L17.3226 20.4701C17.468 20.5475 17.6367 20.5732 17.7984 20.5451C18.2062 20.4748 18.4805 20.0881 18.4101 19.6803L17.393 13.7529L21.6984 9.55528C21.8156 9.44044 21.893 9.29044 21.9164 9.12638C21.9797 8.71622 21.6937 8.33653 21.2836 8.27559Z"
           fill="currentColor"
-          className="text-accent"
+          className="text-primary"
         />
       </svg>
     ))}
@@ -140,7 +140,7 @@ export const Reviews = () => {
                 <div className="flex flex-col gap-5 h-full min-h-55 justify-between">
                   <div className="flex flex-col gap-4">
                     <div className="flex items-center gap-3">
-                      <div className="relative w-12 h-12 rounded-xl overflow-hidden shrink-0 bg-secondary">
+                      <div className="relative w-12 h-12 rounded-xl overflow-hidden shrink-0 bg-muted">
                         <Image
                           src={review.avatar}
                           alt={review.name}
@@ -174,7 +174,7 @@ export const Reviews = () => {
                 onClick={() => api?.scrollTo(index)}
                 className={cn(
                   "h-1 transition-all duration-300 rounded-full cursor-pointer",
-                  current === index ? "w-8 bg-accent" : "w-4 bg-muted/60",
+                  current === index ? "w-8 bg-primary" : "w-4 bg-muted/60",
                 )}
                 aria-label={`Go to slide ${index + 1}`}
               />
@@ -185,7 +185,7 @@ export const Reviews = () => {
         <div className="pt-4 animate-in fade-in zoom-in-95 duration-700">
           <Button
             variant="outline"
-            className="border-accent text-foreground hover:bg-accent/5 font-semibold rounded-xl px-10 py-6 h-auto text-base tracking-widest transition-all duration-300 cursor-pointer"
+            className="border-primary text-foreground hover:bg-muted font-semibold rounded-xl px-10 py-6 h-auto text-base tracking-widest transition-all duration-300 cursor-pointer"
           >
             Залишити відгук про нас
           </Button>

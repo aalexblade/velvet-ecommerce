@@ -8,11 +8,11 @@ import { cn } from "@/shared/lib";
 import { selectCartItemsCount } from "@/features/cart";
 
 const NAV_LINKS = [
-  { label: "Новинки", href: "/catalog/new" },
+  { label: "Новинки", href: "/catalog/new" }, 
   { label: "Білизна", href: "/catalog/lingerie" },
   { label: "Домашній одяг", href: "/catalog/homewear" },
-  { label: "Акції", href: "/catalog/sale" },
-  { label: "Про нас", href: "/about" },
+  { label: "Sale", href: "/catalog/sale" },    
+  { label: "Про нас", href: "/about" },        
   { label: "Блог", href: "/blog" },
 ];
 
@@ -26,8 +26,7 @@ export function Header() {
       setIsScrolled(window.scrollY > 10);
     };
 
-    window.addEventListener("scroll", handleScroll);
-    // Call once to set initial state
+    window.addEventListener("scroll", handleScroll); 
     handleScroll();
 
     return () => window.removeEventListener("scroll", handleScroll);
@@ -42,9 +41,9 @@ export function Header() {
           : "bg-transparent text-white py-5"
       )}
     >
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto px-4">       
         <div className="flex items-center justify-between">
-          {/* Mobile Menu Trigger (Left on mobile/tablet) */}
+          {/* Mobile Menu Trigger */}
           <div className="lg:hidden flex-1">
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -62,12 +61,12 @@ export function Header() {
               "text-lg md:text-xl lg:text-2xl font-bold tracking-widest uppercase transition-colors duration-300"
             )}
           >
-            <Link href="/" className="inline-block">
+            <Link href="/" className="inline-block"> 
               VELVET SECRETS
             </Link>
           </div>
 
-          {/* Desktop Navigation (Centered) */}
+          {/* Desktop Navigation */}      
           <nav className="hidden lg:flex flex-1 justify-center items-center gap-8">
             {NAV_LINKS.map((link) => (
               <Link
@@ -80,7 +79,7 @@ export function Header() {
             ))}
           </nav>
 
-          {/* Utility Icons (Right) */}
+          {/* Utility Icons */}
           <div className="flex flex-1 lg:flex-none justify-end items-center gap-2 md:gap-4">
             <button
               className="p-2 hover:opacity-70 transition-opacity"
@@ -107,7 +106,7 @@ export function Header() {
             >
               <ShoppingBag size={20} />
               {cartItemsCount > 0 && (
-                <span className="bg-accent text-accent-foreground rounded-full text-[10px] w-4 h-4 flex items-center justify-center absolute top-0 right-0">
+                <span className="bg-primary text-primary-foreground rounded-full text-[10px] w-4 h-4 flex items-center justify-center absolute top-0 right-0">   
                   {cartItemsCount}
                 </span>
               )}

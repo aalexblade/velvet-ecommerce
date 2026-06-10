@@ -21,7 +21,7 @@ const BESTSELLERS_DATA: Product[] = [
     is_active: true,
     created_at: new Date().toISOString(),
     images: [
-      { id: 1, product_id: "1", variant_id: null, url: "/next.svg", is_main: true, sort_order: 1 }
+      { id: 1, product_id: "1", variant_id: null, url: "/next.svg", is_main: true, sort_order: 1 }        
     ],
     variants: [
       { id: "v1", product_id: "1", sku: "BBP-001", color: "Black", size: "M", price: 1249, old_price: null, stock: 10 }
@@ -36,7 +36,7 @@ const BESTSELLERS_DATA: Product[] = [
     is_active: true,
     created_at: new Date().toISOString(),
     images: [
-      { id: 2, product_id: "2", variant_id: null, url: "/next.svg", is_main: true, sort_order: 1 }
+      { id: 2, product_id: "2", variant_id: null, url: "/next.svg", is_main: true, sort_order: 1 }        
     ],
     variants: [
       { id: "v2", product_id: "2", sku: "BBB-002", color: "Black", size: "M", price: 1700, old_price: null, stock: 10 }
@@ -51,7 +51,7 @@ const BESTSELLERS_DATA: Product[] = [
     is_active: true,
     created_at: new Date().toISOString(),
     images: [
-      { id: 3, product_id: "3", variant_id: null, url: "/next.svg", is_main: true, sort_order: 1 }
+      { id: 3, product_id: "3", variant_id: null, url: "/next.svg", is_main: true, sort_order: 1 }        
     ],
     variants: [
       { id: "v3", product_id: "3", sku: "BB-003", color: "Black", size: "M", price: 1349, old_price: null, stock: 10 }
@@ -66,7 +66,7 @@ const BESTSELLERS_DATA: Product[] = [
     is_active: true,
     created_at: new Date().toISOString(),
     images: [
-      { id: 4, product_id: "4", variant_id: null, url: "/next.svg", is_main: true, sort_order: 1 }
+      { id: 4, product_id: "4", variant_id: null, url: "/next.svg", is_main: true, sort_order: 1 }        
     ],
     variants: [
       { id: "v4", product_id: "4", sku: "BBB-004", color: "Black", size: "M", price: 1100, old_price: null, stock: 10 }
@@ -74,9 +74,15 @@ const BESTSELLERS_DATA: Product[] = [
   },
 ]
 
+/**
+ * ProductGrid Widget
+ * 
+ * Composite structural block that bridges domain data (Entities) 
+ * with user interactivity (Features).
+ */
 export const ProductGrid = () => {
   const [api, setApi] = React.useState<CarouselApi>()
-  const [current, setCurrent] = React.useState(0)
+  const [current, setCurrent] = React.useState(0)    
 
   React.useEffect(() => {
     if (!api) return;
@@ -97,69 +103,69 @@ export const ProductGrid = () => {
 
   return (
     <section className="w-full max-w-7xl mx-auto px-4 py-16 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-stretch">
-      
-      {/* Left side column (Promo banner box) - Hidden on mobile/tablet */}
-      <div className="relative w-full h-full min-h-112 rounded-lg overflow-hidden bg-muted hidden lg:block">
-        <div className="absolute inset-0 flex items-center justify-center text-muted-foreground font-sans uppercase tracking-widest">
-          Promo Banner
+
+      {/* Left side column (Promo banner box) */}
+      <div className="relative w-full h-full min-h-112 rounded-lg overflow-hidden bg-muted hidden lg:block border border-border">
+        <div className="absolute inset-0 flex items-center justify-center text-muted-foreground font-sans uppercase tracking-widest text-xs">
+          Promo Editorial Frame
         </div>
       </div>
 
-      {/* Right side column: Unified Flexbox container holding headers, grid/carousel, and button */}
+      {/* Right side column: Unified Composition Root */}     
       <div className="flex flex-col h-full justify-between">
-        
+
         <div className="flex flex-col">
-          {/* Header */}
+          {/* Header Typography Group */}
           <div className="mb-4 text-center lg:text-left">
             <h2 className="text-3xl font-bold text-foreground uppercase tracking-widest mb-2">
               Бестселери
             </h2>
-            <p className="text-muted-foreground max-w-sm mx-auto lg:mx-0">
+            <p className="text-muted-foreground max-w-sm mx-auto lg:mx-0 text-sm">
               Найпопулярніші моделі сезону, які обирають наші клієнти найчастіше.
             </p>
           </div>
 
-          {/* Desktop Product Grid */}
+          {/* Desktop Product Composition Matrix */}
           <div className="hidden lg:grid grid-cols-2 gap-6 my-6 h-auto items-stretch">
-            {BESTSELLERS_DATA.map((product) => (
-              <ProductCard 
-                key={product.id} 
+            {BESTSELLERS_DATA.map((product) => (     
+              <ProductCard
+                key={product.id}
                 product={product}
                 action={
-                  <AddToCartButton 
-                    variantId={product.variants?.[0]?.id || product.id} 
+                  <AddToCartButton
+                    variantId={product.variants?.[0]?.id || product.id}
                   />
                 }
               />
             ))}
           </div>
 
-          {/* Mobile/Tablet Carousel */}
-          <div className="block lg:hidden my-6">
+          {/* Mobile/Tablet Viewport Composition */}
+          <div className="block lg:hidden my-6">     
             <Carousel setApi={setApi} className="w-full" opts={{ align: "start", loop: true }}>
               <CarouselContent className="-ml-4 items-stretch">
-                {BESTSELLERS_DATA.map((product) => (
+                {BESTSELLERS_DATA.map((product) => ( 
                   <CarouselItem key={product.id} className="pl-4 basis-3/4 sm:basis-1/2 md:basis-2/5 lg:basis-full">
-                    <ProductCard 
+                    <ProductCard
                       product={product}
                       action={
-                        <AddToCartButton 
-                          variantId={product.variants?.[0]?.id || product.id} 
+                        <AddToCartButton
+                          variantId={product.variants?.[0]?.id || product.id}
                         />
                       }
                     />
                   </CarouselItem>
                 ))}
               </CarouselContent>
-              
-              {/* Horizontal Line Indicators (Dots) */}
+
+              {/* Compositional Navigation Indicators */}
               <div className="flex justify-center gap-2 mt-8">
                 {BESTSELLERS_DATA.map((_, index) => (
                   <button
                     key={index}
                     onClick={() => api?.scrollTo(index)}
                     className={cn(
-                      "h-1 transition-all duration-300",
+                      "h-1 transition-all duration-300 cursor-pointer",
                       current === index ? "w-8 bg-primary" : "w-4 bg-border"
                     )}
                     aria-label={`Go to slide ${index + 1}`}
@@ -170,9 +176,9 @@ export const ProductGrid = () => {
           </div>
         </div>
 
-        {/* Action Button - Always visible at bottom, centered on mobile */}
+        {/* Global Catalog Action */}
         <div className="flex w-full justify-center lg:justify-start lg:w-fit mt-6 md:mt-8">
-          <button className="border border-solid border-primary text-foreground font-medium rounded-lg px-6 py-3.5 transition-colors hover:bg-muted w-full sm:w-fit cursor-pointer">
+          <button className="border border-solid border-primary text-foreground font-bold rounded-xl px-8 py-4 text-xs uppercase tracking-widest transition-all hover:bg-muted active:scale-[0.98] w-full sm:w-fit cursor-pointer shadow-sm">
             Подивитись все
           </button>
         </div>

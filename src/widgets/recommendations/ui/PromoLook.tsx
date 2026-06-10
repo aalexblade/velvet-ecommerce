@@ -61,7 +61,7 @@ export const PromoLook = () => {
                 ))}
               </CarouselContent>
               
-              {/* Navigation Arrows with refined hover states */}
+              {/* Navigation Arrows */}
               <div className="hidden md:flex">
                 <CarouselPrevious 
                   className="-left-6 lg:-left-12 border-border bg-background/80 backdrop-blur-md text-primary shadow-xl hover:bg-primary hover:text-primary-foreground transition-all scale-125 opacity-0 group-hover:opacity-100 disabled:opacity-0" 
@@ -95,7 +95,7 @@ export const PromoLook = () => {
             <div className="w-16 h-px bg-border" />
           </div>
           
-          {/* Gradient Gloss Overlay for Depth */}
+          {/* Gradient Gloss Overlay */}
           <div className="absolute inset-0 bg-linear-to-tr from-foreground/5 via-transparent to-background/10 pointer-events-none group-hover:opacity-0 transition-opacity duration-700" />
           <div className="absolute inset-0 ring-1 ring-inset ring-border/5 rounded-[2.5rem] pointer-events-none" />
         </div>

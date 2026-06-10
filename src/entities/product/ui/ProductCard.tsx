@@ -17,7 +17,6 @@ interface ProductCardProps {
  * Stylized for White-Label themeability using abstract tokens.
  */
 export const ProductCard: React.FC<ProductCardProps> = ({ product, action }) => {
-  // Main image dynamically from product.images[0] with fallback
   const mainImage = product.images?.[0]?.url || "/file.svg";
   const baseVariant = product.variants?.[0];
   const price = baseVariant?.price || 0;
@@ -46,7 +45,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, action }) => 
         />
       </Link>
 
-      {/* Content Block: Typographic details and pricing */}
+      {/* Content Block */}
       <div className="flex flex-col flex-1 p-4 gap-3">
         <div className="flex flex-col gap-1">
           <Link 
@@ -71,7 +70,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, action }) => 
             )}
           </div>
 
-          {/* Slot: Injected Feature-level action component */}
+          {/* Slot: Injected Action */}
           {action && (
             <div className="w-full pt-1">
               {action}
