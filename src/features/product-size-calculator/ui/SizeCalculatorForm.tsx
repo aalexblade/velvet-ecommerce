@@ -58,7 +58,7 @@ export const SizeCalculatorForm = () => {
         <div className="mt-6 mb-4 w-full block">
           {result ? (
             <p className="text-foreground font-medium text-lg">
-              Ваш розмір: <span className="text-accent font-bold">{result}</span>
+              Ваш розмір: <span className="text-primary font-bold">{result}</span>
             </p>
           ) : (
             <p className="text-destructive font-medium text-sm md:text-base">
@@ -73,14 +73,14 @@ export const SizeCalculatorForm = () => {
         <Button
           onClick={handleCalculate}
           disabled={!isFormFilled}
-          className="w-full md:w-auto bg-accent text-accent-foreground hover:bg-accent/90 px-10 h-12 rounded-lg font-semibold transition-all active:scale-95 cursor-pointer"
+          className="w-full md:w-auto bg-primary text-primary-foreground hover:bg-primary/90 px-10 h-12 rounded-lg font-semibold transition-all active:scale-95 cursor-pointer"
         >
           Розрахувати
         </Button>
         
         <Link 
           href="/catalog" 
-          className="w-full md:flex-1 flex items-center justify-center px-6 h-12 rounded-lg border border-accent text-foreground font-semibold hover:bg-accent/5 transition-all active:scale-95 text-sm md:text-base whitespace-nowrap"
+          className="w-full md:flex-1 flex items-center justify-center px-6 h-12 rounded-lg border border-primary text-foreground font-semibold hover:bg-muted transition-all active:scale-95 text-sm md:text-base whitespace-nowrap"
         >
           Знайти мій розмір в каталозі
         </Link>

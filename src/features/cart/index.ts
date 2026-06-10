@@ -4,7 +4,7 @@ export {
   removeFromCart,
   updateQuantity,
   clearCart,
-  selectCartItemsCount,
 } from './model/slice';
+export * from './model/selectors';
 export type { CartItem } from './model/slice';
 export { AddToCartButton } from "./ui/AddToCartButton";

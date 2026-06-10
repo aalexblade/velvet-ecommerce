@@ -1,5 +1,5 @@
 import { HeroSlider } from "@/widgets/hero-slider";
-import { Bestsellers } from "@/widgets/product-grid";
+import { ProductGrid } from "@/widgets/product-grid";
 import { PromoLook, Reviews, DiscountBanner, SizeCalculator, SizeHowTo } from "@/widgets/recommendations";
 
 export default async function HomePage() {
@@ -8,7 +8,7 @@ export default async function HomePage() {
       <HeroSlider />
 
       <div className="w-full flex flex-col">
-        <Bestsellers />
+        <ProductGrid />
         <PromoLook />
         <DiscountBanner />
         <SizeCalculator />

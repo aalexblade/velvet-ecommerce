@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import { ProductCard, Product } from "@/entities/product"
+import { AddToCartButton } from "@/features/cart"
 import {
   Carousel,
   CarouselContent,
@@ -73,7 +74,7 @@ const BESTSELLERS_DATA: Product[] = [
   },
 ]
 
-export const Bestsellers = () => {
+export const ProductGrid = () => {
   const [api, setApi] = React.useState<CarouselApi>()
   const [current, setCurrent] = React.useState(0)
 
@@ -124,7 +125,11 @@ export const Bestsellers = () => {
               <ProductCard 
                 key={product.id} 
                 product={product}
-                className="h-full"
+                action={
+                  <AddToCartButton 
+                    variantId={product.variants?.[0]?.id || product.id} 
+                  />
+                }
               />
             ))}
           </div>
@@ -137,7 +142,11 @@ export const Bestsellers = () => {
                   <CarouselItem key={product.id} className="pl-4 basis-3/4 sm:basis-1/2 md:basis-2/5 lg:basis-full">
                     <ProductCard 
                       product={product}
-                      className="h-full"
+                      action={
+                        <AddToCartButton 
+                          variantId={product.variants?.[0]?.id || product.id} 
+                        />
+                      }
                     />
                   </CarouselItem>
                 ))}
@@ -151,7 +160,7 @@ export const Bestsellers = () => {
                     onClick={() => api?.scrollTo(index)}
                     className={cn(
                       "h-1 transition-all duration-300",
-                      current === index ? "w-8 bg-accent" : "w-4 bg-border"
+                      current === index ? "w-8 bg-primary" : "w-4 bg-border"
                     )}
                     aria-label={`Go to slide ${index + 1}`}
                   />
@@ -163,7 +172,7 @@ export const Bestsellers = () => {
 
         {/* Action Button - Always visible at bottom, centered on mobile */}
         <div className="flex w-full justify-center lg:justify-start lg:w-fit mt-6 md:mt-8">
-          <button className="border border-solid border-accent text-foreground font-medium rounded-lg px-6 py-3.5 transition-colors hover:bg-accent/5 w-full sm:w-fit cursor-pointer">
+          <button className="border border-solid border-primary text-foreground font-medium rounded-lg px-6 py-3.5 transition-colors hover:bg-muted w-full sm:w-fit cursor-pointer">
             Подивитись все
           </button>
         </div>
