@@ -4,8 +4,8 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useSelector } from "react-redux";
 import { Search, Heart, ShoppingBag, User, Menu, X } from "lucide-react";
-import { cn } from "@/shared/lib/utils";
-import { RootState } from "@/app/store/store";
+import { cn } from "@/shared/lib";
+import { selectCartItemsCount } from "@/features/cart";
 
 const NAV_LINKS = [
   { label: "Новинки", href: "/catalog/new" },
@@ -19,7 +19,7 @@ const NAV_LINKS = [
 export function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const cartItemsCount = useSelector((state: RootState) => state.cart.items.length);
+  const cartItemsCount = useSelector(selectCartItemsCount);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -59,7 +59,7 @@ export function Header() {
           <div
             className={cn(
               "flex-1 lg:flex-none text-center lg:text-left",
-              "text-lg md:text-xl lg:text-2xl font-bold tracking-[0.25em] uppercase transition-colors duration-300"
+              "text-lg md:text-xl lg:text-2xl font-bold tracking-widest uppercase transition-colors duration-300"
             )}
           >
             <Link href="/" className="inline-block">
@@ -73,7 +73,7 @@ export function Header() {
               <Link
                 key={link.label}
                 href={link.href}
-                className="text-sm font-medium hover:opacity-70 transition-opacity uppercase tracking-wider"
+                className="text-sm font-medium hover:opacity-70 transition-opacity uppercase tracking-widest"
               >
                 {link.label}
               </Link>
@@ -107,7 +107,7 @@ export function Header() {
             >
               <ShoppingBag size={20} />
               {cartItemsCount > 0 && (
-                <span className="bg-accent text-white rounded-full text-[10px] w-4 h-4 flex items-center justify-center absolute top-0 right-0">
+                <span className="bg-accent text-accent-foreground rounded-full text-[10px] w-4 h-4 flex items-center justify-center absolute top-0 right-0">
                   {cartItemsCount}
                 </span>
               )}

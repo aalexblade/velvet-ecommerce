@@ -72,24 +72,24 @@ export const HeroSlider = () => {
         <CarouselContent className="ml-0 h-full">
           {slides.map((slide, index) => (
             <CarouselItem key={index} className="pl-0 h-full">
-              <div className="relative h-screen w-full bg-stone-800 flex items-center pt-24 md:pt-32">
-                {/* Aesthetic Radial Gradient Overlay - Formatted for Tailwind v4 compiler */}
+              <div className="relative h-screen w-full bg-foreground flex items-center pt-24 md:pt-32">
+                {/* Aesthetic Gradient Overlay - Formatted for Tailwind v4 compiler */}
                 <div 
-                  className="absolute inset-0 bg-[radial-gradient(circle_at_center,var(--tw-gradient-stops))] from-stone-800/20 via-stone-900/60 to-stone-950/90 z-0" 
+                  className="absolute inset-0 bg-linear-to-b from-foreground/20 via-foreground/60 to-foreground/90 z-0" 
                   aria-hidden="true"
                 />
                 
                 <div className="container relative z-10 mx-auto px-6 md:px-12 lg:px-20">
-                  <div className="max-w-3xl text-center lg:text-left text-white">
+                  <div className="max-w-3xl text-center lg:text-left text-primary-foreground">
                     <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-6 tracking-tight leading-[1.1] animate-in fade-in slide-in-from-bottom-4 duration-1000">
                       {slide.title}
                     </h2>
-                    <p className="text-base sm:text-lg md:text-xl text-stone-200 mb-10 max-w-xl mx-auto lg:mx-0 font-medium leading-relaxed animate-in fade-in slide-in-from-bottom-6 duration-1000 delay-200">
+                    <p className="text-base sm:text-lg md:text-xl text-primary-foreground/90 mb-10 max-w-xl mx-auto lg:mx-0 font-medium leading-relaxed animate-in fade-in slide-in-from-bottom-6 duration-1000 delay-200">
                       {slide.description}
                     </p>
                     <div className="animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-500">
                       <Button 
-                        className="bg-accent hover:bg-accent/90 text-white font-sans uppercase tracking-wider px-10 py-7 h-auto text-sm md:text-base font-bold transition-all duration-300 shadow-xl"
+                        className="bg-accent hover:bg-accent/90 text-accent-foreground font-sans uppercase tracking-widest px-10 py-7 h-auto text-sm md:text-base font-bold transition-all duration-300 shadow-xl"
                       >
                         {slide.cta}
                       </Button>

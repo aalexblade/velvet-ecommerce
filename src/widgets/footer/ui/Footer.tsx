@@ -90,7 +90,7 @@ const SOCIAL_LINKS = [
 
 export function Footer() {
   return (
-    <footer className="relative w-full min-h-128 mt-24 text-white selection:bg-accent/20">
+    <footer className="relative w-full min-h-128 mt-24 text-primary-foreground selection:bg-accent/20">
       
       {/* 1. BACKGROUND CANVAS LAYER: Чисте, оригінальне фото бренду Velvet Secrets */}
       <div className="absolute inset-0 z-0 w-full h-full overflow-hidden">
@@ -102,28 +102,28 @@ export function Footer() {
           className="object-cover object-center opacity-90 select-none"
         />
         {/* КЛЮЧОВЕ ВИПРАВЛЕННЯ: Використовуємо чистий глибокий чорний оверлей низької прозорості (black/10) замість сірого neutral-950 */}
-        <div className="absolute inset-0 bg-black/10 mix-blend-normal" />
+        <div className="absolute inset-0 bg-foreground/10 mix-blend-normal" />
       </div>
 
       {/* 2. PREMIUM IPHONE-STYLE GLASS CARD CONTAINER (1268px) */}
-      <div className="relative z-10 mx-auto max-w-317 min-h-128 rounded-[20px] border border-white/10 overflow-hidden isolate">
+      <div className="relative z-10 mx-auto max-w-7xl min-h-128 rounded-[20px] border border-primary-foreground/10 overflow-hidden isolate">
         
         {/* Чистий скляний шар: мінімальне тонування black/20 для збереження рожевого відтінку з-під низу */}
-        <div className="absolute inset-0 -z-10 bg-black/20 backdrop-blur-[50px] w-full h-full" />
+        <div className="absolute inset-0 -z-10 bg-foreground/20 backdrop-blur-3xl w-full h-full" />
 
         {/* Content Viewport Wrapper */}
         <div className="px-6 py-16 md:px-12 w-full h-full">
           
           {/* Structural Top Branding Line Divider */}
           <div className="flex flex-col md:flex-row justify-between items-center gap-6 mb-16 w-full">
-            <div className="w-full md:flex-1 h-px bg-white/10" />
+            <div className="w-full md:flex-1 h-px bg-primary-foreground/10" />
             <Link
               href="/"
-              className="text-2xl md:text-3xl lg:text-4xl font-bold tracking-[0.4em] uppercase text-center block text-white transition-opacity hover:opacity-90 pl-[0.4em] whitespace-nowrap font-sans"
+              className="text-2xl md:text-3xl lg:text-4xl font-bold tracking-widest uppercase text-center block text-primary-foreground transition-opacity hover:opacity-90 pl-4 whitespace-nowrap font-sans"
             >
               VELVET SECRETS
             </Link>
-            <div className="w-full md:flex-1 h-px bg-white/10" />
+            <div className="w-full md:flex-1 h-px bg-primary-foreground/10" />
           </div>
 
           {/* Nav Links Column & Action Grid Architecture */}
@@ -134,7 +134,7 @@ export function Footer() {
               <h3 className="text-sm font-bold uppercase tracking-widest text-accent font-sans">
                 Залишайся в курсі
               </h3>
-              <p className="text-sm text-neutral-200 leading-relaxed font-normal opacity-90 font-sans">
+              <p className="text-sm text-primary-foreground/90 leading-relaxed font-normal opacity-90 font-sans">
                 Будьте першим, хто дізнається про наші спеціальні пропозиції та все, що стосується Velvet Secrets.
               </p>
               <form 
@@ -144,12 +144,12 @@ export function Footer() {
                 <Input
                   type="email"
                   placeholder="Електронна пошта"
-                  className="bg-black/40 border-white/10 text-white placeholder:text-neutral-500 rounded-xl h-12 focus:border-accent/40 focus:ring-0 transition-colors font-sans"
+                  className="bg-foreground/40 border-primary-foreground/10 text-primary-foreground placeholder:text-muted-foreground rounded-xl h-12 focus:border-accent/40 focus:ring-0 transition-colors font-sans"
                   required
                 />
                 <Button
                   type="submit"
-                  className="bg-accent text-white hover:bg-accent/90 rounded-xl uppercase tracking-widest font-bold h-12 text-sm transition-all active:scale-[0.99] cursor-pointer font-sans"
+                  className="bg-accent text-accent-foreground hover:bg-accent/90 rounded-xl uppercase tracking-widest font-bold h-12 text-sm transition-all active:scale-[0.99] cursor-pointer font-sans"
                 >
                   Відправити
                 </Button>
@@ -158,7 +158,7 @@ export function Footer() {
 
             {/* Box 2: Core Directives */}
             <div className="flex flex-col gap-5">
-              <h3 className="text-sm font-bold uppercase tracking-widest text-neutral-200 font-sans">
+              <h3 className="text-sm font-bold uppercase tracking-widest text-primary-foreground/90 font-sans">
                 {FOOTER_LINKS.main.title}
               </h3>
               <ul className="flex flex-col gap-3">
@@ -166,7 +166,7 @@ export function Footer() {
                   <li key={link.label}>
                     <Link
                       href={link.href}
-                      className="text-sm text-white hover:text-accent transition-colors font-normal opacity-85 hover:opacity-100 font-sans"
+                      className="text-sm text-primary-foreground hover:text-accent transition-colors font-normal opacity-85 hover:opacity-100 font-sans"
                     >
                       {link.label}
                     </Link>
@@ -177,7 +177,7 @@ export function Footer() {
 
             {/* Box 3: Client Utility Stream */}
             <div className="flex flex-col gap-5">
-              <h3 className="text-sm font-bold uppercase tracking-widest text-neutral-200 font-sans">
+              <h3 className="text-sm font-bold uppercase tracking-widest text-primary-foreground/90 font-sans">
                 {FOOTER_LINKS.clients.title}
               </h3>
               <ul className="flex flex-col gap-3">
@@ -185,7 +185,7 @@ export function Footer() {
                   <li key={link.label}>
                     <Link
                       href={link.href}
-                      className="text-sm text-white hover:text-accent transition-colors font-normal opacity-85 hover:opacity-100 font-sans"
+                      className="text-sm text-primary-foreground hover:text-accent transition-colors font-normal opacity-85 hover:opacity-100 font-sans"
                     >
                       {link.label}
                     </Link>
@@ -197,7 +197,7 @@ export function Footer() {
             {/* Box 4: Connectivity Channels */}
             <div className="flex flex-col gap-8 lg:items-start w-full">
               <div className="flex flex-col gap-4 w-full">
-                <h3 className="text-sm font-bold uppercase tracking-widest text-neutral-200 font-sans">
+                <h3 className="text-sm font-bold uppercase tracking-widest text-primary-foreground/90 font-sans">
                   Слідкуй за нами
                 </h3>
                 <div className="flex gap-2.5">
@@ -205,14 +205,14 @@ export function Footer() {
                     <a
                       key={social.label}
                       href={social.href}
-                      className="p-3 bg-black/30 border border-white/10 rounded-full hover:bg-accent hover:border-accent transition-all group cursor-pointer"
+                      className="p-3 bg-foreground/30 border border-primary-foreground/10 rounded-full hover:bg-accent hover:border-accent transition-all group cursor-pointer"
                       aria-label={social.label}
                       target="_blank"
                       rel="noopener noreferrer"
                     >
                       <social.icon
                         size={18}
-                        className="text-white group-hover:text-white transition-colors opacity-80 group-hover:opacity-100"
+                        className="text-primary-foreground group-hover:text-accent-foreground transition-colors opacity-80 group-hover:opacity-100"
                       />
                     </a>
                   ))}
@@ -220,25 +220,25 @@ export function Footer() {
               </div>
               
               <div className="flex flex-col gap-4 w-full">
-                <h3 className="text-sm font-bold uppercase tracking-widest text-neutral-200 font-sans">
+                <h3 className="text-sm font-bold uppercase tracking-widest text-primary-foreground/90 font-sans">
                   Контакти
                 </h3>
                 <ul className="flex flex-col gap-3">
                   <li>
                     <a
                       href="tel:+380XXXXXXXXX"
-                      className="flex items-center gap-2.5 text-sm text-white hover:text-accent transition-colors group opacity-85 hover:opacity-100 font-sans"
+                      className="flex items-center gap-2.5 text-sm text-primary-foreground hover:text-accent transition-colors group opacity-85 hover:opacity-100 font-sans"
                     >
-                      <Phone size={14} className="text-neutral-400 group-hover:text-accent transition-colors" />
+                      <Phone size={14} className="text-muted-foreground group-hover:text-accent transition-colors" />
                       +38 (0XX) XXX XX XX
                     </a>
                   </li>
                   <li>
                     <a
                       href="mailto:info@velvetsecrets.com"
-                      className="flex items-center gap-2.5 text-sm text-white hover:text-accent transition-colors group opacity-85 hover:opacity-100 font-sans"
+                      className="flex items-center gap-2.5 text-sm text-primary-foreground hover:text-accent transition-colors group opacity-85 hover:opacity-100 font-sans"
                     >
-                      <Mail size={14} className="text-neutral-400 group-hover:text-accent transition-colors" />
+                      <Mail size={14} className="text-muted-foreground group-hover:text-accent transition-colors" />
                       info@velvetsecrets.com
                     </a>
                   </li>
@@ -249,13 +249,13 @@ export function Footer() {
           </div>
 
           {/* Legal Bar */}
-          <div className="mt-16 pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4 text-[10px] md:text-xs text-neutral-400 uppercase tracking-widest opacity-70 font-sans">
+          <div className="mt-16 pt-8 border-t border-primary-foreground/5 flex flex-col md:flex-row justify-between items-center gap-4 text-[10px] md:text-xs text-muted-foreground uppercase tracking-widest opacity-70 font-sans">
             <p>© {new Date().getFullYear()} VELVET SECRETS. УСІ ПРАВА ЗАХИЩЕНІ.</p>
             <div className="flex gap-6">
-              <Link href="/privacy" className="hover:text-white transition-colors">
+              <Link href="/privacy" className="hover:text-primary-foreground transition-colors">
                 Політика конфіденційності
               </Link>
-              <Link href="/terms" className="hover:text-white transition-colors">
+              <Link href="/terms" className="hover:text-primary-foreground transition-colors">
                 Умови використання
               </Link>
             </div>
