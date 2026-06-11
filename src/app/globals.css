@@ -30,33 +30,66 @@
   --radius-lg: var(--radius);
   --radius-md: calc(var(--radius) - 2px);
   --radius-sm: calc(var(--radius) - 4px);
+
+  --color-product-white: #ffffff;
+  --color-product-smoky-white: #f5f5f5;
+  --color-product-lavender: #e5e3f0;
+  --color-product-creamy-yellow: #fffdd0;
+  --color-product-creamy: #faf2e1;
+  --color-product-milky-creamy: #f2d9bc;
+  --color-product-peach: #ffe5b4;
+  --color-product-cotton-candy: #f9bbd2;
+  --color-product-pale-purple: #eebabc;
+  --color-product-eggplant: #bb006e;
+  --color-product-cherry: #891951;
+  --color-product-dark-purple: #9400d3;
+  --color-product-plum: #660066;
+  --color-product-ruby: #c90130;
+  --color-product-wine-red: #84212a;
+  --color-product-red-purple: #750732;
+  --color-product-red: #b72025;
+  --color-product-mahogany: #512c22;
+  --color-product-magic-mint: #adf0d1;
+  --color-product-emerald: #50c878;
+  --color-product-pearly-green: #1c6031;
+  --color-product-azure-blue: #024b9f;
+  --color-product-denim-blue: #15499f;
+  --color-product-night-blue: #2d2749;
+  --color-product-grey-umbra: #2f2f2f;
+  --color-product-dark: #2b2b2b;
+  --color-product-black: #121212;
+
+  --color-brand-pink-light: #f16393;
+  --color-brand-pink-dark: #ea1a65;
+  --color-ui-divider: #cccccc;
+  --color-ui-border-light: #d9d9d9;
 }
 
 :root {
   /* Exact color hexes extracted from design layout screenshots */
-  --background: #ffffff;      /* WHITE */
-  --foreground: #121212;      /* GREY6 */
+  --background: #ffffff; /* WHITE */
+  --foreground: #121212; /* GREY6 */
 
   --card: #ffffff;
   --card-foreground: #121212;
 
-  --primary: #121212;         /* Pure dark for main premium UI elements */
+  --primary: #121212; /* Pure dark for main premium UI elements */
   --primary-foreground: #ffffff;
 
-  --secondary: #fdf2f8;       /* Very soft pink background block tint */
+  --secondary: #fdf2f8; /* Very soft pink background block tint */
   --secondary-foreground: #c31f5c;
 
-  --muted: #f5f5f5;           /* Light grey button variant from screenshots */
+  --muted: #f5f5f5; /* Light grey button variant from screenshots */
   --muted-foreground: #737373;
 
-  --accent: #c31f5c;          /* PINK5 - used for brand highlights and notifications */
+  --accent: #c31f5c; /* PINK5 - core luxurious identity highlight */
   --accent-foreground: #ffffff;
 
   --border: #e5e5e5;
   --input: #e5e5e5;
   --ring: #c31f5c;
 
-  --radius: 0.25rem;          /* Clean, slightly sharp premium edges for modern retail */
+  --radius: 0.25rem; /* Clean premium retail design edges */
 }
 
 @layer base {
@@ -68,9 +101,12 @@
     color: var(--foreground);
     font-family: var(--font-sans);
   }
-  
-  /* Every header tier matches the geometric Manrope definition from design */
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     font-family: var(--font-sans);
     font-weight: 700;
     letter-spacing: -0.025em;
