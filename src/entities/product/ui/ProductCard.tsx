@@ -60,12 +60,12 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, action }) => 
 
         <div className="mt-auto flex flex-col gap-3">
           <div className="flex items-baseline gap-2">
-            <span className="font-bold text-base text-primary">
-              {price.toLocaleString()} ₴
+            <span className="font-bold text-base text-primary" suppressHydrationWarning>
+              {price.toLocaleString("uk-UA")} ₴
             </span>
             {oldPrice && oldPrice > price && (
-              <span className="text-xs text-muted-foreground line-through">
-                {oldPrice.toLocaleString()} ₴
+              <span className="text-xs text-muted-foreground line-through" suppressHydrationWarning>
+                {oldPrice.toLocaleString("uk-UA")} ₴
               </span>
             )}
           </div>
