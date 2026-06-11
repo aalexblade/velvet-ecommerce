@@ -20,8 +20,8 @@
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
 
-  --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: #c31f5c;
+  --color-accent-foreground: #ffffff;
 
   --color-border: var(--border);
   --color-input: var(--input);

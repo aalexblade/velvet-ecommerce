@@ -147,7 +147,7 @@ export function Footer() {
                 />
                 <Button
                   type="submit"
-                  className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl uppercase tracking-widest font-bold h-12 text-sm transition-all active:scale-[0.99] cursor-pointer font-sans"
+                  className="bg-accent text-accent-foreground hover:bg-accent/90 rounded-xl uppercase tracking-widest font-bold h-12 text-sm transition-all active:scale-[0.99] cursor-pointer font-sans"
                 >
                   Підписатись
                 </Button>

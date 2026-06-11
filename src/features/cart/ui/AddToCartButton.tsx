@@ -43,7 +43,7 @@ export const AddToCartButton: React.FC<AddToCartButtonProps> = ({
     <Button
       onClick={handleAdd}
       className={cn(
-        "w-full bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl h-11 text-sm font-medium transition-all active:scale-[0.98]",
+        "w-full bg-accent text-accent-foreground hover:bg-accent/90 rounded-xl h-11 text-sm font-medium transition-all active:scale-[0.98]",
         className
       )}
     >
