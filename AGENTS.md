@@ -1,6 +1,6 @@
 # 🤖 AI Agent Guidelines & Project Context
 
-Welcome, agent. You are working on a universal, high-performance **Multi-tenant / White-Label e-commerce platform engine** built with Next.js 15/16. The first brand being deployed on this core is **"Velvet Secrets"** (premium lingerie store).
+Welcome, agent. You are working on a universal, high-performance **Multi-tenant / White-Label e-commerce platform engine** built with Next.js 15 (App Router). The first brand being deployed on this core is **"Velvet Secrets"** (premium lingerie store).
 
 Strictly adhere to the rules, architecture, and design tokens specified below.
 
@@ -14,10 +14,13 @@ This project strictly follows the **Feature-Sliced Design (FSD)** methodology. A
 * `app/` — Global routing configs, providers, styles, and Next.js App Router layout setup.
   * `(shop)/` — Isolated storefront routing boundary containing `page.tsx` (Home), `catalog/`, `product/[id]/`, `cart/`, and `checkout/`.
   * `providers/` — App state wrappers (`StoreProvider.tsx`, `store.ts`).
-* `widgets/` — Composite, autonomous layout sections of a page (e.g., `header`, `footer`, `hero-slider`, `product-grid`, `cart-summary`, `checkout-form`, `reviews`, `discount-banner`, `promo-look`, `size-howto`).
+* `widgets/` — Composite, autonomous layout sections of a page.
+  * `header/`, `footer/`, `hero-slider/`, `product-grid/` (`ProductGrid.tsx` for items list), `cart-summary/`, `checkout-form/`.
+  * `recommendations/` — Composite widget layer holding product recommendations blocks: `PromoLook.tsx`, `DiscountBanner.tsx`, `Reviews.tsx`, `SizeCalculator.tsx`, and `SizeHowTo.tsx`.
 * `features/` — User actions with distinct business value and interactive state operations.
   * `cart/` — Holds the **decentralized Redux slice** (`model/slice.ts`), selectors (`model/selectors.ts`), and the interaction boundary (`ui/AddToCartButton.tsx`).
-  * `wishlist/`, `filters/`, `search/`, `checkout/`, `product-size-calculator`.
+  * `product-size-calculator/` — Autonomous size calculation form and math logic (`getSuggestedSize.ts`).
+  * `wishlist/`, `filters/`, `search/`, `checkout/`.
 * `entities/` — Pure domain business models, lightweight data transformations, and basic presentation dumb-cards.
   * `product/` — Holds clean relative components (`ui/ProductCard.tsx`), TS types (`model/types.ts`), and data requests mapping layer (`api/getProducts.ts`).
   * `category/`, `order/`, `user/`.
@@ -43,23 +46,22 @@ We use **Tailwind v4** driven by the central CSS-only configuration directive in
 * **V4 GRADIENTS SYNTAX:** Use pure modern directives: `bg-linear-to-r` or `bg-linear-to-br` instead of legacy configurations.
 
 ### Core UI Semantic Tokens Mapped in `globals.css`
-* `bg-background` — Base viewport background canvas (`#ffffff`).
-* `text-foreground` High-contrast text value (`#121212`).
+* `bg-background` — Base viewport background canvas.
+* `text-foreground` — High-contrast text value.
 * `bg-card` / `text-card-foreground` — Presentation components background elements ecosystem.
-* `bg-primary` / `text-primary-foreground` — Pure dark core block structural interface base (`#121212`).
-* `bg-secondary` — Soft brand background block tint tint (`#fdf2f8`).
-* `bg-muted` / `text-muted-foreground` — Passive background elements and text variants (`#f5f5f5` / `#737373`).
-* `bg-accent` / `text-accent-foreground` — Luxury brand identity highlight and indicators (`#c31f5c`).
-* `border-border` — System-wide borders and lines resolution separator (`#e5e5e5`).
+* `bg-primary` / `text-primary-foreground` — Pure dark core block structural interface base (Default: `#121212`).
+* `bg-secondary` — Soft brand background block tint.
+* `bg-muted` / `text-muted-foreground` — Passive background elements and text variants.
+* `bg-accent` / `text-accent-foreground` — Luxury brand identity highlight and indicators.
+* `border-border` — System-wide borders and lines resolution separator.
 
 ### Multi-Tenant Extended Product & UI Color Tokens
-Use these native Tailwind v4 tokens directly inside loops, selector grids, and variant badges instead of arbitrary parameters:
-* **Product Base & Pastels:** `bg-product-white` (`#ffffff`), `bg-product-smoky-white` (`#f5f5f5`), `bg-product-lavender` (`#e5e3f0`), `bg-product-creamy-yellow` (`#fffdd0`), `bg-product-creamy` (`#faf2e1`), `bg-product-milky-creamy` (`#f2d9bc`), `bg-product-peach` (`#ffe5b4`).
-* **Pinks & Purples:** `bg-product-cotton-candy` (`#f9bbd2`), `bg-product-pale-purple` (`#eebabc`), `bg-product-eggplant` (`#bb006e`), `bg-product-cherry` (`#891951`), `bg-product-dark-purple` (`#9400d3`), `bg-product-plum` (`#660066`).
-* **Reds & Darks:** `bg-product-ruby` (`#c90130`), `bg-product-wine-red` (`#84212a`), `bg-product-red-purple` (`#750732`), `bg-product-red` (`#b72025`), `bg-product-mahogany` (`#512c22`).
-* **Greens & Blues:** `bg-product-magic-mint` (`#adf0d1`), `bg-product-emerald` (`#50c878`), `bg-product-pearly-green` (`#1c6031`), `bg-product-azure-blue` (`#024b9f`), `bg-product-denim-blue` (`#15499f`), `bg-product-night-blue` (`#2d2749`).
-* **Shades & Deep Neutrals:** `bg-product-grey-umbra` (`#2f2f2f`), `bg-product-dark` (`#2b2b2b`), `bg-product-black` (`#121212`).
-* **Menu Context & Layout Accents:** `text-brand-pink-light` / `bg-brand-pink-light` (`#f16393`), `text-brand-pink-dark` / `bg-brand-pink-dark` (`#ea1a65`), `border-ui-divider` (`#cccccc`), `border-ui-border-light` (`#d9d9d9`).
+All product variant colors must strictly correspond to the `ProductColor` type defined in `@/entities/product/model/types.ts`. Use these native Tailwind v4 classes directly inside loops and selector grids:
+* **Product Base & Pastels:** `bg-product-white`, `bg-product-smoky-white`, `bg-product-lavender`, `bg-product-creamy-yellow`, `bg-product-creamy`, `bg-product-creamy-velvet`, `bg-product-peach`.
+* **Pinks & Purples:** `bg-product-cotton-candy`, `bg-product-pale-purple`, `bg-product-eggplant`, `bg-product-cherry`, `bg-product-dark-violet`, `bg-product-plum`.
+* **Reds & Darks:** `bg-product-ruby`, `bg-product-wine-red`, `bg-product-magenta`, `bg-product-red`, `bg-product-mahogany-brown`.
+* **Greens & Blues:** `bg-product-magic-mint`, `bg-product-emerald`, `bg-product-pearl-green`, `bg-product-azure-blue`, `bg-product-denim-blue`, `bg-product-midnight-blue`.
+* **Shades & Deep Neutrals:** `bg-product-raw-umber`, `bg-product-dark`, `bg-product-black`.
 
 ### Typography & Hydration Rules
 * **Font Family:** `Manrope` (`font-sans`) is applied globally. No alternative serif systems allowed.
@@ -69,7 +71,7 @@ Use these native Tailwind v4 tokens directly inside loops, selector grids, and v
 
 ## ⚙️ Tech Stack Configuration
 
-* **Framework:** Next.js 15/16 (App Router structure, Turbopack high-speed dev builder context).
+* **Framework:** Next.js 15.1.0 (App Router structure, Turbopack builder context).
 * **State Management:** Redux Toolkit (`src/app/store/store.ts`) decoupled via clean providers.
 * **Backend Integration:** Native Supabase SSR JavaScript SDK modules (`@/shared/api/supabase`).
 * **Dynamic Routing Parameters:** Dynamic segmentation parameters are asynchronous. Always unwrap `params` or `searchParams` via async/await or React's `use()` hook before calling values (e.g., `const { id } = await params;`).
@@ -77,8 +79,8 @@ Use these native Tailwind v4 tokens directly inside loops, selector grids, and v
 
 ---
 
-## 🚫 Restricted Actions
+## ⚖️ Restricted Actions
 
 1. Do not re-introduce Tailwind v3 configuration files (`tailwind.config.js`).
-2. Do not bypass layer architectural boundaries; components inside `entities/` must remain pure data views and accept action buttons solely via rendering slots (e.g., `action?: React.ReactNode`).
+2. Do not bypass layer architectural boundaries; components inside `entities/` (like `ProductCard.tsx`) must remain pure data views and accept action buttons solely via rendering slots (`action?: React.ReactNode`).
 3. Do not deep-link items across feature/widget modules without rerouting them through a verified `index.ts` Public API boundary.
