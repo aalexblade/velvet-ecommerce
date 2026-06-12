@@ -134,6 +134,12 @@ export const ProductGrid = () => {
                 action={
                   <AddToCartButton
                     variantId={product.variants?.[0]?.id || product.id}
+                    productId={product.id}
+                    title={product.title}
+                    price={product.variants?.[0]?.price || 0}
+                    image={product.images?.[0]?.url || ""}
+                    color={product.variants?.[0]?.color}
+                    size={product.variants?.[0]?.size}
                   />
                 }
               />
@@ -151,6 +157,12 @@ export const ProductGrid = () => {
                       action={
                         <AddToCartButton
                           variantId={product.variants?.[0]?.id || product.id}
+                          productId={product.id}
+                          title={product.title}
+                          price={product.variants?.[0]?.price || 0}
+                          image={product.images?.[0]?.url || ""}
+                          color={product.variants?.[0]?.color}
+                          size={product.variants?.[0]?.size}
                         />
                       }
                     />

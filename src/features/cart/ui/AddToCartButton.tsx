@@ -1,53 +1,61 @@
 "use client";
 
-import React from "react";
-import { useDispatch } from "react-redux";
+import { useAppDispatch } from "@/app/store/store";
 import { addToCart } from "../model/slice";
 import { Button } from "@/shared/ui";
-import { cn } from "@/shared/lib";
+import { ShoppingBag } from "lucide-react";
+import { cn } from "@/shared/lib/utils";
 
 interface AddToCartButtonProps {
   variantId: string;
+  productId: string;
+  title: string;
+  price: number;
+  image: string;
+  color?: string;
+  size?: string;
   className?: string;
 }
 
-/**
- * AddToCartButton
- * 
- * Interactive feature component for adding items to the cart.
- * Strictly adheres to White-Label theme tokens and FSD boundaries.
- */
-export const AddToCartButton: React.FC<AddToCartButtonProps> = ({
-  variantId,
-  className,
-}) => {
-  const dispatch = useDispatch();
+export function AddToCartButton({ 
+  variantId, 
+  productId,
+  title,
+  price,
+  image,
+  color,
+  size,
+  className = "" 
+}: AddToCartButtonProps) {
+  const dispatch = useAppDispatch();
 
-  const handleAdd = (e: React.MouseEvent) => {
+  const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-
-    dispatch(
-      addToCart({
-        variantId,
-        productId: "pending", 
-        title: "Product",    
-        price: 0,            
-        quantity: 1,
-        image: "",           
-      })
-    );
+    
+    dispatch(addToCart({ 
+      variantId, 
+      productId, 
+      title, 
+      price, 
+      image, 
+      color, 
+      size, 
+      quantity: 1 
+    }));
   };
 
   return (
     <Button
-      onClick={handleAdd}
+      type="button"
+      onClick={handleAddToCart}
       className={cn(
-        "w-full bg-accent text-accent-foreground hover:bg-accent/90 rounded-xl h-11 text-sm font-medium transition-all active:scale-[0.98]",
+        "w-full bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl h-11 text-sm font-medium transition-all active:scale-[0.98] cursor-pointer flex items-center justify-center gap-2",
         className
       )}
     >
-      Додати у кошик
+      <ShoppingBag size={14} />
+      До кошика
     </Button>
   );
-};
+}
