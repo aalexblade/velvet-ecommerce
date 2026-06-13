@@ -1,10 +1,10 @@
 import * as React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { cn } from '@/shared/lib';
+import { cn } from '@/shared/lib/utils';
 
 /**
- * Represents a single subcategory item.
+ * Represents a single subcategory item in the store.
  */
 export interface SubCategory {
   id: string;
@@ -22,8 +22,8 @@ export interface SubcategoryGridProps {
 }
 
 /**
- * A highly descriptive and responsive subcategory layout component.
- * Features a mobile-friendly horizontal carousel and a desktop grid system.
+ * A highly professional and responsive subcategory navigation block.
+ * Optimized for mobile horizontal scrolling and desktop grid presentation.
  */
 export const SubcategoryGrid: React.FC<SubcategoryGridProps> = ({
   subcategories,
@@ -46,9 +46,10 @@ export const SubcategoryGrid: React.FC<SubcategoryGridProps> = ({
             "flex flex-col items-center justify-between text-center group"
           )}
         >
+          {/* Visual Container */}
           <div className="relative w-full aspect-square bg-muted rounded-xl overflow-hidden mb-3">
             <Image
-              src={sub.imageUrl || "/assets/categories/placeholder-category.webp"}
+              src={sub.imageUrl || "/placeholder-category.webp"}
               alt={sub.title}
               fill
               className="object-cover group-hover:scale-105 transition-transform duration-300"
@@ -56,6 +57,7 @@ export const SubcategoryGrid: React.FC<SubcategoryGridProps> = ({
             />
           </div>
           
+          {/* Label Section */}
           <span className="font-sans font-medium text-sm md:text-base text-foreground mt-3 transition-colors group-hover:text-primary">
             {sub.title}
           </span>
