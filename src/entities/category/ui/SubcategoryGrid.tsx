@@ -32,7 +32,7 @@ export const SubcategoryGrid: React.FC<SubcategoryGridProps> = ({
   return (
     <div
       className={cn(
-        "flex overflow-x-auto scrollbar-none gap-4 pb-3 snap-x snap-mandatory w-full md:grid md:grid-cols-3 lg:grid-cols-5 md:gap-4 lg:gap-5",
+        "grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 w-full",
         className
       )}
     >

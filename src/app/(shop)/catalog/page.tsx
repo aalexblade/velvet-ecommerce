@@ -27,8 +27,8 @@ export default function CatalogPage() {
   // --- Localized Navigation Path ---
   const breadcrumbPath: PathSegment[] = [
     { pageTitle: 'Головна', targetUrl: '/' },
-    { pageTitle: 'Каталог', targetUrl: '/catalog' },
-    { pageTitle: 'Бюстгалтери' },
+    { pageTitle: 'Білизна', targetUrl: '/catalog' },
+    { pageTitle: 'Бюстгальтери' },
   ];
 
   // --- Specialized Subcategories Data (Bra Styles) ---
@@ -111,11 +111,11 @@ export default function CatalogPage() {
           <Breadcrumbs navigationPath={breadcrumbPath} />
 
           {/* 2. Page Header: Premium Typography & Description */}
-          <header className="flex flex-col gap-3 mb-4">
-            <h1 className="text-2xl md:text-3xl font-light uppercase tracking-widest text-foreground">
-              Бюстгалтери
+          <header className="flex flex-col gap-3 mb-2">
+            <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-foreground uppercase mb-1">
+              Бюстгальтери
             </h1>
-            <p className="text-muted-foreground text-sm md:text-base max-w-2xl font-sans leading-relaxed">
+            <p className="text-muted-foreground text-sm md:text-base max-w-3xl font-sans leading-relaxed mb-6">
               Комфорт, підтримка й краса — в нашій колекції бюстгальтерів ти знайдеш саме те, що підходить для тебе.
             </p>
             <div className="flex items-center justify-between mt-2 pt-4 border-t border-border/40">
