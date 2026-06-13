@@ -1,8 +1,6 @@
 "use client";
 
 import * as React from 'react';
-import { Header } from '@/widgets/header';
-import { Footer } from '@/widgets/footer';
 import { ProductGrid } from '@/widgets/product-grid';
 import { SubcategoryGrid, type SubCategory } from '@/entities/category';
 import { Breadcrumbs, Pagination, type PathSegment } from '@/shared/ui';
@@ -106,9 +104,7 @@ export default function CatalogPage() {
   ];
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
-      <Header />
-
+    <div className="bg-background">
       <main className="flex-grow">
         <div className="max-w-[1200px] mx-auto px-4 md:px-6 py-6 flex flex-col gap-6">
           {/* 1. Global Navigation Breadcrumbs */}
@@ -157,8 +153,6 @@ export default function CatalogPage() {
           </div>
         </div>
       </main>
-
-      <Footer />
     </div>
   );
 }
