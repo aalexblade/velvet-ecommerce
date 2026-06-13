@@ -1,14 +1,21 @@
 "use client";
 
-import React, { useState } from 'react';
+import * as React from 'react';
 import { Header } from '@/widgets/header';
 import { Footer } from '@/widgets/footer';
 import { ProductGrid } from '@/widgets/product-grid';
 import { CategorySelector } from '@/entities/category';
 import { Breadcrumbs, Pagination } from '@/shared/ui';
+import { CatalogFilters, type FilterCriteria, type SortOption } from '@/features/filters';
 
 export default function CatalogPage() {
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = React.useState(1);
+  const [activeFilters, setActiveFilters] = React.useState<FilterCriteria>({
+    priceRange: { min: 0, max: 0 },
+    sizes: [],
+    colors: [],
+  });
+  const [currentSort, setCurrentSort] = React.useState<SortOption>('newest');
 
   // Mock data for Breadcrumbs
   const breadcrumbPath = [
@@ -40,20 +47,13 @@ export default function CatalogPage() {
           <CategorySelector categories={categories} />
 
           <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-8">
-            {/* Sidebar space for filters */}
-            <aside className="hidden lg:block">
-              <div className="sticky top-24 space-y-6">
-                <div className="pb-4 border-b">
-                  <h2 className="text-lg font-semibold text-foreground mb-4">Filters</h2>
-                  {/* Filters feature will be integrated here */}
-                  <div className="space-y-4">
-                    <div className="h-8 bg-muted rounded w-3/4" />
-                    <div className="h-8 bg-muted rounded w-full" />
-                    <div className="h-8 bg-muted rounded w-1/2" />
-                  </div>
-                </div>
-              </div>
-            </aside>
+            {/* Desktop Filter Sidebar & Mobile Drawer Trigger */}
+            <CatalogFilters 
+              activeFilters={activeFilters}
+              onFilterChange={setActiveFilters}
+              currentSortOption={currentSort}
+              onSortChange={setCurrentSort}
+            />
 
             {/* Main items catalog sheet block */}
             <div className="flex flex-col gap-8">
