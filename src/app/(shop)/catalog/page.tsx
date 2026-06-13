@@ -28,15 +28,15 @@ export default function CatalogPage() {
   const breadcrumbPath: PathSegment[] = [
     { pageTitle: 'Головна', targetUrl: '/' },
     { pageTitle: 'Каталог', targetUrl: '/catalog' },
+    { pageTitle: 'Бюстгалтери' },
   ];
 
-  // --- Subcategories Data (Localized) ---
+  // --- Specialized Subcategories Data (Bra Styles) ---
   const subcategories: SubCategory[] = [
-    { id: '1', title: 'Бюстгальтери', slug: 'bras', imageUrl: '/next.svg' },
-    { id: '2', title: 'Трусики', slug: 'panties', imageUrl: '/next.svg' },
-    { id: '3', title: 'Одяг для сну', slug: 'sleepwear', imageUrl: '/next.svg' },
-    { id: '4', title: 'Комплекти', slug: 'sets', imageUrl: '/next.svg' },
-    { id: '5', title: 'Аксесуари', slug: 'accessories', imageUrl: '/next.svg' },
+    { id: '1', title: 'Бралета', slug: 'bralette', imageUrl: '/next.svg' },
+    { id: '2', title: 'Балконет', slug: 'balconette', imageUrl: '/next.svg' },
+    { id: '3', title: 'Пуш-ап', slug: 'push-up', imageUrl: '/next.svg' },
+    { id: '4', title: 'Спортивний', slug: 'sports', imageUrl: '/next.svg' },
   ];
 
   // --- Mock Matrix Feed (Strict Product Type) ---
@@ -110,20 +110,23 @@ export default function CatalogPage() {
           {/* 1. Global Navigation Breadcrumbs */}
           <Breadcrumbs navigationPath={breadcrumbPath} />
 
-          {/* 2. Page Title Header Block (Localized) */}
-          <header className="flex flex-col gap-1 mb-2">
+          {/* 2. Page Header: Premium Typography & Description */}
+          <header className="flex flex-col gap-3 mb-4">
             <h1 className="text-2xl md:text-3xl font-light uppercase tracking-widest text-foreground">
-              Каталог
+              Бюстгалтери
             </h1>
-            <div className="flex items-center justify-between">
-              <span className="text-muted-foreground text-xs md:text-sm">
+            <p className="text-muted-foreground text-sm md:text-base max-w-2xl font-sans leading-relaxed">
+              Комфорт, підтримка й краса — в нашій колекції бюстгальтерів ти знайдеш саме те, що підходить для тебе.
+            </p>
+            <div className="flex items-center justify-between mt-2 pt-4 border-t border-border/40">
+              <span className="text-muted-foreground text-xs md:text-sm uppercase tracking-wider">
                 Знайдено: {catalogProducts.length} товарів
               </span>
             </div>
           </header>
 
           {/* 3. Subcategory Navigation Grid */}
-          <section aria-label="Підкатегорії">
+          <section aria-label="Стилі бюстгальтерів">
             <SubcategoryGrid subcategories={subcategories} />
           </section>
 
