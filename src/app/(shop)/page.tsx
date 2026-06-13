@@ -1,5 +1,5 @@
 import { HeroSlider } from "@/widgets/hero-slider";
-import { ProductGrid } from "@/widgets/product-grid";
+import { ProductGrid, BESTSELLERS_DATA } from "@/widgets/product-grid";
 import { PromoLook, Reviews, DiscountBanner, SizeCalculator, SizeHowTo } from "@/widgets/recommendations";
 
 export default async function HomePage() {
@@ -8,7 +8,12 @@ export default async function HomePage() {
       <HeroSlider />
 
       <div className="w-full flex flex-col">
-        <ProductGrid />
+        <ProductGrid 
+          products={BESTSELLERS_DATA} 
+          title="Бестселери" 
+          description="Найпопулярніші моделі сезону, які обирають наші клієнти найчастіше."
+          showPromo={true}
+        />
         <PromoLook />
         <DiscountBanner />
         <SizeCalculator />

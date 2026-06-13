@@ -1,1 +1,1 @@
-export { ProductGrid } from './ui/ProductGrid';
+export { ProductGrid, BESTSELLERS_DATA } from './ui/ProductGrid';
