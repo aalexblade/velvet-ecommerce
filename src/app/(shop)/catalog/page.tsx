@@ -1,15 +1,19 @@
-import React from 'react';
+"use client";
+
+import React, { useState } from 'react';
 import { Header } from '@/widgets/header';
 import { Footer } from '@/widgets/footer';
 import { ProductGrid } from '@/widgets/product-grid';
 import { CategorySelector } from '@/entities/category';
 import { Breadcrumbs, Pagination } from '@/shared/ui';
 
-export default async function CatalogPage() {
+export default function CatalogPage() {
+  const [currentPage, setCurrentPage] = useState(1);
+
   // Mock data for Breadcrumbs
-  const breadcrumbItems = [
-    { label: 'Home', href: '/' },
-    { label: 'Catalog', href: '/catalog' },
+  const breadcrumbPath = [
+    { pageTitle: 'Home', targetUrl: '/' },
+    { pageTitle: 'Catalog', targetUrl: '/catalog' },
   ];
 
   // Mock data for CategorySelector
@@ -27,7 +31,7 @@ export default async function CatalogPage() {
 
       <main className="flex-grow">
         <div className="max-w-[1268px] mx-auto px-4 md:px-6 py-8 flex flex-col gap-8">
-          <Breadcrumbs items={breadcrumbItems} />
+          <Breadcrumbs navigationPath={breadcrumbPath} />
 
           <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold font-sans tracking-tight text-foreground">
             Product Catalog
@@ -56,9 +60,9 @@ export default async function CatalogPage() {
               <ProductGrid />
               
               <Pagination 
-                currentPage={1} 
+                currentPage={currentPage} 
                 totalPages={5} 
-                onPageChange={() => {}} 
+                onPageChange={setCurrentPage} 
               />
             </div>
           </div>
