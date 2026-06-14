@@ -12,7 +12,7 @@ This project strictly follows the **Feature-Sliced Design (FSD)** methodology. A
 
 ### 1. Layer Directory Structure & Reference Tree
 * `app/` — Global routing configs, providers, styles, and Next.js App Router layout setup.
-  * `(shop)/` — Isolated storefront routing boundary containing `page.tsx` (Home), `catalog/`, `product/[id]/`, `cart/`, and `checkout/`.
+  * `(shop)/` — Isolated storefront routing boundary containing `page.tsx` (Home), `catalog/[[...slug]]/page.tsx` (Catch-all Dynamic Catalog), `product/[id]/`, `cart/`, and `checkout/`.
   * `providers/` — App state wrappers (`StoreProvider.tsx`, `store.ts`).
 * `widgets/` — Composite, autonomous layout sections of a page.
   * `header/`, `footer/`, `hero-slider/`, `product-grid/` (`ProductGrid.tsx` for items list), `cart-summary/`, `checkout-form/`.
@@ -40,7 +40,12 @@ This project strictly follows the **Feature-Sliced Design (FSD)** methodology. A
 We use **Tailwind v4** driven by the central CSS-only configuration directive in `src/app/globals.css` via the `@theme` rule.
 * **NO LEGACY CONFIGS:** Never generate or seek `tailwind.config.js` or `postcss.config.js`. Tailwind v4 compiles directly from CSS.
 * **NO HARDCODED COLORS OR RAW HEX:** Never use raw utility overrides (`bg-black`, `text-pink-600`) or explicit strings (`bg-[#C31F5C]`, `text-[#9C2A4A]`). Always use the standardized semantic theme tokens.
-* **NO ILLEGAL HEIGHT ARBITRARY VALUES:** Avoid arbitrary layouts that crash the v4 pipeline (`min-h-[512px]` or `max-w-[1268px]`). Always translate sizes to native spacing-scale metrics or exact token definitions:
+* **NO ILLEGAL HEIGHT ARBITRARY VALUES:** Avoid arbitrary layouts that crash the v4 pipeline (`max-h-[500px]` or `min-h-[512px]`). Always translate sizes to native spacing-scale metrics or exact token definitions:
+  * Use **`max-h-125`** instead of `max-h-[500px]` (500px / 4 = 125)
+  * Use **`max-h-150`** instead of `max-h-[600px]` (600px / 4 = 150)
+  * Use **`w-21.25`** instead of `w-[85px]` (85px / 4 = 21.25)
+  * Use **`w-27.5`** instead of `w-[110px]` (110px / 4 = 27.5)
+  * Use **`top-px`** instead of `top-[1px]`
   * Use **`min-h-128`** instead of `min-h-[512px]` (512px / 4 = 128)
   * Use **`max-w-317`** instead of `max-w-[1268px]` (1268px / 4 = 317)
 * **V4 GRADIENTS SYNTAX:** Use pure modern directives: `bg-linear-to-r` or `bg-linear-to-br` instead of legacy configurations.

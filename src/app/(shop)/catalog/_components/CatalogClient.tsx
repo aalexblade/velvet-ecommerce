@@ -87,11 +87,20 @@ const MOCK_PRODUCTS = [
   },
 ];
 
-export default function CatalogPage() {
+interface CatalogClientProps {
+  slug?: string[];
+}
+
+export default function CatalogClient({ slug }: CatalogClientProps) {
   // --- UI and Filtering States ---
   const [favorites, setFavorites] = useState<number[]>([]);
   const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+
+  // --- Safe App Router Tracking Implementation ---
+  if (slug && slug.length > 0) {
+    console.log("Current white-label routing dynamic subcategory criteria:", slug);
+  }
 
   // --- Toggle Wishlist Status ---
   const toggleFavorite = (id: number) => {
@@ -105,17 +114,6 @@ export default function CatalogPage() {
   return (
     <div className="min-h-screen bg-background text-foreground antialiased pb-12">
       
-      {/* --- Utility Styles for Custom Horizontal Snap Sliders --- */}
-      <style jsx global>{`
-        .no-scrollbar::-webkit-scrollbar {
-          display: none;
-        }
-        .no-scrollbar {
-          -ms-overflow-style: none;
-          scrollbar-width: none;
-        }
-      `}</style>
-
       {/* ==========================================
           HEADER COMPONENT: Breadcrumbs Navigation
           ========================================== */}
@@ -125,7 +123,9 @@ export default function CatalogPage() {
           <span className="mx-2">/</span>
           <a href="#" className="hover:text-foreground transition-colors cursor-pointer">Білизна</a>
           <span className="mx-2">/</span>
-          <span className="text-foreground font-medium">Бюстгальтери</span>
+          <span className="text-foreground font-medium">
+            {slug && slug.length > 1 ? slug[1] : 'Бюстгальтери'}
+          </span>
         </nav>
       </div>
 
@@ -413,7 +413,7 @@ export default function CatalogPage() {
 
               {/* Filter Module: Size Grid Selection */}
               <div className="space-y-3">
-                <h4 className="text-sm font-bold text-foreground">Розмір чашки / об&apos;єм</h4>
+                <h4 className="text-sm font-bold text-foreground">{"Розмір чашки / об&apos;єм"}</h4>
                 <div className="grid grid-cols-4 gap-2">
                   {['70A', '75A', '70B', '75B', '80B', '75C', '80C', '85C'].map((size) => (
                     <button key={size} className="h-10 rounded-xl border border-muted bg-card text-xs font-semibold hover:border-accent hover:text-accent transition-all cursor-pointer">

@@ -134,16 +134,14 @@
 }
 
 /* ==========================================
-    3. GLOBAL LAYOUT ARCHITECTURE RESET
+    4. UTILITY CLASSES
    ========================================== */
-@layer base {
-  * {
-    border-color: var(--border);
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
   }
-  
-  body {
-    background-color: var(--background);
-    color: var(--foreground);
-    font-family: var(--font-sans);
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
 }
