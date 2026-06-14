@@ -1,114 +1,149 @@
 @import "tailwindcss";
 
+/* ==========================================
+    1. CORE THEME CONFIGURATION (Tailwind v4)
+   ========================================== */
 @theme {
-  /* Typography token setup mapping to Manrope */
-  --font-sans: var(--font-sans), sans-serif;
+  /* --- Typography Config --- */
+  --font-sans: "Manrope", sans-serif;
 
-  /* Strict color tokens mapped from Figma design system */
+  /* --- Core UI Semantic Design Tokens --- */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-
+  
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
-
+  
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
-
+  
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
-
+  
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
-
-  --color-accent: #c31f5c;
-  --color-accent-foreground: #ffffff;
-
+  
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
 
-  --radius-lg: var(--radius);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-sm: calc(var(--radius) - 4px);
+  /* --- Brand Luxurious Identity Highlight --- */
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
 
+  /* --- Multi-Tenant Extended Product Colors (E-commerce Swatches) --- */
+  /* Base & Pastels */
   --color-product-white: #ffffff;
-  --color-product-smoky-white: #f5f5f5;
-  --color-product-lavender: #e5e3f0;
+  --color-product-smoky-white: #f5f5f7;
+  --color-product-lavender: #e0e0ff;
   --color-product-creamy-yellow: #fffdd0;
-  --color-product-creamy: #faf2e1;
-  --color-product-milky-creamy: #f2d9bc;
-  --color-product-peach: #ffe5b4;
-  --color-product-cotton-candy: #f9bbd2;
-  --color-product-pale-purple: #eebabc;
-  --color-product-eggplant: #bb006e;
-  --color-product-cherry: #891951;
-  --color-product-dark-purple: #9400d3;
-  --color-product-plum: #660066;
-  --color-product-ruby: #c90130;
-  --color-product-wine-red: #84212a;
-  --color-product-red-purple: #750732;
-  --color-product-red: #b72025;
-  --color-product-mahogany: #512c22;
-  --color-product-magic-mint: #adf0d1;
+  --color-product-creamy: #fdf5e6;
+  --color-product-creamy-velvet: #f5ebd6;
+  --color-product-peach: #ffcba4;
+  
+  /* Pinks & Purples */
+  --color-product-cotton-candy: #ffbcd9;
+  --color-product-pale-purple: #fae6fa;
+  --color-product-eggplant: #614051;
+  --color-product-cherry: #990033;
+  --color-product-dark-violet: #9400d3;
+  --color-product-plum: #dda0dd;
+  
+  /* Reds & Darks */
+  --color-product-ruby: #cc0000;
+  --color-product-wine-red: #722f37;
+  --color-product-magenta: #ff00ff;
+  --color-product-red: #ff0000;
+  --color-product-mahogany-brown: #c04000;
+  
+  /* Greens & Blues */
+  --color-product-magic-mint: #aaf0d1;
   --color-product-emerald: #50c878;
-  --color-product-pearly-green: #1c6031;
-  --color-product-azure-blue: #024b9f;
-  --color-product-denim-blue: #15499f;
-  --color-product-night-blue: #2d2749;
-  --color-product-grey-umbra: #2f2f2f;
-  --color-product-dark: #2b2b2b;
-  --color-product-black: #121212;
-
-  --color-brand-pink-light: #f16393;
-  --color-brand-pink-dark: #ea1a65;
-  --color-ui-divider: #cccccc;
-  --color-ui-border-light: #d9d9d9;
+  --color-product-pearl-green: #e2f4c5;
+  --color-product-azure-blue: #007fff;
+  --color-product-denim-blue: #1560bd;
+  --color-product-midnight-blue: #191970;
+  
+  /* Shades & Deep Neutrals */
+  --color-product-raw-umber: #826644;
+  --color-product-dark: #222222;
+  --color-product-black: #0a0a0a;
 }
 
+/* ==========================================
+    2. CSS VARIABLE INJECTIONS & TOKENS MAPPING
+   ========================================== */
 :root {
-  /* Exact color hexes extracted from design layout screenshots */
-  --background: #ffffff; /* WHITE */
-  --foreground: #121212; /* GREY6 */
+  /* Layout Canvas Base */
+  --background: #ffffff;
+  --foreground: #121212;
 
+  /* Components Layout System tokens */
   --card: #ffffff;
   --card-foreground: #121212;
+  
+  --popover: #ffffff;
+  --popover-foreground: #121212;
 
-  --primary: #121212; /* Pure dark for main premium UI elements */
+  /* Pure Dark Core Block Interface Base */
+  --primary: #121212;
   --primary-foreground: #ffffff;
 
-  --secondary: #fdf2f8; /* Very soft pink background block tint */
-  --secondary-foreground: #c31f5c;
+  /* Soft Brand Tint */
+  --secondary: #fafafa;
+  --secondary-foreground: #121212;
 
-  --muted: #f5f5f5; /* Light grey button variant from screenshots */
-  --muted-foreground: #737373;
+  /* Passive UI Elements & Muted Text */
+  --muted: #f4f4f5;
+  --muted-foreground: #71717a;
 
-  --accent: #c31f5c; /* PINK5 - core luxurious identity highlight */
+  /* Global Layout Lines Separation Boundaries */
+  --border: #e4e4e7;
+  --input: #e4e4e7;
+  --ring: #121212;
+
+  /* Velvet Secrets Core Luxurious Identity Highlight (PINK5) */
+  --accent: #c31f5c;
   --accent-foreground: #ffffff;
-
-  --border: #e5e5e5;
-  --input: #e5e5e5;
-  --ring: #c31f5c;
-
-  --radius: 0.25rem; /* Clean premium retail design edges */
 }
 
+/* Optional: Dark mode baseline mapping tree placeholder */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #f5f5f7;
+    --card: #121212;
+    --card-foreground: #f5f5f7;
+    --popover: #121212;
+    --popover-foreground: #f5f5f7;
+    --primary: #f5f5f7;
+    --primary-foreground: #121212;
+    --secondary: #1a1a1a;
+    --secondary-foreground: #f5f5f7;
+    --muted: #27272a;
+    --muted-foreground: #a1a1aa;
+    --border: #27272a;
+    --input: #27272a;
+    --ring: #d4d4d8;
+    --accent: #e23e7a;
+    --accent-foreground: #ffffff;
+  }
+}
+
+/* ==========================================
+    3. GLOBAL LAYOUT ARCHITECTURE RESET
+   ========================================== */
 @layer base {
   * {
     border-color: var(--border);
   }
+  
   body {
     background-color: var(--background);
     color: var(--foreground);
     font-family: var(--font-sans);
-  }
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
-    font-family: var(--font-sans);
-    font-weight: 700;
-    letter-spacing: -0.025em;
   }
 }
