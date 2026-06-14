@@ -114,6 +114,16 @@ export default function CatalogClient({ slug }: CatalogClientProps) {
   return (
     <div className="min-h-screen bg-background text-foreground antialiased pb-12">
       
+      <style dangerouslySetInnerHTML={{ __html: `
+        .no-scrollbar::-webkit-scrollbar {
+          display: none;
+        }
+        .no-scrollbar {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+      `}} />
+
       {/* ==========================================
           HEADER COMPONENT: Breadcrumbs Navigation
           ========================================== */}
