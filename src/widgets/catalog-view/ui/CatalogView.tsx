@@ -4,103 +4,44 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 import { Heart, X, ChevronDown, SlidersHorizontal, Eye } from 'lucide-react';
 
-// ==========================================
-// 1. MOCK DATA & CONFIGURATION
-// ==========================================
-
+/**
+ * Mock data for subcategories.
+ * This will be moved to a separate layer or fetched from the server later.
+ */
 const MOCK_SUBCATEGORIES = [
   { id: 'push-up', title: 'Push-up', count: 42, image: 'https://placehold.co/120x120/f5f5f5/a1a1aa?text=Push-up' },
   { id: 'balconette', title: 'Balconette', count: 28, image: 'https://placehold.co/120x120/f5f5f5/a1a1aa?text=Balconette' },
   { id: 'bralette', title: 'Бралети', count: 35, image: 'https://placehold.co/120x120/f5f5f5/a1a1aa?text=Bralette' },
-  { id: 'soft-cup', title: 'М&apos;яка чашка', count: 19, image: 'https://placehold.co/120x120/f5f5f5/a1a1aa?text=Soft+Cup' },
+  { id: 'soft-cup', title: 'М\'яка чашка', count: 19, image: 'https://placehold.co/120x120/f5f5f5/a1a1aa?text=Soft+Cup' },
   { id: 'corset', title: 'Корсети', count: 14, image: 'https://placehold.co/120x120/f5f5f5/a1a1aa?text=Corset' },
   { id: 'wireless', title: 'Без кісточок', count: 22, image: 'https://placehold.co/120x120/f5f5f5/a1a1aa?text=Wireless' },
 ];
 
-const MOCK_PRODUCTS = [
-  {
-    id: 1,
-    title: 'Мереживний бюстгальтер Balconette з формованою чашкою',
-    price: 1250,
-    oldPrice: 1560,
-    colors: ['bg-product-black', 'bg-product-white', 'bg-product-ruby'],
-    badges: ['-20%', 'NEW'],
-    image: 'https://placehold.co/400x533/f5f5f5/a1a1aa?text=Product+1',
-  },
-  {
-    id: 2,
-    title: 'Класичний гладкий бюстгальтер Push-up для глибокого декольте',
-    price: 980,
-    colors: ['bg-product-peach', 'bg-product-emerald', 'bg-product-denim-blue'],
-    badges: ['NEW'],
-    image: 'https://placehold.co/400x533/f5f5f5/a1a1aa?text=Product+2',
-  },
-  {
-    id: 3,
-    title: 'Шовковий бралет без кісточок Velvet Dream',
-    price: 1450,
-    colors: ['bg-product-black', 'bg-product-smoky-white'],
-    badges: [],
-    image: 'https://placehold.co/400x533/f5f5f5/a1a1aa?text=Product+3',
-  },
-  {
-    id: 4,
-    title: 'Бюстгальтер з м&apos;якою чашкою на кісточках Gentle Support',
-    price: 1100,
-    oldPrice: 1380,
-    colors: ['bg-product-white', 'bg-product-cotton-candy'],
-    badges: ['-20%'],
-    image: 'https://placehold.co/400x533/f5f5f5/a1a1aa?text=Product+4',
-  },
-  {
-    id: 5,
-    title: 'Мереживний корсетний топ Elegant Night',
-    price: 2100,
-    colors: ['bg-product-black'],
-    badges: ['HOT'],
-    image: 'https://placehold.co/400x533/f5f5f5/a1a1aa?text=Product+5',
-  },
-  {
-    id: 6,
-    title: 'Базовий трикотажний бюстгальтер на кожен день Comfort Stretch',
-    price: 850,
-    colors: ['bg-product-smoky-white', 'bg-product-peach', 'bg-product-black'],
-    badges: [],
-    image: 'https://placehold.co/400x533/f5f5f5/a1a1aa?text=Product+6',
-  },
-  {
-    id: 7,
-    title: 'Напівпрозорий бралет з вишивкою Floral Romance',
-    price: 1600,
-    colors: ['bg-product-ruby', 'bg-product-white'],
-    badges: ['NEW'],
-    image: 'https://placehold.co/400x533/f5f5f5/a1a1aa?text=Product+7',
-  },
-  {
-    id: 8,
-    title: 'Бюстгальтер-анжеліка зі знімними бретелями Multiway Pro',
-    price: 1350,
-    oldPrice: 1680,
-    colors: ['bg-product-black', 'bg-product-white', 'bg-product-smoky-white'],
-    badges: ['-20%'],
-    image: 'https://placehold.co/400x533/f5f5f5/a1a1aa?text=Product+8',
-  },
-];
-
-interface CatalogClientProps {
-  slug?: string[];
+/**
+ * Props for the CatalogView component.
+ * 
+ * @property {string[]} slug - The dynamic routing segments for the catalog.
+ * @property {any[]} initialProducts - The initial list of products to display.
+ */
+interface CatalogViewProps {
+  slug: string[];
+  initialProducts: any[]; // Will match the Product entity type later
 }
 
-export default function CatalogClient({ slug }: CatalogClientProps) {
+/**
+ * CatalogView Widget.
+ * 
+ * An interactive catalog layout that displays products, filters, and subcategories.
+ * Migrated from the routing layer to comply with Feature-Sliced Design.
+ * 
+ * @param {CatalogViewProps} props - Component properties.
+ * @returns {JSX.Element} The rendered catalog view.
+ */
+export function CatalogView({ slug, initialProducts }: CatalogViewProps) {
   // --- UI and Filtering States ---
   const [favorites, setFavorites] = useState<number[]>([]);
   const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
-
-  // --- Safe App Router Tracking Implementation ---
-  if (slug && slug.length > 0) {
-    console.log("Current white-label routing dynamic subcategory criteria:", slug);
-  }
 
   // --- Toggle Wishlist Status ---
   const toggleFavorite = (id: number) => {
@@ -109,29 +50,22 @@ export default function CatalogClient({ slug }: CatalogClientProps) {
     );
   };
 
-  const filteredCount = MOCK_PRODUCTS.length;
+  const filteredCount = initialProducts.length;
 
   return (
     <div className="min-h-screen bg-background text-foreground antialiased pb-12">
       
-      <style dangerouslySetInnerHTML={{ __html: `
-        .no-scrollbar::-webkit-scrollbar {
-          display: none;
-        }
-        .no-scrollbar {
-          -ms-overflow-style: none;
-          scrollbar-width: none;
-        }
-      `}} />
+      {/* Standard Next.js 15 safe syntax for global scrollbar styling */}
+      <style dangerouslySetInnerHTML={{ __html: `.no-scrollbar::-webkit-scrollbar { display: none; } .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }` }} />
 
       {/* ==========================================
           HEADER COMPONENT: Breadcrumbs Navigation
           ========================================== */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
         <nav className="flex text-xs md:text-sm text-muted-foreground whitespace-nowrap overflow-x-auto no-scrollbar">
-          <a href="#" className="hover:text-foreground transition-colors cursor-pointer">Головна</a>
+          <a href="/" className="hover:text-foreground transition-colors cursor-pointer">Головна</a>
           <span className="mx-2">/</span>
-          <a href="#" className="hover:text-foreground transition-colors cursor-pointer">Білизна</a>
+          <a href="/catalog" className="hover:text-foreground transition-colors cursor-pointer">Білизна</a>
           <span className="mx-2">/</span>
           <span className="text-foreground font-medium">
             {slug && slug.length > 1 ? slug[1] : 'Бюстгальтери'}
@@ -251,7 +185,7 @@ export default function CatalogClient({ slug }: CatalogClientProps) {
           ========================================== */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6 md:mt-8">
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4 lg:gap-6">
-          {MOCK_PRODUCTS.map((product, idx) => {
+          {initialProducts.map((product, idx) => {
             const isFavorite = favorites.includes(product.id);
             return (
               <div key={product.id} className="group flex flex-col bg-card rounded-2xl overflow-hidden border border-transparent hover:border-muted/50 hover:shadow-md transition-all duration-300">
@@ -259,7 +193,7 @@ export default function CatalogClient({ slug }: CatalogClientProps) {
                 {/* --- Image Frame Stage Container (3/4 Proportion) --- */}
                 <div className="relative w-full aspect-3/4 bg-muted overflow-hidden">
                   <Image 
-                    src={product.image} 
+                    src={product.image || 'https://placehold.co/400x533/f5f5f5/a1a1aa?text=No+Image'} 
                     alt={product.title}
                     fill
                     sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
@@ -268,9 +202,9 @@ export default function CatalogClient({ slug }: CatalogClientProps) {
                   />
 
                   {/* --- Marketing Labels & Tags Layers --- */}
-                  {product.badges.length > 0 && (
+                  {product.badges && product.badges.length > 0 && (
                     <div className="absolute top-2 left-2 flex flex-col gap-1 z-10">
-                      {product.badges.map((badge, bIdx) => (
+                      {product.badges.map((badge: string, bIdx: number) => (
                         <span 
                           key={bIdx}
                           className={`text-[10px] md:text-xs font-bold tracking-wider uppercase px-2 py-0.5 rounded-md text-white ${
@@ -299,7 +233,7 @@ export default function CatalogClient({ slug }: CatalogClientProps) {
                   <div className="flex items-center justify-between min-h-6">
                     {/* Swatches Elements Tracker */}
                     <div className="flex items-center gap-1.5">
-                      {product.colors.map((colorClass, cIdx) => (
+                      {product.colors && product.colors.map((colorClass: string, cIdx: number) => (
                         <span 
                           key={cIdx}
                           className={`w-3 h-3 md:w-3.5 md:h-3.5 rounded-full border border-zinc-200 shadow-sm cursor-pointer hover:scale-110 transition-transform ${colorClass}`}
@@ -337,7 +271,7 @@ export default function CatalogClient({ slug }: CatalogClientProps) {
                       </>
                     ) : (
                       <span className="text-sm md:text-base font-semibold text-foreground">
-                        {product.price.toLocaleString('uk-UA')} ₴
+                        {product.price ? product.price.toLocaleString('uk-UA') : '0'} ₴
                       </span>
                     )}
                   </div>
@@ -423,7 +357,7 @@ export default function CatalogClient({ slug }: CatalogClientProps) {
 
               {/* Filter Module: Size Grid Selection */}
               <div className="space-y-3">
-                <h4 className="text-sm font-bold text-foreground">{"Розмір чашки / об&apos;єм"}</h4>
+                <h4 className="text-sm font-bold text-foreground">{"Розмір чашки / об'єм"}</h4>
                 <div className="grid grid-cols-4 gap-2">
                   {['70A', '75A', '70B', '75B', '80B', '75C', '80C', '85C'].map((size) => (
                     <button key={size} className="h-10 rounded-xl border border-muted bg-card text-xs font-semibold hover:border-accent hover:text-accent transition-all cursor-pointer">
@@ -447,7 +381,7 @@ export default function CatalogClient({ slug }: CatalogClientProps) {
                   ].map((colorClass, idx) => (
                     <button 
                       key={idx}
-                      className="w-8 h-8 rounded-full border border-zinc-300 shadow-xs relative focus:outline-hidden focus:ring-2 focus:ring-offset-2 focus:ring-accent cursor-pointer"
+                      className={`w-8 h-8 rounded-full border border-zinc-300 shadow-xs relative focus:outline-hidden focus:ring-2 focus:ring-offset-2 focus:ring-accent cursor-pointer ${colorClass}`}
                     />
                   ))}
                 </div>
