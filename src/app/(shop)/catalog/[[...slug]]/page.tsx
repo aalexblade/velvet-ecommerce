@@ -1,26 +1,27 @@
 import React from 'react';
-import CatalogClient from '../_components/CatalogClient';
+import { CatalogView } from '@/widgets/catalog-view';
+import { getProducts } from '@/entities/product';
 
-/**
- * Props for the CatalogPage component.
- * Next.js 15 requires 'params' and 'searchParams' to be asynchronous.
- */
 interface Props {
   params: Promise<{ slug?: string[] }>;
 }
 
 /**
- * CatalogPage (Server Component)
- * Handles the unwrapping of dynamic route parameters (Optional Catch-all).
- * 
- * @param {Props} props - The component props containing the async params.
- * @returns {Promise<JSX.Element>} The rendered catalog client view.
+ * CatalogPage (Pure Server Component)
+ * Correctly unwraps async params and safely injects data into the CatalogView widget.
  */
 export default async function CatalogPage({ params }: Props) {
-  // Unwrap the slug array from the asynchronous params according to Next.js 15 spec.
+  // 1. Асинхронно розгортаємо параметри роутингу Next.js 15
   const { slug } = await params;
 
+  // 2. Гарантуємо передачу масиву для безпеки типів сутності
+  const safeSlug = slug ?? [];
+  const products = await getProducts(safeSlug);
+
   return (
-    <CatalogClient slug={slug} />
+    <CatalogView 
+      slug={safeSlug} 
+      initialProducts={products} 
+    />
   );
 }
