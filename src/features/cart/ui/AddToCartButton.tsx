@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { useCartStore } from "../model/cartStore";
 import { Button } from "@/shared/ui";
 import { ShoppingBag } from "lucide-react";
@@ -26,11 +27,18 @@ export function AddToCartButton({
   size,
   className = "" 
 }: AddToCartButtonProps) {
+  const [isMounted, setIsMounted] = useState(false);
   const addToCart = useCartStore((state) => state.addToCart);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    
+    if (!isMounted) return;
     
     addToCart({ 
       variantId, 

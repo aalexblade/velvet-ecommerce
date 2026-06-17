@@ -72,10 +72,10 @@ const colorToClass = (color: ProductColor): string => {
   return map[color] || "bg-neutral-400";
 };
 
+import { CatalogFilters } from "@/features/filters";
+
 export function CatalogView({ slug, initialProducts }: CatalogViewProps) {
   const [favorites, setFavorites] = useState<string[]>([]);
-  const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
-  const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
 
   const toggleFavorite = (id: string) => {
     setFavorites((prev) =>
@@ -83,9 +83,6 @@ export function CatalogView({ slug, initialProducts }: CatalogViewProps) {
     );
   };
 
-  const filteredCount = initialProducts.length;
-
-  // Resolves the current human-readable category title based on parameters to clear unread lint warnings
   const currentCategoryTitle = useMemo(() => {
     if (!slug || slug.length === 0) return "Бюстгальтери";
     const lastSegment = slug[slug.length - 1].toLowerCase();
@@ -177,202 +174,130 @@ export function CatalogView({ slug, initialProducts }: CatalogViewProps) {
         </div>
       </div>
 
-      {/* --- Toolbar --- */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 border-y border-muted bg-card/50">
-        <div className="flex items-center justify-between h-14">
-          <div className="hidden md:flex items-center gap-6">
-            {["Розмір", "Колір", "Ціна", "Колекція"].map((filterName) => (
-              <div key={filterName} className="relative">
-                <button
-                  onClick={() =>
-                    setActiveDropdown(
-                      activeDropdown === filterName ? null : filterName,
-                    )
-                  }
-                  className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors py-2 cursor-pointer"
+      {/* --- Main Content Grid (Filters + Products) --- */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 flex flex-col md:flex-row gap-8">
+        {/* Sidebar Filters */}
+        <CatalogFilters className="md:w-64" />
+
+        {/* Product Grid */}
+        <div className="flex-1">
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-x-4 gap-y-8">
+            {initialProducts.map((product, idx) => {
+              const isFavorite = favorites.includes(product.id);
+
+              const mainImage =
+                product.images?.[0]?.url ||
+                "https://placehold.co/400x533/f5f5f5/a1a1aa?text=No+Image";
+              const primaryVariant = product.variants?.[0];
+              const currentPrice = primaryVariant?.price || 0;
+              const oldPrice = primaryVariant?.old_price;
+
+              const uniqueColors = Array.from(
+                new Set(product.variants?.map((v) => v.color) || []),
+              );
+              const hasDiscount = !!oldPrice;
+
+              return (
+                <div
+                  key={product.id}
+                  className="group flex flex-col bg-background rounded-xs overflow-hidden transition-all duration-300"
                 >
-                  {filterName}
-                  <ChevronDown className="w-4 h-4 transition-transform duration-200" />
-                </button>
-              </div>
-            ))}
-          </div>
+                  <div className="relative w-full aspect-3/4 bg-neutral-100 overflow-hidden rounded-sm">
+                    <Image
+                      src={mainImage}
+                      alt={product.title}
+                      fill
+                      sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
+                      priority={idx < 4}
+                      className="object-cover object-center group-hover:scale-102 transition-transform duration-500"
+                    />
 
-          <button
-            onClick={() => setIsMobileDrawerOpen(true)}
-            className="md:hidden flex items-center justify-center gap-2 w-full h-full text-sm font-semibold text-foreground hover:bg-muted/50 transition-colors cursor-pointer"
-          >
-            <SlidersHorizontal className="w-4 h-4" />
-            Фільтри та сортування
-          </button>
-        </div>
-      </div>
-
-      {activeDropdown && (
-        <div
-          className="fixed inset-0 z-20"
-          onClick={() => setActiveDropdown(null)}
-        />
-      )}
-
-      {/* ==========================================
-          PRODUCT CARDS CATALOGUE
-          ========================================== */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6 md:mt-8">
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-8">
-          {initialProducts.map((product, idx) => {
-            const isFavorite = favorites.includes(product.id);
-
-            const mainImage =
-              product.images?.[0]?.url ||
-              "https://placehold.co/400x533/f5f5f5/a1a1aa?text=No+Image";
-            const primaryVariant = product.variants?.[0];
-            const currentPrice = primaryVariant?.price || 0;
-            const oldPrice = primaryVariant?.old_price;
-
-            const uniqueColors = Array.from(
-              new Set(product.variants?.map((v) => v.color) || []),
-            );
-            const hasDiscount = !!oldPrice;
-
-            return (
-              <div
-                key={product.id}
-                className="group flex flex-col bg-background rounded-xs overflow-hidden transition-all duration-300"
-              >
-                {/* Контейнер зображення — БЕЗ тексту всередині */}
-                <div className="relative w-full aspect-3/4 bg-neutral-100 overflow-hidden rounded-sm">
-                  <Image
-                    src={mainImage}
-                    alt={product.title}
-                    fill
-                    sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
-                    priority={idx < 4}
-                    className="object-cover object-center group-hover:scale-102 transition-transform duration-500"
-                  />
-
-                  {/* Маркетингові бейджі строго як на макеті */}
-                  <div className="absolute top-2 left-2 flex flex-col gap-1 z-10">
-                    {hasDiscount ? (
-                      <span className="text-[9px] md:text-10px font-semibold tracking-wider uppercase px-2 py-0.5 rounded-xs text-white bg-pink-600">
-                        Акція
-                      </span>
-                    ) : idx % 3 === 0 ? (
-                      <span className="text-[9px] md:text-10px font-semibold tracking-wider uppercase px-2 py-0.5 rounded-xs text-zinc-900 bg-zinc-100 border border-zinc-200">
-                        Новинка
-                      </span>
-                    ) : null}
-                  </div>
-
-                  {/* Швидкий перегляд з'являється плавно знизу */}
-                  <div className="hidden lg:flex absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 items-end justify-center pb-4 z-10">
-                    <button className="flex items-center gap-2 bg-white/95 text-zinc-900 font-medium text-xs px-4 py-2 rounded-md shadow-sm hover:bg-white transition-all transform translate-y-1 group-hover:translate-y-0 cursor-pointer">
-                      <Eye className="w-3.5 h-3.5" />
-                      Швидкий перегляд
-                    </button>
-                  </div>
-                </div>
-
-                {/* Метадані під картинкою */}
-                <div className="pt-3 flex flex-col grow">
-                  {/* Рядок кольорів та обраного */}
-                  <div className="flex items-center justify-between min-h-5">
-                    <div className="flex items-center gap-1.5">
-                      {uniqueColors.map((colorName, cIdx) => (
-                        <span
-                          key={cIdx}
-                          title={colorName}
-                          className={`w-3 h-3 rounded-full border border-zinc-200/80 shadow-xs cursor-pointer hover:scale-110 transition-transform ${colorToClass(colorName)}`}
-                        />
-                      ))}
+                    <div className="absolute top-2 left-2 flex flex-col gap-1 z-10">
+                      {hasDiscount ? (
+                        <span className="text-[9px] md:text-10px font-semibold tracking-wider uppercase px-2 py-0.5 rounded-xs text-white bg-pink-600">
+                          Акція
+                        </span>
+                      ) : idx % 3 === 0 ? (
+                        <span className="text-[9px] md:text-10px font-semibold tracking-wider uppercase px-2 py-0.5 rounded-xs text-zinc-900 bg-zinc-100 border border-zinc-200">
+                          Новинка
+                        </span>
+                      ) : null}
                     </div>
-                    <button
-                      onClick={() => toggleFavorite(product.id)}
-                      className="text-muted-foreground hover:text-pink-600 transition-colors p-1 cursor-pointer"
-                    >
-                      <Heart
-                        className={`w-4 h-4 transition-all ${isFavorite ? "fill-pink-600 text-pink-600 scale-105" : ""}`}
-                      />
-                    </button>
+
+                    <div className="hidden lg:flex absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 items-end justify-center pb-4 z-10">
+                      <button className="flex items-center gap-2 bg-white/95 text-zinc-900 font-medium text-xs px-4 py-2 rounded-md shadow-sm hover:bg-white transition-all transform translate-y-1 group-hover:translate-y-0 cursor-pointer">
+                        <Eye className="w-3.5 h-3.5" />
+                        Швидкий перегляд
+                      </button>
+                    </div>
                   </div>
 
-                  {/* Назва товару */}
-                  <h2 className="mt-1.5 text-xs md:text-sm font-medium text-zinc-800 line-clamp-1 group-hover:text-pink-600 transition-colors">
-                    {product.title}
-                  </h2>
+                  <div className="pt-3 flex flex-col grow">
+                    <div className="flex items-center justify-between min-h-5">
+                      <div className="flex items-center gap-1.5">
+                        {uniqueColors.map((colorName, cIdx) => (
+                          <span
+                            key={cIdx}
+                            title={colorName}
+                            className={`w-3 h-3 rounded-full border border-zinc-200/80 shadow-xs cursor-pointer hover:scale-110 transition-transform ${colorToClass(colorName as any)}`}
+                          />
+                        ))}
+                      </div>
+                      <button
+                        onClick={() => toggleFavorite(product.id)}
+                        className="text-muted-foreground hover:text-pink-600 transition-colors p-1 cursor-pointer"
+                      >
+                        <Heart
+                          className={`w-4 h-4 transition-all ${isFavorite ? "fill-pink-600 text-pink-600 scale-105" : ""}`}
+                        />
+                      </button>
+                    </div>
 
-                  {/* Ціни у форматі UAH як на макеті */}
-                  <div className="mt-1 flex items-baseline gap-2 flex-wrap text-xs md:text-sm">
-                    {hasDiscount ? (
-                      <>
-                        <span className="font-bold text-pink-600">
+                    <h2 className="mt-1.5 text-xs md:text-sm font-medium text-zinc-800 line-clamp-1 group-hover:text-pink-600 transition-colors">
+                      {product.title}
+                    </h2>
+
+                    <div className="mt-1 flex items-baseline gap-2 flex-wrap text-xs md:text-sm">
+                      {hasDiscount ? (
+                        <>
+                          <span className="font-bold text-pink-600">
+                            {currentPrice} UAH
+                          </span>
+                          <span className="text-11px md:text-xs text-muted-foreground line-through decoration-pink-600/40">
+                            {oldPrice} UAH
+                          </span>
+                        </>
+                      ) : (
+                        <span className="font-semibold text-zinc-900">
                           {currentPrice} UAH
                         </span>
-                        <span className="text-11px md:text-xs text-muted-foreground line-through decoration-pink-600/40">
-                          {oldPrice} UAH
-                        </span>
-                      </>
-                    ) : (
-                      <span className="font-semibold text-zinc-900">
-                        {currentPrice} UAH
-                      </span>
-                    )}
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
+              );
+            })}
+          </div>
 
-      {/* --- Pagination --- */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12">
-        <nav className="flex justify-center items-center gap-1">
-          <button className="w-9 h-9 rounded-xl flex items-center justify-center text-sm font-medium border border-border bg-card text-muted-foreground cursor-pointer">
-            &larr;
-          </button>
-          <button className="w-9 h-9 rounded-xl flex items-center justify-center text-sm font-bold bg-accent text-accent-foreground shadow-sm">
-            1
-          </button>
-          <button className="w-9 h-9 rounded-xl flex items-center justify-center text-sm font-medium hover:bg-muted text-foreground transition-colors cursor-pointer">
-            2
-          </button>
-          <button className="w-9 h-9 rounded-xl flex items-center justify-center text-sm font-medium border border-border bg-card text-muted-foreground cursor-pointer">
-            &rarr;
-          </button>
-        </nav>
-      </div>
-
-      {/* --- Mobile Drawer --- */}
-      {isMobileDrawerOpen && (
-        <div className="fixed inset-0 z-50 md:hidden flex justify-end">
-          <div
-            className="absolute inset-0 bg-black/40 backdrop-blur-xs"
-            onClick={() => setIsMobileDrawerOpen(false)}
-          />
-          <div className="relative w-full max-w-sm h-full bg-background flex flex-col shadow-2xl z-10">
-            <div className="flex items-center justify-between p-4 border-b border-muted">
-              <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
-                <SlidersHorizontal className="w-4 h-4" /> Фільтри
-              </h2>
-              <button
-                onClick={() => setIsMobileDrawerOpen(false)}
-                className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground transition-all cursor-pointer"
-              >
-                <X className="w-5 h-5" />
+          {/* --- Pagination --- */}
+          <div className="mt-12">
+            <nav className="flex justify-center items-center gap-1">
+              <button className="w-9 h-9 rounded-xl flex items-center justify-center text-sm font-medium border border-border bg-card text-muted-foreground cursor-pointer">
+                &larr;
               </button>
-            </div>
-            <div className="absolute bottom-0 inset-x-0 bg-background/90 backdrop-blur-md border-t border-muted p-4 z-20">
-              <button
-                onClick={() => setIsMobileDrawerOpen(false)}
-                className="w-full h-12 bg-accent text-accent-foreground font-bold text-sm rounded-xl shadow-lg flex items-center justify-center gap-2 cursor-pointer"
-              >
-                Показати ({filteredCount}) товарів
+              <button className="w-9 h-9 rounded-xl flex items-center justify-center text-sm font-bold bg-accent text-accent-foreground shadow-sm">
+                1
               </button>
-            </div>
+              <button className="w-9 h-9 rounded-xl flex items-center justify-center text-sm font-medium hover:bg-muted text-foreground transition-colors cursor-pointer">
+                2
+              </button>
+              <button className="w-9 h-9 rounded-xl flex items-center justify-center text-sm font-medium border border-border bg-card text-muted-foreground cursor-pointer">
+                &rarr;
+              </button>
+            </nav>
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }

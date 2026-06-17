@@ -1,5 +1,4 @@
-"use client";
-
+import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import * as React from 'react';
 import { X, Filter, Check } from 'lucide-react';
 import { cn } from '@/shared/lib';
@@ -9,16 +8,12 @@ import { Button } from '@/shared/ui';
 export interface FilterCriteria {
   priceRange: { min: number; max: number };
   sizes: string[];
-  colors: ProductColor[];
+  colors: string[];
 }
 
 export type SortOption = 'newest' | 'price-low-high' | 'price-high-low' | 'popular';
 
 export interface CatalogFiltersProps {
-  activeFilters: FilterCriteria;
-  onFilterChange: (filters: FilterCriteria) => void;
-  currentSortOption: SortOption;
-  onSortChange: (sort: SortOption) => void;
   className?: string;
 }
 
@@ -30,38 +25,52 @@ const AVAILABLE_COLORS: ProductColor[] = [
 /**
  * CatalogFilters Feature
  * 
- * Provides responsive filtering and sorting for the product catalog.
- * Adapts between a desktop sidebar and a mobile slide-out drawer.
+ * Synchronizes filter state with URL Query Strings for SEO and shareability.
+ * Uses Next.js navigation hooks to manage searchParams.
  */
 export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
-  activeFilters,
-  onFilterChange,
-  currentSortOption,
-  onSortChange,
   className,
 }) => {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [isMobileOpen, setIsMobileOpen] = React.useState(false);
 
-  const toggleSize = (size: string) => {
-    const newSizes = activeFilters.sizes.includes(size)
-      ? activeFilters.sizes.filter((s) => s !== size)
-      : [...activeFilters.sizes, size];
-    onFilterChange({ ...activeFilters, sizes: newSizes });
+  // Sync state from URL
+  const activeSizes = searchParams.getAll('size');
+  const activeColors = searchParams.getAll('color');
+  const activeSort = (searchParams.get('sort') as SortOption) || 'newest';
+  const minPrice = searchParams.get('minPrice') || '';
+  const maxPrice = searchParams.get('maxPrice') || '';
+
+  const updateQueryParams = (name: string, value: string | string[], isArray = false) => {
+    const params = new URLSearchParams(searchParams.toString());
+    
+    if (isArray) {
+      const currentValues = params.getAll(name);
+      const val = value as string;
+      if (currentValues.includes(val)) {
+        // Remove item from array params
+        const newValues = currentValues.filter(v => v !== val);
+        params.delete(name);
+        newValues.forEach(v => params.append(name, v));
+      } else {
+        // Add item to array params
+        params.append(name, val);
+      }
+    } else {
+      if (value) {
+        params.set(name, value as string);
+      } else {
+        params.delete(name);
+      }
+    }
+
+    router.push(`${pathname}?${params.toString()}`, { scroll: false });
   };
 
-  const toggleColor = (color: ProductColor) => {
-    const newColors = activeFilters.colors.includes(color)
-      ? activeFilters.colors.filter((c) => c !== color)
-      : [...activeFilters.colors, color];
-    onFilterChange({ ...activeFilters, colors: newColors });
-  };
-
-  const handlePriceChange = (type: 'min' | 'max', value: string) => {
-    const numValue = parseInt(value) || 0;
-    onFilterChange({
-      ...activeFilters,
-      priceRange: { ...activeFilters.priceRange, [type]: numValue },
-    });
+  const clearAll = () => {
+    router.push(pathname, { scroll: false });
   };
 
   const FilterContent = () => (
@@ -70,8 +79,8 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
       <section>
         <h3 className="text-sm font-bold uppercase tracking-wider text-foreground mb-4">Sort By</h3>
         <select
-          value={currentSortOption}
-          onChange={(e) => onSortChange(e.target.value as SortOption)}
+          value={activeSort}
+          onChange={(e) => updateQueryParams('sort', e.target.value)}
           className="w-full bg-background border border-border rounded-xl py-2 px-3 text-sm focus:ring-2 focus:ring-primary focus:outline-none"
         >
           <option value="newest">Newest Arrivals</option>
@@ -88,16 +97,16 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
           <input
             type="number"
             placeholder="Min"
-            value={activeFilters.priceRange.min || ''}
-            onChange={(e) => handlePriceChange('min', e.target.value)}
+            value={minPrice}
+            onChange={(e) => updateQueryParams('minPrice', e.target.value)}
             className="w-full bg-background border border-border rounded-xl py-2 px-3 text-sm focus:ring-2 focus:ring-primary"
           />
           <span className="text-border">-</span>
           <input
             type="number"
             placeholder="Max"
-            value={activeFilters.priceRange.max || ''}
-            onChange={(e) => handlePriceChange('max', e.target.value)}
+            value={maxPrice}
+            onChange={(e) => updateQueryParams('maxPrice', e.target.value)}
             className="w-full bg-background border border-border rounded-xl py-2 px-3 text-sm focus:ring-2 focus:ring-primary"
           />
         </div>
@@ -110,10 +119,10 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
           {AVAILABLE_SIZES.map((size) => (
             <button
               key={size}
-              onClick={() => toggleSize(size)}
+              onClick={() => updateQueryParams('size', size, true)}
               className={cn(
                 "h-10 min-w-10 px-2 rounded-xl border text-xs font-medium transition-all",
-                activeFilters.sizes.includes(size)
+                activeSizes.includes(size)
                   ? "bg-primary text-primary-foreground border-primary"
                   : "bg-background border-border text-foreground hover:bg-muted"
               )}
@@ -131,15 +140,15 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
           {AVAILABLE_COLORS.map((color) => (
             <button
               key={color}
-              onClick={() => toggleColor(color)}
+              onClick={() => updateQueryParams('color', color, true)}
               title={color}
               className={cn(
                 "group relative w-full aspect-square rounded-full border border-border overflow-hidden transition-all hover:scale-110",
-                activeFilters.colors.includes(color) && "ring-2 ring-primary ring-offset-2"
+                activeColors.includes(color) && "ring-2 ring-primary ring-offset-2"
               )}
               style={{ backgroundColor: color.toLowerCase().replace(' ', '') }}
             >
-              {activeFilters.colors.includes(color) && (
+              {activeColors.includes(color) && (
                 <div className="absolute inset-0 flex items-center justify-center bg-black/10">
                   <Check className="w-4 h-4 text-white" />
                 </div>
@@ -172,7 +181,7 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
           <Button 
             variant="ghost" 
             size="sm" 
-            onClick={() => onFilterChange({ priceRange: { min: 0, max: 0 }, sizes: [], colors: [] })}
+            onClick={clearAll}
             className="text-xs text-muted-foreground hover:text-primary"
           >
             Clear All

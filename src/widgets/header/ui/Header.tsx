@@ -60,8 +60,14 @@ export function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMobileLingerieOpen, setIsMobileLingerieOpen] = useState(false);
   const [isMegaHovered, setIsMegaHovered] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
   
   const cartItemsCount = useCartStore((state) => state.items.length);
+
+  // Handle hydration
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   // Track page scrolling state
   useEffect(() => {
@@ -144,7 +150,7 @@ export function Header() {
               </button>
               <Link href="/cart" className="p-2 hover:opacity-60 transition-opacity relative cursor-pointer" aria-label="Cart">
                 <ShoppingBag size={20} />
-                {cartItemsCount > 0 && (
+                {isMounted && cartItemsCount > 0 && (
                   <span className="bg-accent text-accent-foreground font-bold rounded-full text-[9px] w-4 h-4 flex items-center justify-center absolute top-0.5 right-0.5 animate-pulse">
                     {cartItemsCount}
                   </span>

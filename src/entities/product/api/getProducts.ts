@@ -296,39 +296,61 @@ const MOCK_PRODUCTS: Product[] = [
   },
 ];
 
+interface ProductFilters {
+  color?: string | string[];
+  size?: string | string[];
+}
+
 /**
- * Server-side function to fetch products based on URL slug criteria.
+ * Server-side function to fetch products based on URL slug criteria and filters.
  * Formatted and ready for seamless Supabase SSR SDK mapping.
  *
  * @param slug - Array of dynamic routing criteria from Next.js App Router.
+ * @param filters - Optional filters for color and size.
  * @returns {Promise<Product[]>} A promise that resolves to the array of matching products.
  */
-export async function getProducts(slug: string[]): Promise<Product[]> {
+export async function getProducts(slug: string[], filters?: ProductFilters): Promise<Product[]> {
   await new Promise(res => setTimeout(res, 500));
-  // 1. Якщо масив slug порожній (ми на базовій сторінці /catalog), повертаємо всі товари
-  if (!slug || slug.length === 0) {
-    return Promise.resolve(MOCK_PRODUCTS);
+  
+  let products = [...MOCK_PRODUCTS];
+
+  // 1. Фільтрація за категорією (slug)
+  if (slug && slug.length > 0) {
+    const targetCategory = slug[slug.length - 1].toLowerCase();
+    
+    // Пропускаємо фільтрацію, якщо це корінь каталогу
+    if (targetCategory !== "catalog" && targetCategory !== "bilyzna") {
+      products = products.filter(
+        (product) => product.slug.includes(targetCategory)
+      );
+    }
   }
 
-  console.log(
-    "Filtering server-side mock dataset for dynamic URL categories matrix:",
-    slug,
-  );
+  // 2. Фільтрація за кольором та розміром варіантів
+  if (filters) {
+    if (filters.color) {
+      const colors = Array.isArray(filters.color) 
+        ? filters.color.map(c => c.toLowerCase()) 
+        : [filters.color.toLowerCase()];
+        
+      products = products.filter((product) =>
+        product.variants.some((v) => colors.includes(v.color.toLowerCase()))
+      );
+    }
+    
+    if (filters.size) {
+      const sizes = Array.isArray(filters.size) 
+        ? filters.size.map(s => s.toLowerCase()) 
+        : [filters.size.toLowerCase()];
 
-  // 2. Витягуємо цільову категорію
-  const targetCategory = slug[slug.length - 1].toLowerCase();
-
-  // 3. Змінено: Пропускаємо фільтрацію через пряме читання масиву 'slug' за допомогою .includes()
-  // Це твій рідний логічний ланцюжок, але тепер він залізобетонно задіює саму назву аргументу 'slug'
-  const filteredProducts = MOCK_PRODUCTS.filter(
-    (product) =>
-      product.slug.includes(targetCategory) ||
-      targetCategory === "bilyzna" ||
-      slug.includes("catalog"),
-  );
+      products = products.filter((product) =>
+        product.variants.some((v) => sizes.includes(v.size.toLowerCase()))
+      );
+    }
+  }
 
   // Якщо нічого не знайшли за фільтром — віддаємо дефолтний набір, щоб не ламати верстку
   return Promise.resolve(
-    filteredProducts.length > 0 ? filteredProducts : MOCK_PRODUCTS,
+    products.length > 0 ? products : MOCK_PRODUCTS,
   );
 }
