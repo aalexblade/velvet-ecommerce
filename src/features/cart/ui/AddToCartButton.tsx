@@ -1,7 +1,6 @@
 "use client";
 
-import { useAppDispatch } from "@/app/store/store";
-import { addToCart } from "../model/slice";
+import { useCartStore } from "../model/cartStore";
 import { Button } from "@/shared/ui";
 import { ShoppingBag } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
@@ -27,13 +26,13 @@ export function AddToCartButton({
   size,
   className = "" 
 }: AddToCartButtonProps) {
-  const dispatch = useAppDispatch();
+  const addToCart = useCartStore((state) => state.addToCart);
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     
-    dispatch(addToCart({ 
+    addToCart({ 
       variantId, 
       productId, 
       title, 
@@ -42,7 +41,7 @@ export function AddToCartButton({
       color, 
       size, 
       quantity: 1 
-    }));
+    });
   };
 
   return (

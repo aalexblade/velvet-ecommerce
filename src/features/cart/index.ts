@@ -1,10 +1,3 @@
-export {
-  cartReducer,
-  addToCart,
-  removeFromCart,
-  updateQuantity,
-  clearCart,
-} from './model/slice';
-export * from './model/selectors';
-export type { CartItem } from './model/slice';
+export { useCartStore } from './model/cartStore';
+export type { CartItem } from './model/cartStore';
 export { AddToCartButton } from "./ui/AddToCartButton";

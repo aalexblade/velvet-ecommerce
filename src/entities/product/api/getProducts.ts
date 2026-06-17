@@ -304,6 +304,7 @@ const MOCK_PRODUCTS: Product[] = [
  * @returns {Promise<Product[]>} A promise that resolves to the array of matching products.
  */
 export async function getProducts(slug: string[]): Promise<Product[]> {
+  await new Promise(res => setTimeout(res, 500));
   // 1. Якщо масив slug порожній (ми на базовій сторінці /catalog), повертаємо всі товари
   if (!slug || slug.length === 0) {
     return Promise.resolve(MOCK_PRODUCTS);

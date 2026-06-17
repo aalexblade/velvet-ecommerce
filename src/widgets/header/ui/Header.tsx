@@ -3,10 +3,9 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { useSelector } from "react-redux";
 import { Search, Heart, ShoppingBag, User, Menu, X, ChevronDown } from "lucide-react";
 import { cn } from "@/shared/lib";
-import { selectCartItemsCount } from "@/features/cart";
+import { useCartStore } from "@/features/cart";
 
 // ==========================================
 // 1. DATA CONFIGURATION FOR MEGA MENU & ROUTING
@@ -62,7 +61,7 @@ export function Header() {
   const [isMobileLingerieOpen, setIsMobileLingerieOpen] = useState(false);
   const [isMegaHovered, setIsMegaHovered] = useState(false);
   
-  const cartItemsCount = useSelector(selectCartItemsCount);
+  const cartItemsCount = useCartStore((state) => state.items.length);
 
   // Track page scrolling state
   useEffect(() => {
