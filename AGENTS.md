@@ -1,6 +1,6 @@
 # 🤖 AI Agent Guidelines & Project Context
 
-Welcome, agent. You are working on a universal, high-performance **Multi-tenant / White-Label e-commerce platform engine** built with Next.js 15/16 (App Router). The first brand being deployed on this core is **"Velvet Secrets"** (premium lingerie store).
+Welcome, agent. You are working on a universal, high-performance **Multi-tenant / White-Label e-commerce platform engine** built with Next.js 16.2.6 (App Router) and React 19.2.4. The first brand being deployed on this core is **"Velvet Secrets"** (premium lingerie store).
 
 Strictly adhere to the rules, architecture, state structures, and design tokens specified below.
 
@@ -15,7 +15,7 @@ This project strictly follows the **Feature-Sliced Design (FSD)** methodology. A
 - `app/` — Layer 1: Global routing configurations, root styles (`globals.css`), and metadata.
   - `(shop)/` — Isolated storefront routing boundary containing pure, lightweight server entries: `page.tsx` (Home), `catalog/[[...slug]]/page.tsx` (Dynamic Catalog Router), `product/[id]/`, `cart/`, and `checkout/`.
   - **Rule:** App router components must contain ZERO business logic, layouts, or states. They unwrap parameters and return the corresponding page from the `views/` layer.
-- `views/` (or `pages/`) — Layer 2: Compositions of widgets and features that represent a full page layout.
+- `views/` — Layer 2: Compositions of widgets and features that represent a full page layout.
   - `catalog/ui/CatalogPage.tsx` — Server Component orchestrator that captures route params/searchParams, fetches public datasets, and feeds them into the widgets layer.
 - `widgets/` — Layer 3: Composite, autonomous, self-contained layout sections of a page.
   - `catalog-view/ui/CatalogView.tsx` — The interactive core layout view component for the catalogue.
@@ -27,9 +27,9 @@ This project strictly follows the **Feature-Sliced Design (FSD)** methodology. A
   - `product-size-calculator/` — Independent size form orchestrating math inputs via callbacks.
   - `wishlist/`, `search/`, `checkout/`, `auth/`.
 - `entities/` — Layer 5: Pure domain business models, lightweight data transformations, and basic presentation dumb-cards.
-  - `product/` — Holds clean relative components (`ui/ProductCard.tsx`), TS types (`model/types.ts`), and strict data requests mock API layer (`api/getProducts.ts`).
-  - `category/`, `order/`, `user/`, `review/`.
-- `shared/` — Layer 6: Reusable infrastructure, generic UI primitives (Shadcn kit), cross-domain utilities, and global assets (`api`, `ui`, `lib`, `types`, `hooks`, `constants`).
+  - `product/` — Holds clean relative components (`ui/ProductCard.tsx`), TS types (`model/types.ts`), and data requests (`api/getProducts.ts`).
+  - `category/`, `order/`, `user/`.
+- `shared/` — Layer 6: Reusable infrastructure, generic UI primitives (Shadcn kit), cross-domain utilities, and global assets (`api/supabase`, `ui`, `lib`, `types`).
 
 ### 2. Isolation, Cross-Imports & Public APIs
 
@@ -46,7 +46,28 @@ Global state stores like Redux are completely forbidden. Client interaction stat
 
 ### 1. Cart Zustand Store Schema (`@/features/cart/model/cartStore.ts`)
 
-The shopping cart utilizing Zustand's `persist` middleware must safely isolate data syncing into `localStorage`.
+The shopping cart utilizes Zustand's `persist` middleware to safely isolate data syncing into `localStorage` under the name `'cart-storage'`.
+
+```typescript
+export interface CartItem {
+  variantId: string;
+  productId: string;
+  title: string;
+  price: number;
+  quantity: number;
+  image: string;
+  color?: string;
+  size?: string;
+}
+
+interface CartState {
+  items: CartItem[];
+  addToCart: (item: CartItem) => void;
+  removeFromCart: (variantId: string) => void;
+  updateQuantity: (variantId: string, quantity: number) => void;
+  clearCart: () => void;
+}
+```
 
 ### 2. Next.js Hydration Mismatch Guard
 
@@ -77,6 +98,14 @@ We use **Tailwind v4** driven by the central CSS-only configuration directive in
 - `bg-card` / `text-card-foreground` — Presentation components background elements.
 - `bg-primary` / `bg-accent` / `text-accent-foreground` — Luxury brand identity highlights and text context indicators.
 
+### Multi-Tenant Extended Product Colors (E-commerce Swatches)
+Available values mapped via CSS theme config:
+- `white`, `smoky-white`, `lavender`, `creamy-yellow`, `creamy`, `creamy-velvet`, `peach`
+- `cotton-candy`, `pale-purple`, `eggplant`, `cherry`, `dark-violet`, `plum`
+- `ruby`, `wine-red`, `magenta`, `red`, `mahogany-brown`
+- `magic-mint`, `emerald`, `pearl-green`, `azure-blue`, `denim-blue`, `midnight-blue`
+- `raw-umber`, `dark`, `black`
+
 ### Typography & Price Formatting
 
 - **Font Family:** `Manrope` (`font-sans`) is applied globally. No alternative serif systems allowed.
@@ -86,9 +115,13 @@ We use **Tailwind v4** driven by the central CSS-only configuration directive in
 
 ## ⚙️ Relational Data Models & Static Caching (Supabase Integration)
 
-All product-related interfaces strictly follow a relational data model where prices and presentation swatches are unboxed from variants and nested image sub-arrays.
+All product-related interfaces strictly follow a relational data model where prices and presentation swatches are unboxed from variants and nested image sub-arrays. Integration is managed via `@supabase/ssr` using separated server and browser clients.
 
-### Product Interface Schema (`@/entities/product/model/types.ts`)
+### 1. Supabase Clients (`@/shared/api/supabase/`)
+- `browserClient.ts`: Exports `createSupabaseBrowserClient()` initialized with public environment variables.
+- `serverClient.ts`: Exports asynchronous `createSupabaseServerClient()` supporting Next.js header-based cookie manipulation.
+
+### 2. Product Interface Schema (`@/entities/product/model/types.ts`)
 
 ```typescript
 export type ProductColor =
