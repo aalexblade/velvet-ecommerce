@@ -174,14 +174,14 @@ export function CatalogView({ slug, initialProducts }: CatalogViewProps) {
         </div>
       </div>
 
-      {/* --- Main Content Grid (Filters + Products) --- */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 flex flex-col md:flex-row gap-8">
-        {/* Sidebar Filters */}
-        <CatalogFilters className="md:w-64" />
+      {/* --- Main Content Area (Restructured to full-width per Figma mockup) --- */}
+      <div className="mt-8 flex flex-col gap-6">
+        {/* Full-width Filters placed above products */}
+        <CatalogFilters />
 
-        {/* Product Grid */}
-        <div className="flex-1">
-          <div className="grid grid-cols-2 lg:grid-cols-3 gap-x-4 gap-y-8">
+        {/* Product Grid - occupying full available width */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {initialProducts.map((product, idx) => {
               const isFavorite = favorites.includes(product.id);
 
@@ -200,75 +200,80 @@ export function CatalogView({ slug, initialProducts }: CatalogViewProps) {
               return (
                 <div
                   key={product.id}
-                  className="group flex flex-col bg-background rounded-xs overflow-hidden transition-all duration-300"
+                  /* Styled card with white background, border, and shadow as in Figma */
+                  className="group flex flex-col bg-white rounded-xl border border-zinc-200 shadow-sm overflow-hidden transition-all duration-300 hover:shadow-md"
                 >
-                  <div className="relative w-full aspect-3/4 bg-neutral-100 overflow-hidden rounded-sm">
+                  <div className="relative w-full aspect-[3/4] bg-neutral-100 overflow-hidden">
                     <Image
                       src={mainImage}
                       alt={product.title}
                       fill
                       sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
                       priority={idx < 4}
-                      className="object-cover object-center group-hover:scale-102 transition-transform duration-500"
+                      className="object-cover object-center group-hover:scale-105 transition-transform duration-500"
                     />
 
-                    <div className="absolute top-2 left-2 flex flex-col gap-1 z-10">
+                    {/* Marketing badges styled with brand pink color and white background */}
+                    <div className="absolute top-3 left-3 flex flex-col gap-1 z-10">
                       {hasDiscount ? (
-                        <span className="text-[9px] md:text-10px font-semibold tracking-wider uppercase px-2 py-0.5 rounded-xs text-white bg-pink-600">
+                        <span className="text-[10px] font-bold tracking-wider uppercase px-2.5 py-1 rounded-md text-white bg-[#C8205C]">
                           Акція
                         </span>
                       ) : idx % 3 === 0 ? (
-                        <span className="text-[9px] md:text-10px font-semibold tracking-wider uppercase px-2 py-0.5 rounded-xs text-zinc-900 bg-zinc-100 border border-zinc-200">
+                        <span className="text-[10px] font-bold tracking-wider uppercase px-2.5 py-1 rounded-md text-zinc-900 bg-white border border-zinc-200 shadow-xs">
                           Новинка
                         </span>
                       ) : null}
                     </div>
 
-                    <div className="hidden lg:flex absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 items-end justify-center pb-4 z-10">
-                      <button className="flex items-center gap-2 bg-white/95 text-zinc-900 font-medium text-xs px-4 py-2 rounded-md shadow-sm hover:bg-white transition-all transform translate-y-1 group-hover:translate-y-0 cursor-pointer">
-                        <Eye className="w-3.5 h-3.5" />
+                    {/* Simplified Quick view button (removed icon, styled per Figma) */}
+                    <div className="hidden lg:flex absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 items-end justify-center pb-6 z-10">
+                      <button className="flex items-center justify-center bg-white/95 text-zinc-900 font-semibold text-sm px-6 py-2.5 rounded-lg shadow-sm hover:bg-white hover:text-[#C8205C] transition-all transform translate-y-2 group-hover:translate-y-0 cursor-pointer border border-zinc-200">
                         Швидкий перегляд
                       </button>
                     </div>
                   </div>
 
-                  <div className="pt-3 flex flex-col grow">
-                    <div className="flex items-center justify-between min-h-5">
-                      <div className="flex items-center gap-1.5">
+                  <div className="p-4 flex flex-col grow">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        {/* Square color swatches with rounded corners per Figma design */}
                         {uniqueColors.map((colorName, cIdx) => (
                           <span
                             key={cIdx}
                             title={colorName}
-                            className={`w-3 h-3 rounded-full border border-zinc-200/80 shadow-xs cursor-pointer hover:scale-110 transition-transform ${colorToClass(colorName as any)}`}
+                            className={`w-5 h-5 rounded-md border border-zinc-300 shadow-xs cursor-pointer hover:scale-110 transition-transform ${colorToClass(colorName as any)}`}
                           />
                         ))}
                       </div>
                       <button
                         onClick={() => toggleFavorite(product.id)}
-                        className="text-muted-foreground hover:text-pink-600 transition-colors p-1 cursor-pointer"
+                        className="text-zinc-400 hover:text-[#C8205C] transition-colors p-1 cursor-pointer"
                       >
                         <Heart
-                          className={`w-4 h-4 transition-all ${isFavorite ? "fill-pink-600 text-pink-600 scale-105" : ""}`}
+                          className={`w-5 h-5 transition-all ${isFavorite ? "fill-[#C8205C] text-[#C8205C] scale-110" : ""}`}
                         />
                       </button>
                     </div>
 
-                    <h2 className="mt-1.5 text-xs md:text-sm font-medium text-zinc-800 line-clamp-1 group-hover:text-pink-600 transition-colors">
+                    {/* Product title with stronger typography and brand color on hover */}
+                    <h2 className="text-sm font-semibold text-zinc-900 line-clamp-2 group-hover:text-[#C8205C] transition-colors">
                       {product.title}
                     </h2>
 
-                    <div className="mt-1 flex items-baseline gap-2 flex-wrap text-xs md:text-sm">
+                    {/* Prices with strict brand pink for discounted price */}
+                    <div className="mt-2 flex items-baseline gap-2 flex-wrap text-sm">
                       {hasDiscount ? (
                         <>
-                          <span className="font-bold text-pink-600">
+                          <span className="font-bold text-[#C8205C]">
                             {currentPrice} UAH
                           </span>
-                          <span className="text-11px md:text-xs text-muted-foreground line-through decoration-pink-600/40">
+                          <span className="text-xs text-zinc-500 line-through decoration-[#C8205C]/40">
                             {oldPrice} UAH
                           </span>
                         </>
                       ) : (
-                        <span className="font-semibold text-zinc-900">
+                        <span className="font-bold text-zinc-900">
                           {currentPrice} UAH
                         </span>
                       )}
