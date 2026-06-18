@@ -4,6 +4,10 @@ import React from "react";
 import Image from "next/image";
 import { SizeCalculatorForm } from "@/features/product-size-calculator";
 
+export interface SizeCalculatorProps {
+  onSizeCalculated?: (size: string) => void;
+}
+
 /**
  * SizeCalculator Widget
  *
@@ -11,7 +15,7 @@ import { SizeCalculatorForm } from "@/features/product-size-calculator";
  * Mobile/Tablet (<lg): Header (1) -> Image (2) -> Form (3) in a single column.
  * Desktop (>=lg): Balanced two-column grid.
  */
-export const SizeCalculator: React.FC = () => {      
+export const SizeCalculator: React.FC<SizeCalculatorProps> = ({ onSizeCalculated }) => {      
   const modelImageUrl =
     "https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=1200";
 
@@ -57,7 +61,7 @@ export const SizeCalculator: React.FC = () => {
 
         {/* 3. Form Feature: Bottom on mobile (order-3), Bottom-Right on Desktop */}
         <div className="order-3 lg:col-start-2 lg:row-start-2 w-full">
-          <SizeCalculatorForm />
+          <SizeCalculatorForm onSizeCalculated={onSizeCalculated} />
         </div>
       </div>
     </section>

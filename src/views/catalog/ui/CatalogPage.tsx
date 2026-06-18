@@ -1,11 +1,22 @@
 import { CatalogView } from "@/widgets/catalog-view";
-import { Product } from "@/entities/product";
+import { getProducts } from "@/entities/product";
 
 interface CatalogPageProps {
-  slug?: string[];
-  initialProducts: Product[];
+  params: { slug?: string[] };
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
-export function CatalogPage({ slug, initialProducts }: CatalogPageProps) {
-  return <CatalogView slug={slug} initialProducts={initialProducts} />;
+export async function CatalogPage({ params, searchParams }: CatalogPageProps) {
+  const { slug } = params;
+  const search = await searchParams;
+  const safeSlug = slug ?? [];
+
+  const filters = {
+    color: search.color,
+    size: search.size,
+  };
+
+  const products = await getProducts(safeSlug, filters);
+
+  return <CatalogView slug={safeSlug} initialProducts={products} />;
 }

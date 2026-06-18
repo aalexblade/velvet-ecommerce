@@ -29,10 +29,13 @@ export function AddToCartButton({
 }: AddToCartButtonProps) {
   const [isMounted, setIsMounted] = useState(false);
   const addToCart = useCartStore((state) => state.addToCart);
+  const items = useCartStore((state) => state.items);
 
   useEffect(() => {
     setIsMounted(true);
   }, []);
+
+  const isInCart = items.some((item) => item.variantId === variantId);
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -58,11 +61,12 @@ export function AddToCartButton({
       onClick={handleAddToCart}
       className={cn(
         "w-full bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl h-11 text-sm font-medium transition-all active:scale-[0.98] cursor-pointer flex items-center justify-center gap-2",
+        isMounted && isInCart && "bg-muted text-foreground border border-border hover:bg-muted",
         className
       )}
     >
       <ShoppingBag size={14} />
-      До кошика
+      {isMounted && isInCart ? "Вже в кошику" : "До кошика"}
     </Button>
   );
 }

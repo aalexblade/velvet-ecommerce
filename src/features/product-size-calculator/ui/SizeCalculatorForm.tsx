@@ -8,13 +8,17 @@ import { SuggestedSize } from "../model/types";
 import { MeasurementInput } from "./MeasurementInput";
 import Link from "next/link";
 
+export interface SizeCalculatorFormProps {
+  onSizeCalculated?: (size: string) => void;
+}
+
 /**
  * SizeCalculatorForm
  * 
  * Refactored for a vertical input stack and responsive action row.
  * Adheres to premium UI specs with 100% width fields and clear result labeling.
  */
-export const SizeCalculatorForm = () => {
+export const SizeCalculatorForm = ({ onSizeCalculated }: SizeCalculatorFormProps) => {
   const [values, setValues] = useState<Record<string, string>>({
     overbust: "",
     underbust: "",
@@ -35,6 +39,10 @@ export const SizeCalculatorForm = () => {
     const suggestedSize = getSuggestedSize(underbust, overbust);
     setResult(suggestedSize);
     setHasCalculated(true);
+
+    if (suggestedSize && onSizeCalculated) {
+      onSizeCalculated(suggestedSize);
+    }
   };
 
   const isFormFilled = values.overbust !== "" && values.underbust !== "" && values.hips !== "";
