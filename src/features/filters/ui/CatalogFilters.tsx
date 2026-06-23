@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useTransition } from "react";
+import React, { useTransition, useState } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
-import { ChevronDown, Filter } from "lucide-react";
+import { ChevronDown, Filter, X, Menu } from "lucide-react";
 import { cn } from "@/shared/lib";
 import { ProductColor } from "@/entities/product";
 
@@ -127,6 +127,11 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
 
+  // Керування стейтами шторки фільтрів та мобільного сортування
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isMobSortOpen, setIsMobSortOpen] = useState(false);
+  const [openAccordion, setOpenAccordion] = useState<string | null>(null);
+
   const activeSizes = AVAILABLE_SIZES.filter((s) =>
     searchParams
       .getAll("size")
@@ -156,6 +161,10 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
   const activeSort = (searchParams.get("sort") as SortOption) || "popular";
   const minPrice = searchParams.get("minPrice") || "";
   const maxPrice = searchParams.get("maxPrice") || "";
+
+  const toggleAccordion = (id: string) => {
+    setOpenAccordion(openAccordion === id ? null : id);
+  };
 
   const updateQueryParams = (
     name: string,
@@ -210,13 +219,9 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
   };
 
   const getSortButtonTitle = () => {
-    if (searchParams.get("sort")) {
-      return (
-        SORT_OPTIONS.find((o) => o.id === activeSort)?.title ||
-        "За популярністю"
-      );
-    }
-    return "За популярністю";
+    return (
+      SORT_OPTIONS.find((o) => o.id === activeSort)?.title || "За популярністю"
+    );
   };
 
   const hasActiveFilters =
@@ -230,8 +235,6 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
 
   const dropdownContainerClasses =
     "absolute top-full left-0 mt-1 z-50 bg-white border border-zinc-200 shadow-xl rounded-xl opacity-0 pointer-events-none transition-all duration-200 scale-95 origin-top-left group-hover:opacity-100 group-hover:pointer-events-auto group-hover:scale-100 overflow-visible";
-
-  // 1-й рядок UI Kit ліворуч: Преміально-рожевий фон. При ховері плавно переходить у 4-й рядок (темно-винний)
   const activeBadgeClasses =
     "inline-flex items-center justify-center bg-[#b91c56] text-white rounded-lg px-5 py-2.5 text-xs font-bold transition-colors cursor-pointer select-none hover:bg-[#73103a] active:scale-[0.98] shadow-xs";
 
@@ -243,17 +246,18 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
         className,
       )}
     >
-      <div className="border-y border-zinc-200 py-1 overflow-visible">
+      {/* ========================================================================= */}
+      {/* 💻 ДЕСКТОПНА ПАНЕЛЬ ФІЛЬТРІВ (hidden lg:block) */}
+      {/* ========================================================================= */}
+      <div className="border-y border-zinc-200 py-1 overflow-visible hidden lg:block">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 overflow-visible">
           <div className="flex items-center justify-between h-14 overflow-visible">
-            {/* 1. Всі Фільтри */}
-            <div className="flex items-center gap-2 text-zinc-900 py-4 font-semibold text-xs uppercase tracking-wider shrink-0 mr-4 lg:mr-6 select-none cursor-pointer hover:text-pink-600 transition-colors whitespace-nowrap">
+            <div className="flex items-center gap-2 text-zinc-900 py-4 font-semibold text-xs uppercase tracking-wider shrink-0 mr-6 select-none cursor-pointer hover:text-pink-600 transition-colors whitespace-nowrap">
               <Filter className="w-4 h-4 stroke-[2.5px]" />
               Всі Фільтри
             </div>
 
-            {/* ГОРІЗОНТАЛЬНИЙ ДЕСКТОПНИЙ ТУЛБАР */}
-            <div className="hidden md:flex items-center gap-x-3 lg:gap-x-6 flex-1 overflow-visible h-full">
+            <div className="flex items-center gap-x-6 flex-1 overflow-visible h-full">
               {/* А. Назва товару */}
               <div className="relative group shrink-0 py-4 overflow-visible">
                 <button
@@ -262,7 +266,7 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
                     activeNames.length > 0 ? "text-pink-600" : "text-zinc-500",
                   )}
                 >
-                  Назва товару
+                  Назва товару{" "}
                   <ChevronDown className="w-3.5 h-3.5 transition-transform duration-300 group-hover:rotate-180" />
                 </button>
                 <div
@@ -305,7 +309,7 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
                     minPrice || maxPrice ? "text-pink-600" : "text-zinc-500",
                   )}
                 >
-                  Ціна
+                  Ціна{" "}
                   <ChevronDown className="w-3.5 h-3.5 transition-transform duration-300 group-hover:rotate-180" />
                 </button>
                 <div
@@ -344,7 +348,7 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
                     activeSizes.length > 0 ? "text-pink-600" : "text-zinc-500",
                   )}
                 >
-                  Розмір
+                  Розмір{" "}
                   <ChevronDown className="w-3.5 h-3.5 transition-transform duration-300 group-hover:rotate-180" />
                 </button>
                 <div
@@ -380,7 +384,7 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
                     activeColors.length > 0 ? "text-pink-600" : "text-zinc-500",
                   )}
                 >
-                  Колір
+                  Колір{" "}
                   <ChevronDown className="w-3.5 h-3.5 transition-transform duration-300 group-hover:rotate-180" />
                 </button>
                 <div
@@ -420,7 +424,7 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
                     onClick={() => updateQueryParams("color", "")}
                     className="flex items-center gap-3 w-full py-1.5 px-2 rounded-md text-left text-xs font-semibold text-zinc-400 hover:text-zinc-900 hover:bg-zinc-50 cursor-pointer transition-colors whitespace-nowrap"
                   >
-                    <span className="w-4 h-4 rounded-[5px] shrink-0 bg-linear-to-tr from-blue-500 via-yellow-400 to-red-500 shadow-xs" />
+                    <span className="w-4 h-4 rounded-[5px] shrink-0 bg-linear-to-tr from-blue-500 via-yellow-400 to-red-500 shadow-xs" />{" "}
                     Всі кольори...
                   </button>
                 </div>
@@ -431,12 +435,10 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
                 <button
                   className={cn(
                     "flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider transition-colors cursor-pointer group-hover:text-pink-600 whitespace-nowrap",
-                    activeFabrics.length > 0
-                      ? "text-pink-600"
-                      : "text-zinc-500",
+                    activeColors.length > 0 ? "text-pink-600" : "text-zinc-500",
                   )}
                 >
-                  Тип тканини
+                  Тип тканини{" "}
                   <ChevronDown className="w-3.5 h-3.5 transition-transform duration-300 group-hover:rotate-180" />
                 </button>
                 <div
@@ -476,7 +478,7 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
                       : "text-zinc-500",
                   )}
                 >
-                  Колекція
+                  Колекція{" "}
                   <ChevronDown className="w-3.5 h-3.5 transition-transform duration-300 group-hover:rotate-180" />
                 </button>
                 <div
@@ -507,13 +509,13 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
               </div>
             </div>
 
-            {/* СОРТУВАТИ ЗА */}
-            <div className="flex items-center gap-2 shrink-0 ml-auto md:ml-0 relative group py-4 overflow-visible">
+            {/* Сортувати десктоп */}
+            <div className="flex items-center gap-2 shrink-0 relative group py-4 overflow-visible">
               <label className="text-xs font-medium text-zinc-400 select-none whitespace-nowrap">
                 Сортувати за:
               </label>
               <button className="flex items-center gap-1 text-xs font-semibold text-zinc-800 hover:text-pink-600 cursor-pointer transition-colors whitespace-nowrap">
-                {getSortButtonTitle()}
+                {getSortButtonTitle()}{" "}
                 <ChevronDown className="w-3.5 h-3.5 transition-transform duration-300 group-hover:rotate-180" />
               </button>
               <div className="absolute right-0 top-full mt-1 z-50 bg-white border border-zinc-200 shadow-xl rounded-xl py-1.5 min-w-52 opacity-0 pointer-events-none transition-all duration-200 scale-95 origin-top-right group-hover:opacity-100 group-hover:pointer-events-auto group-hover:scale-100 overflow-visible">
@@ -540,9 +542,380 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
         </div>
       </div>
 
-      {/* РЯДОК АКТИВНИХ БЕЙДЖІВ ТА КНОПКИ СКИДАННЯ */}
+      {/* ========================================================================= */}
+      {/* 📱 МОБІЛЬНИЙ ТА ТАБЛЕТ ТУЛБАР (Замінено клік-ховер на чистий React State) */}
+      {/* ========================================================================= */}
+      <div className="border-y border-zinc-200 py-3 block lg:hidden bg-white sticky top-0 z-30">
+        <div className="px-4 flex items-center justify-between gap-4">
+          <button
+            onClick={() => {
+              setIsMobileMenuOpen(true);
+              setIsMobSortOpen(false);
+            }}
+            className="flex-1 flex items-center justify-center gap-2 border border-zinc-300 rounded-lg py-3 text-xs font-bold uppercase tracking-wider text-zinc-900 bg-white active:bg-zinc-50 transition-all select-none cursor-pointer"
+          >
+            <Menu className="w-4 h-4 stroke-[2.5px] text-[#b91c56]" />
+            Фільтри{" "}
+            {hasActiveFilters &&
+              `(${activeSizes.length + activeColors.length + activeFabrics.length + activeCollections.length + activeNames.length})`}
+          </button>
+
+          {/* 💎 Контрольоване мобільне сортування без group-hover */}
+          <div className="relative flex-1">
+            <button
+              onClick={() => setIsMobSortOpen(!isMobSortOpen)}
+              className="w-full flex items-center justify-center gap-1.5 border border-zinc-300 rounded-lg py-3 text-xs font-bold uppercase tracking-wider text-zinc-900 bg-white active:bg-zinc-50 transition-all select-none cursor-pointer"
+            >
+              <span className="truncate">{getSortButtonTitle()}</span>
+              <ChevronDown
+                className={cn(
+                  "w-4 h-4 transition-transform duration-300 shrink-0 text-zinc-400",
+                  isMobSortOpen && "rotate-180 text-[#b91c56]",
+                )}
+              />
+            </button>
+
+            <div
+              className={cn(
+                "absolute right-0 left-0 top-full mt-1 z-50 bg-white border border-zinc-200 shadow-2xl rounded-xl py-1.5 transition-all duration-200 origin-top",
+                isMobSortOpen
+                  ? "opacity-100 scale-100 pointer-events-auto"
+                  : "opacity-0 scale-95 pointer-events-none",
+              )}
+            >
+              {SORT_OPTIONS.map((opt) => (
+                <button
+                  key={`mob-sort-${opt.id}`}
+                  onClick={() => {
+                    updateQueryParams("sort", opt.id);
+                    setIsMobSortOpen(false); // Закриваємо меню після тапу на елемент
+                  }}
+                  className={cn(
+                    "w-full text-left px-5 py-3.5 text-xs font-semibold transition-colors flex items-center justify-between border-b border-zinc-50 last:border-0 cursor-pointer",
+                    activeSort === opt.id
+                      ? "bg-pink-50/50 text-[#b91c56]"
+                      : "text-zinc-700 active:bg-zinc-50",
+                  )}
+                >
+                  {opt.title}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ========================================================================= */}
+      {/* 📥 МОБІЛЬНА/ТАБЛЕТ ШТОРКА (DRAWER SHEET) */}
+      {/* ========================================================================= */}
+      <div
+        className={cn(
+          "fixed inset-0 z-50 transition-all duration-300 lg:hidden",
+          isMobileMenuOpen
+            ? "opacity-100 pointer-events-auto"
+            : "opacity-0 pointer-events-none",
+        )}
+      >
+        <div
+          onClick={() => setIsMobileMenuOpen(false)}
+          className="absolute inset-0 bg-black/40 backdrop-blur-xs"
+        />
+
+        <div
+          className={cn(
+            "absolute top-0 right-0 bottom-0 w-[90%] max-w-100 bg-white shadow-2xl flex flex-col transition-transform duration-300 transform",
+            isMobileMenuOpen ? "translate-x-0" : "translate-x-full",
+          )}
+        >
+          <div className="p-4 border-b border-zinc-200 flex items-center justify-between bg-zinc-50">
+            <div className="flex items-center gap-2 text-zinc-900 font-bold text-xs uppercase tracking-wider">
+              <Filter className="w-4 h-4 text-[#b91c56]" />
+              Панель фільтрів
+            </div>
+            <button
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="p-1 rounded-md text-zinc-400 hover:text-zinc-900 active:bg-zinc-200 transition-colors cursor-pointer"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+
+          <div className="flex-1 overflow-y-auto p-4 space-y-4 no-scrollbar pb-24">
+            {/* 1. Назва товару */}
+            <div className="border-b border-zinc-100 pb-3">
+              <button
+                onClick={() => toggleAccordion("name")}
+                className="w-full flex items-center justify-between text-xs font-bold uppercase tracking-wider text-zinc-800 py-1 cursor-pointer"
+              >
+                <span>
+                  Назва товару{" "}
+                  {activeNames.length > 0 && `(${activeNames.length})`}
+                </span>
+                <ChevronDown
+                  className={cn(
+                    "w-4 h-4 transition-transform duration-200 text-zinc-400",
+                    openAccordion === "name" && "rotate-180 text-[#b91c56]",
+                  )}
+                />
+              </button>
+              {openAccordion === "name" && (
+                <div className="mt-3 flex flex-col gap-1.5 pl-1 animate-in fade-in slide-in-from-top-2 duration-200">
+                  {AVAILABLE_NAMES.map((name) => (
+                    <button
+                      key={`mob-name-${name.id}`}
+                      onClick={() => updateQueryParams("search", name.title)}
+                      className={cn(
+                        "w-full text-left py-2.5 px-3 rounded-lg text-xs font-medium transition-colors cursor-pointer",
+                        activeNames.some((n) => n.id === name.id)
+                          ? "bg-pink-50 text-[#b91c56] font-bold"
+                          : "text-zinc-600 active:bg-zinc-50",
+                      )}
+                    >
+                      {name.title}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* 2. Ціна */}
+            <div className="border-b border-zinc-100 pb-3">
+              <button
+                onClick={() => toggleAccordion("price")}
+                className="w-full flex items-center justify-between text-xs font-bold uppercase tracking-wider text-zinc-800 py-1 cursor-pointer"
+              >
+                <span>Ціна {(minPrice || maxPrice) && "•"}</span>
+                <ChevronDown
+                  className={cn(
+                    "w-4 h-4 transition-transform duration-200 text-zinc-400",
+                    openAccordion === "price" && "rotate-180 text-[#b91c56]",
+                  )}
+                />
+              </button>
+              {openAccordion === "price" && (
+                <div className="mt-3 flex flex-col gap-2 pl-1 animate-in fade-in slide-in-from-top-2 duration-200">
+                  {PRICE_PRESETS.map((preset) => (
+                    <button
+                      key={`mob-preset-${preset.label}`}
+                      onClick={() => handlePricePreset(preset.min, preset.max)}
+                      className={cn(
+                        "w-full text-left py-2.5 px-3 rounded-lg text-xs font-medium transition-colors cursor-pointer",
+                        minPrice === preset.min && maxPrice === preset.max
+                          ? "bg-pink-50 text-[#b91c56] font-bold"
+                          : "text-zinc-600 active:bg-zinc-50",
+                      )}
+                    >
+                      {preset.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* 3. Розмір */}
+            <div className="border-b border-zinc-100 pb-3">
+              <button
+                onClick={() => toggleAccordion("size")}
+                className="w-full flex items-center justify-between text-xs font-bold uppercase tracking-wider text-zinc-800 py-1 cursor-pointer"
+              >
+                <span>
+                  Розмір {activeSizes.length > 0 && `(${activeSizes.length})`}
+                </span>
+                <ChevronDown
+                  className={cn(
+                    "w-4 h-4 transition-transform duration-200 text-zinc-400",
+                    openAccordion === "size" && "rotate-180 text-[#b91c56]",
+                  )}
+                />
+              </button>
+              {openAccordion === "size" && (
+                <div className="mt-3 grid grid-cols-4 gap-2 pl-1 animate-in fade-in slide-in-from-top-2 duration-200">
+                  {AVAILABLE_SIZES.map((size) => {
+                    const isSelected = activeSizes.includes(size);
+                    return (
+                      <button
+                        key={`mob-size-${size}`}
+                        onClick={() => updateQueryParams("size", size, true)}
+                        className={cn(
+                          "flex items-center justify-center h-11 border rounded-lg text-xs font-bold transition-all cursor-pointer",
+                          isSelected
+                            ? "border-[#b91c56] bg-[#b91c56] text-white"
+                            : "border-zinc-200 text-zinc-800 active:bg-zinc-50",
+                        )}
+                      >
+                        {size}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* 4. Колір */}
+            <div className="border-b border-zinc-100 pb-3">
+              <button
+                onClick={() => toggleAccordion("color")}
+                className="w-full flex items-center justify-between text-xs font-bold uppercase tracking-wider text-zinc-800 py-1 cursor-pointer"
+              >
+                <span>
+                  Колір {activeColors.length > 0 && `(${activeColors.length})`}
+                </span>
+                <ChevronDown
+                  className={cn(
+                    "w-4 h-4 transition-transform duration-200 text-zinc-400",
+                    openAccordion === "color" && "rotate-180 text-[#b91c56]",
+                  )}
+                />
+              </button>
+              {openAccordion === "color" && (
+                <div className="mt-3 grid grid-cols-2 gap-2 pl-1 animate-in fade-in slide-in-from-top-2 duration-200">
+                  {AVAILABLE_COLORS_DATA.map((color) => {
+                    const isSelected = activeColors.some(
+                      (c) => c.id === color.id,
+                    );
+                    return (
+                      <button
+                        key={`mob-color-${color.id}`}
+                        onClick={() =>
+                          updateQueryParams("color", color.id, true)
+                        }
+                        className={cn(
+                          "flex items-center gap-2.5 p-2 rounded-lg border text-left text-xs font-medium transition-all truncate cursor-pointer",
+                          isSelected
+                            ? "border-[#b91c56] bg-pink-50/40 text-[#b91c56] font-semibold"
+                            : "border-zinc-100 bg-zinc-50 text-zinc-700 active:bg-zinc-100",
+                        )}
+                      >
+                        <span
+                          className={cn(
+                            "w-4 h-4 rounded-1 shrink-0 border border-black/5 shadow-xs",
+                            color.bgClass,
+                          )}
+                        />
+                        <span className="truncate">{color.title}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* 5. Тип тканини */}
+            <div className="border-b border-zinc-100 pb-3">
+              <button
+                onClick={() => toggleAccordion("fabric")}
+                className="w-full flex items-center justify-between text-xs font-bold uppercase tracking-wider text-zinc-800 py-1 cursor-pointer"
+              >
+                <span>
+                  Тип тканини{" "}
+                  {activeFabrics.length > 0 && `(${activeFabrics.length})`}
+                </span>
+                <ChevronDown
+                  className={cn(
+                    "w-4 h-4 transition-transform duration-200 text-zinc-400",
+                    openAccordion === "fabric" && "rotate-180 text-[#b91c56]",
+                  )}
+                />
+              </button>
+              {openAccordion === "fabric" && (
+                <div className="mt-3 flex flex-col gap-1.5 pl-1 animate-in fade-in slide-in-from-top-2 duration-200">
+                  {AVAILABLE_FABRICS.map((fabric) => {
+                    const isSelected = activeFabrics.some(
+                      (f) => f.id === fabric.id,
+                    );
+                    return (
+                      <button
+                        key={`mob-fabric-${fabric.id}`}
+                        onClick={() =>
+                          updateQueryParams("fabric", fabric.id, true)
+                        }
+                        className={cn(
+                          "w-full text-left py-2.5 px-3 rounded-lg text-xs font-medium transition-colors cursor-pointer",
+                          isSelected
+                            ? "bg-pink-50 text-[#b91c56] font-bold"
+                            : "text-zinc-600 active:bg-zinc-50",
+                        )}
+                      >
+                        {fabric.title}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* 6. Колекція */}
+            <div className="border-b border-zinc-100 pb-3">
+              <button
+                onClick={() => toggleAccordion("collection")}
+                className="w-full flex items-center justify-between text-xs font-bold uppercase tracking-wider text-zinc-800 py-1 cursor-pointer"
+              >
+                <span>
+                  Колекція{" "}
+                  {activeCollections.length > 0 &&
+                    `(${activeCollections.length})`}
+                </span>
+                <ChevronDown
+                  className={cn(
+                    "w-4 h-4 transition-transform duration-200 text-zinc-400",
+                    openAccordion === "collection" &&
+                      "rotate-180 text-[#b91c56]",
+                  )}
+                />
+              </button>
+              {openAccordion === "collection" && (
+                <div className="mt-3 flex flex-col gap-1.5 pl-1 animate-in fade-in slide-in-from-top-2 duration-200">
+                  {AVAILABLE_COLLECTIONS.map((col) => {
+                    const isSelected = activeCollections.some(
+                      (c) => c.id === col.id,
+                    );
+                    return (
+                      <button
+                        key={`mob-col-${col.id}`}
+                        onClick={() =>
+                          updateQueryParams("collection", col.id, true)
+                        }
+                        className={cn(
+                          "w-full text-left py-2.5 px-3 rounded-lg text-xs font-medium transition-colors cursor-pointer",
+                          isSelected
+                            ? "bg-pink-50 text-[#b91c56] font-bold"
+                            : "text-zinc-700 active:bg-zinc-50",
+                        )}
+                      >
+                        {col.title}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-zinc-200 bg-white flex items-center gap-3">
+            {hasActiveFilters && (
+              <button
+                onClick={() => {
+                  clearAll();
+                  setIsMobileMenuOpen(false);
+                }}
+                className="flex-1 border border-zinc-300 text-zinc-700 font-bold rounded-lg py-3.5 text-xs uppercase tracking-wider active:bg-zinc-50 transition-colors text-center cursor-pointer"
+              >
+                Скинути
+              </button>
+            )}
+            <button
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="flex-3 bg-[#b91c56] text-white font-bold rounded-lg py-3.5 text-xs uppercase tracking-wider hover:bg-[#73103a] active:scale-[0.99] transition-all text-center cursor-pointer shadow-xs"
+            >
+              Застосувати фільтри
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* РЯДОК АКТИВНИХ БЕЙДЖІВ */}
       {hasActiveFilters && (
-        <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-4 flex flex-wrap gap-2.5 items-center animate-in fade-in duration-300">
+        <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-4 flex flex-wrap gap-2.5 items-center animate-in fade-in duration-300 overflow-visible">
           {searchParams.get("search") && (
             <button
               onClick={() => updateQueryParams("search", "")}
@@ -604,7 +977,6 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
             </button>
           )}
 
-          {/* 💎 1-й рядок UI Kit праворуч: Рожевий контур, який при ховері м'яко наливається рожевою пастеллю */}
           <button
             onClick={clearAll}
             className="inline-flex items-center justify-center border border-[#b91c56] text-zinc-900 font-bold rounded-lg px-5 py-2.5 text-xs bg-white cursor-pointer hover:bg-pink-50/60 active:scale-[0.98] transition-all shrink-0 select-none shadow-xs"
