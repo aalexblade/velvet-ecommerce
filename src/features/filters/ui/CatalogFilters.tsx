@@ -127,7 +127,6 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
 
-  // Керування стейтами шторки фільтрів та мобільного сортування
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMobSortOpen, setIsMobSortOpen] = useState(false);
   const [openAccordion, setOpenAccordion] = useState<string | null>(null);
