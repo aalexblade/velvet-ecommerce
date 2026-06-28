@@ -3,8 +3,9 @@
 import React, { useState, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Heart, X, ChevronDown, SlidersHorizontal, Eye } from "lucide-react";
+import { Heart } from "lucide-react";
 import { Product, ProductColor } from "@/entities/product";
+import { CatalogFilters } from "@/features/filters";
 
 interface CatalogViewProps {
   slug?: string[];
@@ -52,27 +53,46 @@ const MOCK_SUBCATEGORIES = [
 
 // Transformed static color mapper aligned with the strict DB ProductColor model types
 const colorToClass = (color: ProductColor): string => {
-  const map: Record<string, string> = {
+  const map: Record<ProductColor, string> = {
+    // Базові та темні відтінки
     Black: "bg-zinc-900",
+    Dark: "bg-zinc-800",
     White: "bg-zinc-100",
-    Ruby: "bg-rose-700",
-    Peach: "bg-orange-200",
-    Emerald: "bg-emerald-700",
-    "Denim Blue": "bg-blue-600",
     "Smoky White": "bg-slate-200",
-    "Cotton Candy": "bg-pink-200",
-    "Wine Red": "bg-red-900",
-    Cherry: "bg-red-600",
+    
+    // Червона та бордова палітра
     Red: "bg-red-500",
+    Cherry: "bg-red-600",
+    Ruby: "bg-rose-700",
+    "Wine Red": "bg-red-900",
+    Magenta: "bg-fuchsia-600", // Додано! Мапиться на насичений рожево-пурпурний відтінок
+    
+    // Фіолетова та пудрова палітра
+    "Cotton Candy": "bg-pink-200",
+    Peach: "bg-orange-200",
+    Lavender: "bg-purple-200",
+    "Pale Purple": "bg-purple-300",
     Plum: "bg-purple-900",
     "Dark Violet": "bg-violet-950",
-    Lavender: "bg-purple-200",
+    Eggplant: "bg-indigo-950",
+    
+    // Нюдові та кремові відтінки
     Cream: "bg-amber-50",
+    "Creamy Yellow": "bg-amber-100",
+    "Creamy Velvet": "bg-yellow-50",
+    "Raw Umber": "bg-amber-800",
+    "Mahogany Brown": "bg-amber-900",
+    
+    // Зелена та синя палітра
+    "Magic Mint": "bg-emerald-200",
+    Emerald: "bg-emerald-700",
+    "Pearl Green": "bg-teal-600",
+    "Azure Blue": "bg-sky-500",
+    "Denim Blue": "bg-blue-600",
+    "Midnight Blue": "bg-blue-950",
   };
   return map[color] || "bg-neutral-400";
 };
-
-import { CatalogFilters } from "@/features/filters";
 
 export function CatalogView({ slug, initialProducts }: CatalogViewProps) {
   const [favorites, setFavorites] = useState<string[]>([]);
@@ -151,7 +171,7 @@ export function CatalogView({ slug, initialProducts }: CatalogViewProps) {
           {MOCK_SUBCATEGORIES.map((sub, index) => (
             <div
               key={sub.id}
-              className="shrink-0 w-21.25 md:w-27.5 text-center cursor-pointer group snap-start"
+              className="shrink-0 w-24 md:w-28 text-center cursor-pointer group snap-start"
             >
               <div className="w-full aspect-square rounded-2xl overflow-hidden bg-muted border border-transparent group-hover:border-muted-foreground/20 transition-all duration-300 shadow-sm relative">
                 <Image
@@ -174,12 +194,11 @@ export function CatalogView({ slug, initialProducts }: CatalogViewProps) {
         </div>
       </div>
 
-      {/* --- Main Content Area (Restructured to full-width per Figma mockup) --- */}
+      {/* --- Main Content Area --- */}
       <div className="mt-8 flex flex-col gap-6">
-        {/* Full-width Filters placed above products */}
         <CatalogFilters />
 
-        {/* Product Grid - occupying full available width */}
+        {/* Product Grid */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {initialProducts.map((product, idx) => {
@@ -200,10 +219,9 @@ export function CatalogView({ slug, initialProducts }: CatalogViewProps) {
               return (
                 <div
                   key={product.id}
-                  /* Styled card with white background, border, and shadow as in Figma */
                   className="group flex flex-col bg-white rounded-xl border border-zinc-200 shadow-sm overflow-hidden transition-all duration-300 hover:shadow-md"
                 >
-                  <div className="relative w-full aspect-[3/4] bg-neutral-100 overflow-hidden">
+                  <div className="relative w-full aspect-3/4 bg-neutral-100 overflow-hidden">
                     <Image
                       src={mainImage}
                       alt={product.title}
@@ -213,7 +231,6 @@ export function CatalogView({ slug, initialProducts }: CatalogViewProps) {
                       className="object-cover object-center group-hover:scale-105 transition-transform duration-500"
                     />
 
-                    {/* Marketing badges styled with brand pink color and white background */}
                     <div className="absolute top-3 left-3 flex flex-col gap-1 z-10">
                       {hasDiscount ? (
                         <span className="text-[10px] font-bold tracking-wider uppercase px-2.5 py-1 rounded-md text-white bg-[#C8205C]">
@@ -226,7 +243,6 @@ export function CatalogView({ slug, initialProducts }: CatalogViewProps) {
                       ) : null}
                     </div>
 
-                    {/* Simplified Quick view button (removed icon, styled per Figma) */}
                     <div className="hidden lg:flex absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 items-end justify-center pb-6 z-10">
                       <button className="flex items-center justify-center bg-white/95 text-zinc-900 font-semibold text-sm px-6 py-2.5 rounded-lg shadow-sm hover:bg-white hover:text-[#C8205C] transition-all transform translate-y-2 group-hover:translate-y-0 cursor-pointer border border-zinc-200">
                         Швидкий перегляд
@@ -237,12 +253,11 @@ export function CatalogView({ slug, initialProducts }: CatalogViewProps) {
                   <div className="p-4 flex flex-col grow">
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-2">
-                        {/* Square color swatches with rounded corners per Figma design */}
                         {uniqueColors.map((colorName, cIdx) => (
                           <span
                             key={cIdx}
                             title={colorName}
-                            className={`w-5 h-5 rounded-md border border-zinc-300 shadow-xs cursor-pointer hover:scale-110 transition-transform ${colorToClass(colorName as any)}`}
+                            className={`w-5 h-5 rounded-md border border-zinc-300 shadow-xs cursor-pointer hover:scale-110 transition-transform ${colorToClass(colorName as ProductColor)}`}
                           />
                         ))}
                       </div>
@@ -256,12 +271,10 @@ export function CatalogView({ slug, initialProducts }: CatalogViewProps) {
                       </button>
                     </div>
 
-                    {/* Product title with stronger typography and brand color on hover */}
                     <h2 className="text-sm font-semibold text-zinc-900 line-clamp-2 group-hover:text-[#C8205C] transition-colors">
                       {product.title}
                     </h2>
 
-                    {/* Prices with strict brand pink for discounted price */}
                     <div className="mt-2 flex items-baseline gap-2 flex-wrap text-sm">
                       {hasDiscount ? (
                         <>
