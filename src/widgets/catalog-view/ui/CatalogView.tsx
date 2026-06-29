@@ -65,9 +65,9 @@ const colorToClass = (color: ProductColor): string => {
     Cherry: "bg-red-600",
     Ruby: "bg-rose-700",
     "Wine Red": "bg-red-900",
-    Magenta: "bg-fuchsia-600", // Додано! Мапиться на насичений рожево-пурпурний відтінок
+    Magenta: "bg-fuchsia-600", 
     
-    // Фіолетова та пудрова палітра
+    
     "Cotton Candy": "bg-pink-200",
     Peach: "bg-orange-200",
     Lavender: "bg-purple-200",
@@ -76,14 +76,14 @@ const colorToClass = (color: ProductColor): string => {
     "Dark Violet": "bg-violet-950",
     Eggplant: "bg-indigo-950",
     
-    // Нюдові та кремові відтінки
+    
     Cream: "bg-amber-50",
     "Creamy Yellow": "bg-amber-100",
     "Creamy Velvet": "bg-yellow-50",
     "Raw Umber": "bg-amber-800",
     "Mahogany Brown": "bg-amber-900",
     
-    // Зелена та синя палітра
+    
     "Magic Mint": "bg-emerald-200",
     Emerald: "bg-emerald-700",
     "Pearl Green": "bg-teal-600",
