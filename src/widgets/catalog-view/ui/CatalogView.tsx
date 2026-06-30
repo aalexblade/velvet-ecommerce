@@ -8,10 +8,95 @@ import { Product, ProductColor } from "@/entities/product";
 import { CatalogFilters } from "@/features/filters";
 import { ProductDetailsBlock } from "@/widgets/product-details-block";
 
-interface CatalogViewProps {
-  slug?: string[];
-  initialProducts: Product[];
-}
+// Re-using the identical figma data format from the product page
+const MOCK_DETAILED_PRODUCT: Product = {
+  id: "mock-bra-1",
+  title: "Корсетний мереживний бра балконет",
+  slug: "korsetnii-merezhaivnii-bra-balkonet",
+  description:
+    "Елегантне поєднання витонченого стилю та ефектного силуету. Завдяки м'яким формованим чашкам з пуш-ап ефектом, модель делікатно піднімає і підкреслює форму грудей, створюючи привабливу лінію декольте.",
+  category_id: 12,
+  is_active: true,
+  created_at: new Date().toISOString(),
+  images: [
+    {
+      id: 1,
+      product_id: "mock-bra-1",
+      variant_id: null,
+      url: "https://images.unsplash.com/photo-1616606145305-1e755225c56c?q=80&w=600",
+      is_main: true,
+      sort_order: 1,
+    },
+    {
+      id: 2,
+      product_id: "mock-bra-1",
+      variant_id: null,
+      url: "https://images.unsplash.com/photo-1551488831-00ddcb6c6bd3?q=80&w=600",
+      is_main: false,
+      sort_order: 2,
+    },
+    {
+      id: 3,
+      product_id: "mock-bra-1",
+      variant_id: null,
+      url: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?q=80&w=600",
+      is_main: false,
+      sort_order: 3,
+    },
+  ],
+  variants: [
+    {
+      id: "v-cherry-xs",
+      product_id: "mock-bra-1",
+      sku: "565940",
+      color: "Cherry",
+      size: "XS",
+      price: 650,
+      old_price: null,
+      stock: 5,
+    },
+    {
+      id: "v-cherry-s",
+      product_id: "mock-bra-1",
+      sku: "565940",
+      color: "Cherry",
+      size: "S",
+      price: 650,
+      old_price: null,
+      stock: 5,
+    },
+    {
+      id: "v-cherry-m",
+      product_id: "mock-bra-1",
+      sku: "565940",
+      color: "Cherry",
+      size: "M",
+      price: 650,
+      old_price: null,
+      stock: 3,
+    },
+    {
+      id: "v-cherry-l",
+      product_id: "mock-bra-1",
+      sku: "565940",
+      color: "Cherry",
+      size: "L",
+      price: 650,
+      old_price: null,
+      stock: 2,
+    },
+    {
+      id: "v-cherry-xl",
+      product_id: "mock-bra-1",
+      sku: "565940",
+      color: "Cherry",
+      size: "XL",
+      price: 650,
+      old_price: null,
+      stock: 4,
+    },
+  ],
+};
 
 const MOCK_SUBCATEGORIES = [
   {
@@ -85,10 +170,24 @@ const colorToClass = (color: ProductColor): string => {
   return map[color] || "bg-neutral-400";
 };
 
+interface CatalogViewProps {
+  slug?: string[];
+  initialProducts: Product[];
+}
+
 export function CatalogView({ slug, initialProducts }: CatalogViewProps) {
   const [favorites, setFavorites] = useState<string[]>([]);
-  // 🎯 State for Quick View context modal controller
-  const [selectedQuickView, setSelectedQuickView] = useState<Product | null>(null);
+  const [selectedQuickView, setSelectedQuickView] = useState<Product | null>(
+    null,
+  );
+
+  // Synchronize local testing stream by injecting the target figma mockup product
+  const localProducts = useMemo(() => {
+    return [
+      MOCK_DETAILED_PRODUCT,
+      ...initialProducts.filter((p) => p.id !== MOCK_DETAILED_PRODUCT.id),
+    ];
+  }, [initialProducts]);
 
   const toggleFavorite = (id: string) => {
     setFavorites((prev) =>
@@ -99,7 +198,6 @@ export function CatalogView({ slug, initialProducts }: CatalogViewProps) {
   const currentCategoryTitle = useMemo(() => {
     if (!slug || slug.length === 0) return "Бюстгальтери";
     const lastSegment = slug[slug.length - 1].toLowerCase();
-
     const registry: Record<string, string> = {
       biusthaltery: "Бюстгальтери",
       bralette: "Бралети",
@@ -108,7 +206,6 @@ export function CatalogView({ slug, initialProducts }: CatalogViewProps) {
       bilyzna: "Білизна",
       corset: "Корсети",
     };
-
     return registry[lastSegment] || "Бюстгальтери";
   }, [slug]);
 
@@ -126,15 +223,23 @@ export function CatalogView({ slug, initialProducts }: CatalogViewProps) {
       {/* --- Breadcrumbs Navigation --- */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
         <nav className="flex text-xs md:text-sm text-muted-foreground whitespace-nowrap overflow-x-auto no-scrollbar">
-          <Link href="/" className="hover:text-foreground transition-colors cursor-pointer">
+          <Link
+            href="/"
+            className="hover:text-foreground transition-colors cursor-pointer"
+          >
             Головна
           </Link>
           <span className="mx-2">/</span>
-          <Link href="/catalog" className="hover:text-foreground transition-colors cursor-pointer">
+          <Link
+            href="/catalog"
+            className="hover:text-foreground transition-colors cursor-pointer"
+          >
             Білизна
           </Link>
           <span className="mx-2">/</span>
-          <span className="text-foreground font-medium">{currentCategoryTitle}</span>
+          <span className="text-foreground font-medium">
+            {currentCategoryTitle}
+          </span>
         </nav>
       </div>
 
@@ -144,7 +249,8 @@ export function CatalogView({ slug, initialProducts }: CatalogViewProps) {
           {currentCategoryTitle}
         </h1>
         <p className="mt-2 text-sm md:text-base text-muted-foreground max-w-3xl leading-relaxed">
-          Відкрийте для себе ідеальне поєднання витонченого дизайну та бездоганної підтримки.
+          Відкрийте для себе ідеальне поєднання витонченого дизайну та
+          бездоганної підтримки.
         </p>
       </div>
 
@@ -152,7 +258,10 @@ export function CatalogView({ slug, initialProducts }: CatalogViewProps) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6 md:mt-8">
         <div className="flex gap-4 overflow-x-auto pb-3 pt-1 no-scrollbar snap-x scroll-smooth">
           {MOCK_SUBCATEGORIES.map((sub, index) => (
-            <div key={sub.id} className="shrink-0 w-24 md:w-28 text-center cursor-pointer group snap-start">
+            <div
+              key={sub.id}
+              className="shrink-0 w-24 md:w-28 text-center cursor-pointer group snap-start"
+            >
               <div className="w-full aspect-square rounded-2xl overflow-hidden bg-muted border border-transparent group-hover:border-muted-foreground/20 transition-all duration-300 shadow-sm relative">
                 <Image
                   src={sub.image}
@@ -166,7 +275,9 @@ export function CatalogView({ slug, initialProducts }: CatalogViewProps) {
               <h3 className="mt-2 text-xs md:text-sm font-medium text-foreground group-hover:text-accent transition-colors line-clamp-1">
                 {sub.title}
               </h3>
-              <p className="text-[10px] md:text-xs text-muted-foreground">{sub.count} од.</p>
+              <p className="text-[10px] md:text-xs text-muted-foreground">
+                {sub.count} од.
+              </p>
             </div>
           ))}
         </div>
@@ -179,13 +290,17 @@ export function CatalogView({ slug, initialProducts }: CatalogViewProps) {
         {/* Product Grid */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {initialProducts.map((product, idx) => {
+            {localProducts.map((product, idx) => {
               const isFavorite = favorites.includes(product.id);
-              const mainImage = product.images?.[0]?.url || "https://placehold.co/400x533/f5f5f5/a1a1aa?text=No+Image";
+              const mainImage =
+                product.images?.[0]?.url ||
+                "https://placehold.co/400x533/f5f5f5/a1a1aa?text=No+Image";
               const primaryVariant = product.variants?.[0];
               const currentPrice = primaryVariant?.price || 0;
               const oldPrice = primaryVariant?.old_price;
-              const uniqueColors = Array.from(new Set(product.variants?.map((v) => v.color) || []));
+              const uniqueColors = Array.from(
+                new Set(product.variants?.map((v) => v.color) || []),
+              );
               const hasDiscount = !!oldPrice;
 
               return (
@@ -215,9 +330,8 @@ export function CatalogView({ slug, initialProducts }: CatalogViewProps) {
                       ) : null}
                     </div>
 
-                    {/* ⚡ Quick view interactive capture trigger */}
                     <div className="hidden lg:flex absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 items-end justify-center pb-6 z-10">
-                      <button 
+                      <button
                         onClick={() => setSelectedQuickView(product)}
                         className="flex items-center justify-center bg-white/95 text-zinc-900 font-semibold text-sm px-6 py-2.5 rounded-lg shadow-sm hover:bg-white hover:text-[#C8205C] transition-all transform translate-y-2 group-hover:translate-y-0 cursor-pointer border border-zinc-200"
                       >
@@ -241,7 +355,9 @@ export function CatalogView({ slug, initialProducts }: CatalogViewProps) {
                         onClick={() => toggleFavorite(product.id)}
                         className="text-zinc-400 hover:text-[#C8205C] transition-colors p-1 cursor-pointer"
                       >
-                        <Heart className={`w-5 h-5 transition-all ${isFavorite ? "fill-[#C8205C] text-[#C8205C] scale-110" : ""}`} />
+                        <Heart
+                          className={`w-5 h-5 transition-all ${isFavorite ? "fill-[#C8205C] text-[#C8205C] scale-110" : ""}`}
+                        />
                       </button>
                     </div>
 
@@ -252,11 +368,17 @@ export function CatalogView({ slug, initialProducts }: CatalogViewProps) {
                     <div className="mt-2 flex items-baseline gap-2 flex-wrap text-sm">
                       {hasDiscount ? (
                         <>
-                          <span className="font-bold text-[#C8205C]">{currentPrice} UAH</span>
-                          <span className="text-xs text-zinc-500 line-through decoration-[#C8205C]/40">{oldPrice} UAH</span>
+                          <span className="font-bold text-[#C8205C]">
+                            {currentPrice} UAH
+                          </span>
+                          <span className="text-xs text-zinc-500 line-through decoration-[#C8205C]/40">
+                            {oldPrice} UAH
+                          </span>
                         </>
                       ) : (
-                        <span className="font-bold text-zinc-900">{currentPrice} UAH</span>
+                        <span className="font-bold text-zinc-900">
+                          {currentPrice} UAH
+                        </span>
                       )}
                     </div>
                   </div>
@@ -285,22 +407,15 @@ export function CatalogView({ slug, initialProducts }: CatalogViewProps) {
         </div>
       </div>
 
-      {/* ========================================================================= */}
-      {/* 💎 LUXURY QUICK VIEW DIALOG SYSTEM LAYER (Tailwind v4 tokens layout)        */}
-      {/* ========================================================================= */}
+      {/* --- Quick View Modal System Layer --- */}
       {selectedQuickView && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-6 animate-in fade-in duration-200">
-          
-          {/* Backdrop Blur Overlay Dimmer */}
-          <div 
+          <div
             onClick={() => setSelectedQuickView(null)}
-            className="absolute inset-0 bg-black/40 backdrop-blur-md transition-opacity cursor-pointer" 
+            className="absolute inset-0 bg-black/40 backdrop-blur-md transition-opacity cursor-pointer"
           />
 
-          {/* Modal Container Body Card */}
           <div className="relative bg-white w-full max-w-5xl rounded-3xl shadow-2xl border border-zinc-100 overflow-y-auto no-scrollbar max-h-[90vh] p-6 md:p-8 z-10 scale-in duration-300">
-            
-            {/* Elegant Close Target Button Cross */}
             <button
               onClick={() => setSelectedQuickView(null)}
               className="absolute top-4 right-4 md:top-6 md:right-6 p-2 rounded-full border border-zinc-100 text-zinc-400 hover:text-zinc-900 hover:bg-zinc-50 cursor-pointer transition-all z-30"
@@ -309,13 +424,10 @@ export function CatalogView({ slug, initialProducts }: CatalogViewProps) {
               <X className="w-4 h-4" />
             </button>
 
-            {/* Injecting our shared core ProductDetailsBlock engine payload */}
             <ProductDetailsBlock product={selectedQuickView} />
-
           </div>
         </div>
       )}
-
     </div>
   );
 }

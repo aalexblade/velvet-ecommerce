@@ -4,7 +4,7 @@ import * as React from "react";
 import { useState, useEffect, useCallback, useMemo } from "react";
 import Image from "next/image";
 import useEmblaCarousel from "embla-carousel-react";
-import { Heart, Minus, Plus, Star } from "lucide-react";
+import { Heart, Minus, Plus, Star, Ruler } from "lucide-react";
 import { cn, getProductColorClass } from "@/shared/lib";
 import { Product, ProductColor } from "@/entities/product/model/types";
 
@@ -12,65 +12,47 @@ interface ProductDetailsBlockProps {
   product: Product;
 }
 
-type TabType = "description" | "delivery";
+type TabType = "description" | "delivery" | "recommendations";
 
-/**
- * ProductDetailsBlock Widget
- * 
- * High-performance, pixel-perfect core engine for Product Page & Quick View[cite: 3].
- * Synchronizes variant matrices correctly without triggering cascading state updates within effects.
- * Fully compatible with Tailwind v4 standards and strict eslint rules.
- */
 export const ProductDetailsBlock: React.FC<ProductDetailsBlockProps> = ({ product }) => {
-  // 1. DYNAMIC ATTRIBUTES MATRIX EXTRACTION
   const uniqueColors = useMemo(() => Array.from(new Set(product.variants.map((v) => v.color))), [product.variants]);
   const uniqueSizes = useMemo(() => Array.from(new Set(product.variants.map((v) => v.size))), [product.variants]);
 
- // 2. INTERACTIVE STATES WITH ZERO SYNCHRONOUS EFFECT CASCADES
-const [selectedColor, setSelectedColor] = useState<ProductColor>(uniqueColors[0] || "White");
-
-// Get initial size for the first color safely during mount initialization
-const initialAvailableVariants = useMemo(() => product.variants.filter((v) => v.color === uniqueColors[0]), [product.variants, uniqueColors]);
-const initialSize = useMemo(() => {
-  const firstAvailable = initialAvailableVariants.find((v) => v.stock > 0);
-  return firstAvailable ? firstAvailable.size : initialAvailableVariants[0]?.size || "";
-}, [initialAvailableVariants]);
-
-const [selectedSize, setSelectedSize] = useState(initialSize);
-const [quantity, setQuantity] = useState(1);
-const [activeTab, setActiveTab] = useState<TabType>("description");
-const [isWishlist, setIsWishlist] = useState(false);
-
-// Get available variants for the currently chosen color track
-const availableVariantsForColor = useMemo(() => {
-  return product.variants.filter((v) => v.color === selectedColor);
-}, [product.variants, selectedColor]);
-
-// Derive the active single variant row combination from color + size selection
-const currentVariant = useMemo(() => {
-  return product.variants.find((v) => v.color === selectedColor && v.size === selectedSize) || product.variants[0];
-}, [product.variants, selectedColor, selectedSize]);
-
-// Core handler for switching colors with strict typing
-const handleColorChange = (color: ProductColor) => {
-  setSelectedColor(color);
-  setQuantity(1); // Reset counter on variation change
+  const [selectedColor, setSelectedColor] = useState<ProductColor>(uniqueColors[0] || "White");
   
-  const nextVariants = product.variants.filter((v) => v.color === color);
-  const sizeExistsInNewColor = nextVariants.some((v) => v.size === selectedSize && v.stock > 0);
-  
-  if (!sizeExistsInNewColor) {
-    const firstAvailable = nextVariants.find((v) => v.stock > 0);
-    setSelectedSize(firstAvailable ? firstAvailable.size : nextVariants[0]?.size || "");
-  }
-};
+  const initialAvailableVariants = useMemo(() => product.variants.filter((v) => v.color === uniqueColors[0]), [product.variants, uniqueColors]);
+  const initialSize = useMemo(() => {
+    const firstAvailable = initialAvailableVariants.find((v) => v.stock > 0);
+    return firstAvailable ? firstAvailable.size : initialAvailableVariants[0]?.size || "";
+  }, [initialAvailableVariants]);
 
-  // 3. IMAGE CAROUSEL LOGIC (EMBLA MULTI-VIEW)
-  const [emblaRef, emblaApi] = useEmblaCarousel({
-    loop: true,
-    duration: 25,
-    dragFree: false,
-  });
+  const [selectedSize, setSelectedSize] = useState(initialSize);
+  const [quantity, setQuantity] = useState(1);
+  const [activeTab, setActiveTab] = useState<TabType>("description");
+  const [isWishlist, setIsWishlist] = useState(false);
+
+  const availableVariantsForColor = useMemo(() => {
+    return product.variants.filter((v) => v.color === selectedColor);
+  }, [product.variants, selectedColor]);
+
+  const currentVariant = useMemo(() => {
+    return product.variants.find((v) => v.color === selectedColor && v.size === selectedSize) || product.variants[0];
+  }, [product.variants, selectedColor, selectedSize]);
+
+  const handleColorChange = (color: ProductColor) => {
+    setSelectedColor(color);
+    setQuantity(1);
+    
+    const nextVariants = product.variants.filter((v) => v.color === color);
+    const sizeExistsInNewColor = nextVariants.some((v) => v.size === selectedSize && v.stock > 0);
+    
+    if (!sizeExistsInNewColor) {
+      const firstAvailable = nextVariants.find((v) => v.stock > 0);
+      setSelectedSize(firstAvailable ? firstAvailable.size : nextVariants[0]?.size || "");
+    }
+  };
+
+  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true, duration: 25 });
   const [selectedIndex, setSelectedIndex] = useState(0);
 
   const onSelect = useCallback(() => {
@@ -92,148 +74,88 @@ const handleColorChange = (color: ProductColor) => {
     if (emblaApi) emblaApi.scrollTo(index);
   }, [emblaApi]);
 
-  // Sync image viewport when color or variant shifts asynchronously
   useEffect(() => {
     if (!emblaApi) return;
     const variantImageIndex = product.images.findIndex((img) => img.variant_id === currentVariant?.id);
     if (variantImageIndex !== -1) {
       emblaApi.scrollTo(variantImageIndex);
-    } else {
-      const mainImgIndex = product.images.findIndex((img) => img.is_main);
-      if (mainImgIndex !== -1) emblaApi.scrollTo(mainImgIndex);
     }
   }, [selectedColor, currentVariant, emblaApi, product.images]);
 
   const imagesToRender = product.images.length > 0 ? product.images : [{ url: "/placeholder-product.webp", id: 0 }];
-
-  // 4. INTERACTION ACTIONS
-  const handleQuantityChange = (type: "inc" | "dec") => {
-    if (type === "dec") {
-      setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
-    } else {
-      const maxStock = currentVariant?.stock || 1;
-      setQuantity((prev) => (prev < maxStock ? prev + 1 : maxStock));
-    }
-  };
-
   const isOutOfStock = !currentVariant || currentVariant.stock === 0;
-  const basePrice = product.variants?.[0]?.price || 0;
 
   return (
-    <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 py-6 items-start">
+    <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 py-2 items-start text-zinc-900">
       
-      {/* ========================================================================= */}
-      {/* 📸 LEFT ZONE: PREMIUM CAROUSEL WITH VERTICAL THUMBNAILS (lg:col-span-7)     */}
-      {/* ========================================================================= */}
-      {/* Refactored for Tailwind v4 tokens: aspect-3/4 and max-h-136 layout scales */}
-      <div className="flex flex-col-reverse md:flex-row lg:col-span-7 gap-4 h-full sticky top-24">
-        
-        {/* Vertical Desktop Thumbnails Stack */}
+      {/* 📸 LEFT GALLERY ZONE */}
+      <div className="flex flex-col-reverse md:flex-row lg:col-span-7 gap-4 h-full">
         {imagesToRender.length > 1 && (
-          <div className="hidden md:flex flex-row md:flex-col gap-2.5 shrink-0 w-full md:w-20 overflow-y-auto no-scrollbar max-h-136">
+          <div className="hidden md:flex flex-col gap-2 shrink-0 w-16 overflow-y-auto no-scrollbar max-h-136">
             {imagesToRender.map((img, idx) => (
               <button
                 key={`thumb-${img.id || idx}`}
                 onClick={() => scrollTo(idx)}
                 className={cn(
-                  "relative aspect-3/4 w-20 bg-muted/10 rounded-xl overflow-hidden border transition-all cursor-pointer",
-                  idx === selectedIndex ? "border-[#b91c56] scale-102 shadow-xs" : "border-border/40 hover:border-zinc-400"
+                  "relative aspect-3/4 w-16 bg-zinc-50 rounded-md overflow-hidden border transition-all cursor-pointer",
+                  idx === selectedIndex ? "border-zinc-900 opacity-100 shadow-xs" : "border-transparent opacity-60 hover:opacity-100"
                 )}
               >
-                <Image src={img.url} alt="Миніатюра" fill className="object-cover" sizes="80px" />
+                <Image src={img.url} alt="Мініатюра" fill className="object-cover" sizes="64px" unoptimized />
               </button>
             ))}
           </div>
         )}
 
-        {/* Main Major Slider Display Viewport */}
-        <div className="relative aspect-3/4 flex-1 bg-muted/20 rounded-2xl border border-border/40 overflow-hidden">
+        <div className="relative aspect-3/4 flex-1 bg-zinc-50 rounded-lg overflow-hidden border border-zinc-100">
           <div className="w-full h-full overflow-hidden" ref={emblaRef}>
             <div className="flex h-full touch-pan-y">
               {imagesToRender.map((img, idx) => (
                 <div className="relative flex-full min-w-0 h-full" key={`main-slide-${img.id || idx}`}>
                   <Image
                     src={img.url}
-                    alt={`${product.title} - фото ${idx + 1}`}
+                    alt={product.title}
                     fill
-                    className="object-cover"
-                    sizes="(max-width: 1024px) 100vw, 60vw"
+                    className="object-cover object-center"
+                    sizes="(max-width: 1024px) 100vw, 50vw"
                     priority={idx === 0}
+                    unoptimized
                   />
                 </div>
               ))}
             </div>
           </div>
-
-          {/* Mobile Line Dash Pagination indicators */}
-          {imagesToRender.length > 1 && (
-            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex gap-1.5 w-max px-2 py-1 md:hidden pointer-events-none">
-              {imagesToRender.map((_, idx) => (
-                <span
-                  key={`dot-${idx}`}
-                  className={cn(
-                    "h-0.5 w-6 rounded-full transition-all duration-300",
-                    idx === selectedIndex ? "bg-white" : "bg-white/40"
-                  )}
-                />
-              ))}
-            </div>
-          )}
-
-          {/* Luxury Sale Promo Label badge marker */}
-          {currentVariant?.old_price && currentVariant.old_price > currentVariant.price && (
-            <span className="absolute top-4 left-4 bg-accent text-accent-foreground text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-lg shadow-xs z-10">
-              Sale
-            </span>
-          )}
         </div>
       </div>
 
-      {/* ========================================================================= */}
-      {/* 📝 RIGHT ZONE: MATRIX ATTRIBUTES INFOPANEL (lg:col-span-5)                  */}
-      {/* ========================================================================= */}
-      <div className="flex flex-col lg:col-span-5 gap-6">
+      {/* 📝 RIGHT INFO ZONE */}
+      <div className="flex flex-col lg:col-span-5 gap-5 font-sans">
         
-        {/* Brand Header Meta Title */}
-        <div className="flex flex-col gap-1">
-          <span className="text-[10px] uppercase tracking-widest text-muted-foreground font-medium">
-            Velvet Secrets Premium
-          </span>
-          <h1 className="text-2xl font-light text-foreground tracking-tight font-sans">
+        {/* Title & SKU */}
+        <div className="flex flex-col gap-2">
+          <h1 className="text-2xl font-medium tracking-tight text-zinc-900 leading-tight">
             {product.title}
           </h1>
-          <div className="flex items-center gap-4 text-xs text-muted-foreground font-mono mt-1">
-            <span>Арт: {currentVariant?.sku || "111240"}</span>
-            <div className="flex items-center gap-1.5 text-amber-500">
-              <div className="flex items-center">
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="w-3.5 h-3.5 fill-current stroke-current" />
-                ))}
-              </div>
-              <span className="text-zinc-500 font-sans text-[11px]">(32 відгуки)</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Financial Price Cluster display */}
-        <div className="flex items-baseline gap-3 py-1.5 border-y border-border/30 font-sans">
-          <span className="text-2xl font-semibold text-foreground">
-            {currentVariant ? currentVariant.price.toLocaleString("uk-UA") : basePrice.toLocaleString("uk-UA")} ₴
+          <span className="text-sm text-zinc-950 font-normal">
+            Арт. {currentVariant?.sku || "565940"}
           </span>
-          {currentVariant?.old_price && currentVariant.old_price > currentVariant.price && (
-            <span className="text-sm text-muted-foreground/60 line-through font-normal">
-              {currentVariant.old_price.toLocaleString("uk-UA")} ₴
-            </span>
-          )}
         </div>
 
-        {/* Color matrix swatches selection */}
+        {/* Rating */}
+        <div className="flex items-center gap-2 text-sm">
+          <div className="flex items-center text-amber-400">
+            {[...Array(5)].map((_, i) => (
+              <Star key={i} className={cn("w-4 h-4 fill-current", i < 3 ? "text-amber-400" : "text-zinc-200 fill-zinc-200")} />
+            ))}
+          </div>
+          <span className="text-zinc-500 text-xs">(10) відгуків</span>
+        </div>
+
+        {/* Colors */}
         {uniqueColors.length > 0 && (
-          <div className="flex flex-col gap-2.5">
-            <span className="text-xs font-semibold text-foreground uppercase tracking-wider flex items-center gap-2">
-              Колір: <span className="text-muted-foreground font-normal normal-case">{selectedColor}</span>
-            </span>
-            <div className="flex flex-wrap gap-2 items-center">
+          <div className="flex flex-col gap-2">
+            <span className="text-sm text-zinc-600">Колір:</span>
+            <div className="flex flex-wrap gap-3 items-center">
               {uniqueColors.map((color) => {
                 const isSelected = selectedColor === color;
                 return (
@@ -241,11 +163,11 @@ const handleColorChange = (color: ProductColor) => {
                     key={`detail-color-${color}`}
                     onClick={() => handleColorChange(color)}
                     className={cn(
-                      "w-6 h-6 rounded-full flex items-center justify-center p-0.5 transition-all cursor-pointer border shadow-xs hover:scale-105",
-                      isSelected ? "border-[#b91c56] scale-105" : "border-border/60"
+                      "w-7 h-7 rounded-md flex items-center justify-center p-0.5 transition-all cursor-pointer border",
+                      isSelected ? "border-zinc-900 scale-105" : "border-zinc-200 hover:border-zinc-400"
                     )}
                   >
-                    <span className={cn("w-full h-full rounded-full", getProductColorClass(color))} />
+                    <span className={cn("w-full h-full rounded-md shadow-xs", getProductColorClass(color))} />
                   </button>
                 );
               })}
@@ -253,15 +175,10 @@ const handleColorChange = (color: ProductColor) => {
           </div>
         )}
 
-        {/* Sizes tile matrix selection layout */}
+        {/* Sizes */}
         {uniqueSizes.length > 0 && (
-          <div className="flex flex-col gap-2.5">
-            <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-wider">
-              <span>Розмір:</span>
-              <button className="text-[11px] text-muted-foreground underline lowercase font-normal tracking-normal hover:text-[#b91c56] cursor-pointer transition-colors">
-                Таблиця розмірів
-              </button>
-            </div>
+          <div className="flex flex-col gap-2">
+            <span className="text-sm text-zinc-600">Розмір:</span>
             <div className="flex flex-wrap gap-2">
               {uniqueSizes.map((size) => {
                 const isSelected = selectedSize === size;
@@ -274,10 +191,10 @@ const handleColorChange = (color: ProductColor) => {
                     disabled={!hasStock}
                     onClick={() => setSelectedSize(size)}
                     className={cn(
-                      "h-11 min-w-12 border px-4 rounded-lg text-xs font-medium transition-all cursor-pointer",
-                      isSelected && "border-[#b91c56] bg-pink-50/20 text-[#b91c56] font-bold shadow-xs",
-                      !isSelected && hasStock && "border-border text-foreground hover:border-zinc-400 active:scale-98",
-                      !hasStock && "border-border/30 bg-muted/5 text-muted-foreground/40 opacity-40 line-through cursor-not-allowed"
+                      "h-9 min-w-14 border rounded-md text-xs font-medium transition-all cursor-pointer flex items-center justify-center",
+                      isSelected && "border-[#C8205C] text-[#C8205C] font-semibold bg-white",
+                      !isSelected && hasStock && "border-zinc-300 text-zinc-900 hover:border-zinc-900",
+                      !hasStock && "border-zinc-200 bg-zinc-50 text-zinc-300 line-through opacity-50 cursor-not-allowed"
                     )}
                   >
                     {size}
@@ -288,35 +205,43 @@ const handleColorChange = (color: ProductColor) => {
           </div>
         )}
 
-        {/* Quantity counter and Checkout actions */}
-        <div className="flex flex-col sm:flex-row gap-3 items-center mt-2 w-full">
-          <div className="flex items-center border border-border rounded-lg h-12 w-full sm:w-max bg-zinc-50/50">
-            <button
-              onClick={() => handleQuantityChange("dec")}
-              disabled={quantity <= 1 || isOutOfStock}
-              className="px-4 h-full flex items-center justify-center text-muted-foreground hover:text-foreground disabled:opacity-30 cursor-pointer transition-colors"
-            >
-              <Minus className="w-3.5 h-3.5" />
-            </button>
-            <span className="w-12 text-center text-xs font-semibold text-foreground select-none font-sans">
-              {isOutOfStock ? 0 : quantity}
-            </span>
-            <button
-              onClick={() => handleQuantityChange("inc")}
-              disabled={isOutOfStock || quantity >= (currentVariant?.stock || 0)}
-              className="px-4 h-full flex items-center justify-center text-muted-foreground hover:text-foreground disabled:opacity-30 cursor-pointer transition-colors"
-            >
-              <Plus className="w-3.5 h-3.5" />
-            </button>
-          </div>
+        {/* Size Calculator Trigger */}
+        <button className="flex items-center gap-2 text-xs text-[#C8205C] hover:underline cursor-pointer font-medium -mt-1 w-max">
+          <Ruler className="w-3.5 h-3.5 transform rotate-45" />
+          <span>Підібрати розмір</span>
+        </button>
 
+        {/* Quantity */}
+        <div className="flex items-center border border-zinc-300 rounded-md h-9 w-max bg-white">
+          <button
+            onClick={() => setQuantity(q => q > 1 ? q - 1 : 1)}
+            disabled={quantity <= 1 || isOutOfStock}
+            className="px-3 h-full flex items-center justify-center text-zinc-500 hover:text-zinc-900 disabled:opacity-30 cursor-pointer"
+          >
+            <Minus className="w-3 h-3" />
+          </button>
+          <span className="w-8 text-center text-xs font-medium select-none">{isOutOfStock ? 0 : quantity}</span>
+          <button
+            onClick={() => setQuantity(q => q < (currentVariant?.stock || 1) ? q + 1 : q)}
+            disabled={isOutOfStock}
+            className="px-3 h-full flex items-center justify-center text-zinc-500 hover:text-zinc-900 disabled:opacity-30 cursor-pointer"
+          >
+            <Plus className="w-3 h-3" />
+          </button>
+        </div>
+
+        {/* Price */}
+        <div className="text-xl font-semibold tracking-tight text-zinc-900 -mt-1">
+          {currentVariant ? currentVariant.price : 650} UAH
+        </div>
+
+        {/* Call to Action Row */}
+        <div className="flex gap-3 items-center w-full">
           <button
             disabled={isOutOfStock}
             className={cn(
-              "flex-1 h-12 rounded-lg text-xs font-bold uppercase tracking-wider transition-all shadow-xs text-center w-full flex items-center justify-center cursor-pointer",
-              isOutOfStock 
-                ? "bg-zinc-100 text-muted-foreground cursor-not-allowed border border-border" 
-                : "bg-[#b91c56] text-white hover:bg-[#73103a] active:scale-[0.99]"
+              "flex-1 h-11 rounded-md text-xs font-bold uppercase tracking-wider transition-all text-center flex items-center justify-center cursor-pointer text-white",
+              isOutOfStock ? "bg-zinc-300 cursor-not-allowed" : "bg-[#C8205C] hover:bg-[#a6174a]"
             )}
           >
             {isOutOfStock ? "Немає в наявності" : "Додати до кошика"}
@@ -324,53 +249,63 @@ const handleColorChange = (color: ProductColor) => {
 
           <button
             onClick={() => setIsWishlist(!isWishlist)}
-            className="h-12 w-12 rounded-lg border border-border flex items-center justify-center text-muted-foreground hover:text-[#b91c56] hover:border-pink-200 cursor-pointer active:scale-95 transition-all shrink-0"
+            className="h-11 w-11 rounded-md border border-zinc-300 flex items-center justify-center text-zinc-400 hover:text-[#C8205C] hover:border-[#C8205C] cursor-pointer active:scale-95 transition-all shrink-0"
           >
-            <Heart className={cn("w-4 h-4 transition-all", isWishlist ? "fill-[#b91c56] stroke-[#b91c56]" : "stroke-[2px]")} />
+            <Heart className={cn("w-5 h-5 transition-all", isWishlist ? "fill-[#C8205C] stroke-[#C8205C]" : "stroke-[1.5px]")} />
           </button>
         </div>
 
-        {/* Tabs Block Container. Escaped quote character from standard string via HTML token formatting */}
-        <div className="flex flex-col gap-4 mt-4 border-t border-border/40 pt-5">
-          <div className="flex items-center gap-6 border-b border-border/40 pb-2 text-xs font-bold uppercase tracking-wider">
-            <button
-              onClick={() => setActiveTab("description")}
-              className={cn("pb-2 relative cursor-pointer transition-colors", activeTab === "description" ? "text-[#b91c56]" : "text-muted-foreground hover:text-foreground")}
-            >
-              Опис
-              {activeTab === "description" && <span className="absolute bottom-0 inset-x-0 h-0.5 bg-[#b91c56] rounded-full animate-in fade-in duration-200" />}
-            </button>
-            <button
-              onClick={() => setActiveTab("delivery")}
-              className={cn("pb-2 relative cursor-pointer transition-colors", activeTab === "delivery" ? "text-[#b91c56]" : "text-muted-foreground hover:text-foreground")}
-            >
-              Доставка та оплата
-              {activeTab === "delivery" && <span className="absolute bottom-0 inset-x-0 h-0.5 bg-[#b91c56] rounded-full animate-in fade-in duration-200" />}
-            </button>
+        {/* Tabs System */}
+        <div className="flex flex-col gap-4 mt-2 border-t border-zinc-200 pt-4">
+          <div className="flex items-center gap-6 border-b border-zinc-100 pb-1 text-xs font-bold uppercase tracking-wider">
+            {(["description", "delivery", "recommendations"] as TabType[]).map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={cn(
+                  "pb-2 relative cursor-pointer transition-colors",
+                  activeTab === tab ? "text-zinc-900 font-bold" : "text-zinc-400 hover:text-zinc-600"
+                )}
+              >
+                {tab === "description" ? "Опис" : tab === "delivery" ? "Доставка та оплата" : "Рекомендації"}
+                {activeTab === tab && <span className="absolute bottom-0 inset-x-0 h-0.5 bg-[#C8205C] rounded-full" />}
+              </button>
+            ))}
           </div>
 
-          <div className="text-xs text-muted-foreground font-light leading-relaxed font-sans min-h-32">
+          <div className="text-xs text-zinc-700 leading-relaxed min-h-36 font-sans">
             {activeTab === "description" && (
-              <div className="flex flex-col gap-3 animate-in fade-in duration-200">
-                <p>{product.description || "Преміальний мереживний бюстгальтер від Velvet Secrets. Виконаний із витончених італійських матеріалів преміумкласу. Забезпечує ідеальну посадку, підкреслює природні лінії грудей та створює неповторний спокусливий образ на кожен день."}</p>
-                <ul className="list-disc pl-4 space-y-1 mt-1 text-zinc-600 font-normal">
-                  <li>Склад: 80% поліамід, 15% еластан, 5% бавовна</li>
-                  <li>Регульовані бретелі для ідеальної посадки</li>
-                  <li>Витончене французьке мереживо</li>
-                  <li>Країна виробник: Україна (італійські матеріали)</li>
-                </ul>
+              <div className="flex flex-col gap-4 animate-in fade-in duration-150">
+                <p>{product.description}</p>
+                
+                <div className="border-t border-zinc-200 pt-3 flex flex-col gap-1.5 text-zinc-900 font-light">
+                  <div><strong className="font-semibold">Посадка:</strong> середня підтримка з відкритим вирізом</div>
+                  <div><strong className="font-semibold">Фасон:</strong> балконет із пуш-ап ефектом</div>
+                  <div><strong className="font-semibold">Бретелі:</strong> регульовані, можна знімати</div>
+                  <div><strong className="font-semibold">Застібка:</strong> класична на спині</div>
+                </div>
+
+                <div className="border-t border-zinc-200 pt-3">
+                  <span className="font-semibold block uppercase tracking-wider text-[10px] text-zinc-500 mb-1">Тканина:</span>
+                  <div className="flex flex-col gap-1">
+                    <div><strong className="font-medium">Верх:</strong> ніжне мереживо з еластичними волокнами</div>
+                    <div><strong className="font-medium">Внутрішня частина чашок:</strong> бавовна для комфорту шкіри</div>
+                    <div><strong className="font-medium">Основна тканина:</strong> мікрофібра з додаванням еластану</div>
+                  </div>
+                </div>
               </div>
             )}
 
             {activeTab === "delivery" && (
-              <div className="flex flex-col gap-3 animate-in fade-in duration-200">
-                <p>Ми піклуємося про вашу конфіденційність, тому всі замовлення відправляються в **абсолютно анонімній та непрозорій преміум-упаковці** без жодного вказання вмісту посилки.</p>
-                <ul className="list-disc pl-4 space-y-1 text-zinc-600 font-normal">
-                  <li>**Нова Пошта:** відправка у день замовлення (1-2 дні по Україні).</li>
-                  <li>**Самовивіз з кав&apos;ярні-шоуруму:** м. Київ, безкоштовно.</li>
-                  <li>**Оплата:** при отриманні (післяплата) або безпечна оплата карткою на сайті.</li>
-                </ul>
-              </div>
+              <p className="animate-in fade-in duration-150">
+                Ми піклуємося про вашу конфіденційність, тому всі замовлення відправляються в абсолютно анонімній та непрозорій упаковці. Доставка Новою Поштою по всій Україні протягом 1-2 днів.
+              </p>
+            )}
+
+            {activeTab === "recommendations" && (
+              <p className="animate-in fade-in duration-150 text-zinc-400 italic">
+                Секція супутніх аксесуарів та трусиків для комплекту з&apos;явиться незабаром.
+              </p>
             )}
           </div>
         </div>
