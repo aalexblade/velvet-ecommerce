@@ -103,7 +103,7 @@ export const ProductDetailsBlock: React.FC<ProductDetailsBlockProps> = ({ produc
     // Dispatches well-formed line item payload parameters into cart store state machine
     addToCart({
       variantId: currentVariant.id,
-      productId: product.id, // Fixed: changed 'id' to 'productId' to match CartItem type
+      productId: product.id,
       title: product.title,
       price: currentVariant.price,
       quantity: quantity,
