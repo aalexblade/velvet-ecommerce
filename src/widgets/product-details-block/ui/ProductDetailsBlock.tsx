@@ -4,9 +4,11 @@ import * as React from "react";
 import { useState, useEffect, useCallback, useMemo } from "react";
 import Image from "next/image";
 import useEmblaCarousel from "embla-carousel-react";
-import { Heart, Minus, Plus, Star, Ruler } from "lucide-react";
+import { Heart, Minus, Plus, Star, Ruler, Check } from "lucide-react";
 import { cn, getProductColorClass } from "@/shared/lib";
 import { Product, ProductColor } from "@/entities/product/model/types";
+// Import cart state hook according to FSD architecture guidelines
+import { useCartStore } from "@/features/cart/model/cartStore";
 
 interface ProductDetailsBlockProps {
   product: Product;
@@ -15,6 +17,9 @@ interface ProductDetailsBlockProps {
 type TabType = "description" | "delivery" | "recommendations";
 
 export const ProductDetailsBlock: React.FC<ProductDetailsBlockProps> = ({ product }) => {
+  // Bind dynamic add action controller from global Zustand state storage
+  const addToCart = useCartStore((state) => state.addToCart);
+
   const uniqueColors = useMemo(() => Array.from(new Set(product.variants.map((v) => v.color))), [product.variants]);
   const uniqueSizes = useMemo(() => Array.from(new Set(product.variants.map((v) => v.size))), [product.variants]);
 
@@ -30,6 +35,7 @@ export const ProductDetailsBlock: React.FC<ProductDetailsBlockProps> = ({ produc
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState<TabType>("description");
   const [isWishlist, setIsWishlist] = useState(false);
+  const [isAdded, setIsAdded] = useState(false);
 
   const availableVariantsForColor = useMemo(() => {
     return product.variants.filter((v) => v.color === selectedColor);
@@ -42,6 +48,7 @@ export const ProductDetailsBlock: React.FC<ProductDetailsBlockProps> = ({ produc
   const handleColorChange = (color: ProductColor) => {
     setSelectedColor(color);
     setQuantity(1);
+    setIsAdded(false);
     
     const nextVariants = product.variants.filter((v) => v.color === color);
     const sizeExistsInNewColor = nextVariants.some((v) => v.size === selectedSize && v.stock > 0);
@@ -85,6 +92,30 @@ export const ProductDetailsBlock: React.FC<ProductDetailsBlockProps> = ({ produc
   const imagesToRender = product.images.length > 0 ? product.images : [{ url: "/placeholder-product.webp", id: 0 }];
   const isOutOfStock = !currentVariant || currentVariant.stock === 0;
 
+  // Intercept checkout click payload pipeline
+  const handleAddToCart = () => {
+    if (isOutOfStock || !currentVariant) return;
+
+    const variantImage = product.images.find((img) => img.variant_id === currentVariant.id)?.url 
+      || product.images.find((img) => img.is_main)?.url 
+      || imagesToRender[0].url;
+
+    // Dispatches well-formed line item payload parameters into cart store state machine
+    addToCart({
+      variantId: currentVariant.id,
+      productId: product.id, // Fixed: changed 'id' to 'productId' to match CartItem type
+      title: product.title,
+      price: currentVariant.price,
+      quantity: quantity,
+      image: variantImage,
+      color: currentVariant.color,
+      size: currentVariant.size,
+    });
+
+    setIsAdded(true);
+    setTimeout(() => setIsAdded(false), 2000);
+  };
+
   return (
     <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 py-2 items-start text-zinc-900">
       
@@ -101,7 +132,7 @@ export const ProductDetailsBlock: React.FC<ProductDetailsBlockProps> = ({ produc
                   idx === selectedIndex ? "border-zinc-900 opacity-100 shadow-xs" : "border-transparent opacity-60 hover:opacity-100"
                 )}
               >
-                <Image src={img.url} alt="Мініатюра" fill className="object-cover" sizes="64px" unoptimized />
+                <Image src={img.url} alt="Thumbnail image" fill className="object-cover" sizes="64px" unoptimized />
               </button>
             ))}
           </div>
@@ -189,7 +220,10 @@ export const ProductDetailsBlock: React.FC<ProductDetailsBlockProps> = ({ produc
                   <button
                     key={`detail-size-${size}`}
                     disabled={!hasStock}
-                    onClick={() => setSelectedSize(size)}
+                    onClick={() => {
+                      setSelectedSize(size);
+                      setIsAdded(false);
+                    }}
                     className={cn(
                       "h-9 min-w-14 border rounded-md text-xs font-medium transition-all cursor-pointer flex items-center justify-center",
                       isSelected && "border-[#C8205C] text-[#C8205C] font-semibold bg-white",
@@ -239,12 +273,26 @@ export const ProductDetailsBlock: React.FC<ProductDetailsBlockProps> = ({ produc
         <div className="flex gap-3 items-center w-full">
           <button
             disabled={isOutOfStock}
+            onClick={handleAddToCart}
             className={cn(
-              "flex-1 h-11 rounded-md text-xs font-bold uppercase tracking-wider transition-all text-center flex items-center justify-center cursor-pointer text-white",
-              isOutOfStock ? "bg-zinc-300 cursor-not-allowed" : "bg-[#C8205C] hover:bg-[#a6174a]"
+              "flex-1 h-11 rounded-md text-xs font-bold uppercase tracking-wider transition-all text-center flex items-center justify-center gap-2 cursor-pointer text-white",
+              isOutOfStock 
+                ? "bg-zinc-300 cursor-not-allowed" 
+                : isAdded 
+                  ? "bg-emerald-600 hover:bg-emerald-700" 
+                  : "bg-[#C8205C] hover:bg-[#a6174a]"
             )}
           >
-            {isOutOfStock ? "Немає в наявності" : "Додати до кошика"}
+            {isOutOfStock ? (
+              "Немає в наявності"
+            ) : isAdded ? (
+              <>
+                <Check className="w-4 h-4 animate-bounce" />
+                <span>Додано!</span>
+              </>
+            ) : (
+              "Додати до кошика"
+            )}
           </button>
 
           <button
@@ -255,7 +303,7 @@ export const ProductDetailsBlock: React.FC<ProductDetailsBlockProps> = ({ produc
           </button>
         </div>
 
-        {/* Tabs System */}
+        {/* Tabs System Layout Panel */}
         <div className="flex flex-col gap-4 mt-2 border-t border-zinc-200 pt-4">
           <div className="flex items-center gap-6 border-b border-zinc-100 pb-1 text-xs font-bold uppercase tracking-wider">
             {(["description", "delivery", "recommendations"] as TabType[]).map((tab) => (
