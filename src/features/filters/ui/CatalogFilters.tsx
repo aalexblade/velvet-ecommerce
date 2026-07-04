@@ -246,7 +246,7 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
       )}
     >
       {/* ========================================================================= */}
-      {/* 💻 ДЕСКТОПНА ПАНЕЛЬ ФІЛЬТРІВ (hidden lg:block) */}
+      {/* 💻  (hidden lg:block) */}
       {/* ========================================================================= */}
       <div className="border-y border-zinc-200 py-1 overflow-visible hidden lg:block">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 overflow-visible">
@@ -257,7 +257,7 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
             </div>
 
             <div className="flex items-center gap-x-6 flex-1 overflow-visible h-full">
-              {/* А. Назва товару */}
+              {/* А. name of type */}
               <div className="relative group shrink-0 py-4 overflow-visible">
                 <button
                   className={cn(
@@ -300,7 +300,7 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
                 </div>
               </div>
 
-              {/* Б. Ціна */}
+              {/* Б. price */}
               <div className="relative group shrink-0 py-4 overflow-visible">
                 <button
                   className={cn(
@@ -339,7 +339,7 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
                 </div>
               </div>
 
-              {/* В. Розмір */}
+              {/* В. size */}
               <div className="relative group shrink-0 py-4 overflow-visible">
                 <button
                   className={cn(
@@ -375,7 +375,7 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
                 </div>
               </div>
 
-              {/* Г. Колір */}
+              {/* Г. color */}
               <div className="relative group shrink-0 py-4 overflow-visible">
                 <button
                   className={cn(
@@ -429,7 +429,7 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
                 </div>
               </div>
 
-              {/* Д. Тип Тканини */}
+              {/* Д. type  */}
               <div className="relative group shrink-0 py-4 overflow-visible">
                 <button
                   className={cn(
@@ -467,7 +467,7 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
                 </div>
               </div>
 
-              {/* Е. Колекція */}
+              {/* Е. colection */}
               <div className="relative group shrink-0 py-4 overflow-visible">
                 <button
                   className={cn(
@@ -508,7 +508,7 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
               </div>
             </div>
 
-            {/* Сортувати десктоп */}
+            {/* sort of type */}
             <div className="flex items-center gap-2 shrink-0 relative group py-4 overflow-visible">
               <label className="text-xs font-medium text-zinc-400 select-none whitespace-nowrap">
                 Сортувати за:
@@ -542,7 +542,7 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
       </div>
 
       {/* ========================================================================= */}
-      {/* 📱 МОБІЛЬНИЙ ТА ТАБЛЕТ ТУЛБАР (Замінено клік-ховер на чистий React State) */}
+      {/* 📱 React State */}
       {/* ========================================================================= */}
       <div className="border-y border-zinc-200 py-3 block lg:hidden bg-white sticky top-0 z-30">
         <div className="px-4 flex items-center justify-between gap-4">
@@ -605,7 +605,7 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
       </div>
 
       {/* ========================================================================= */}
-      {/* 📥 МОБІЛЬНА/ТАБЛЕТ ШТОРКА (DRAWER SHEET) */}
+      {/* 📥 (DRAWER SHEET) */}
       {/* ========================================================================= */}
       <div
         className={cn(
@@ -640,7 +640,7 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
           </div>
 
           <div className="flex-1 overflow-y-auto p-4 space-y-4 no-scrollbar pb-24">
-            {/* 1. Назва товару */}
+            {/* 1.name of type */}
             <div className="border-b border-zinc-100 pb-3">
               <button
                 onClick={() => toggleAccordion("name")}
@@ -677,7 +677,7 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
               )}
             </div>
 
-            {/* 2. Ціна */}
+            {/* 2. price */}
             <div className="border-b border-zinc-100 pb-3">
               <button
                 onClick={() => toggleAccordion("price")}
@@ -711,7 +711,7 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
               )}
             </div>
 
-            {/* 3. Розмір */}
+            {/* 3. size */}
             <div className="border-b border-zinc-100 pb-3">
               <button
                 onClick={() => toggleAccordion("size")}
@@ -750,7 +750,7 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
               )}
             </div>
 
-            {/* 4. Колір */}
+            {/* 4. color */}
             <div className="border-b border-zinc-100 pb-3">
               <button
                 onClick={() => toggleAccordion("color")}
@@ -799,7 +799,7 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
               )}
             </div>
 
-            {/* 5. Тип тканини */}
+            {/* 5. type of fabryc*/}
             <div className="border-b border-zinc-100 pb-3">
               <button
                 onClick={() => toggleAccordion("fabric")}
@@ -843,7 +843,7 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
               )}
             </div>
 
-            {/* 6. Колекція */}
+            {/* 6. colection */}
             <div className="border-b border-zinc-100 pb-3">
               <button
                 onClick={() => toggleAccordion("collection")}
@@ -912,7 +912,7 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
         </div>
       </div>
 
-      {/* РЯДОК АКТИВНИХ БЕЙДЖІВ */}
+      {/* raw active  */}
       {hasActiveFilters && (
         <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-4 flex flex-wrap gap-2.5 items-center animate-in fade-in duration-300 overflow-visible">
           {searchParams.get("search") && (
