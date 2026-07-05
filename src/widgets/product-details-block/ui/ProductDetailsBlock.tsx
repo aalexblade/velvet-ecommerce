@@ -4,11 +4,13 @@ import * as React from "react";
 import { useState, useEffect, useCallback, useMemo } from "react";
 import Image from "next/image";
 import useEmblaCarousel from "embla-carousel-react";
-import { Heart, Minus, Plus, Star, Ruler, Check } from "lucide-react";
+import { Heart, Minus, Plus, Star, Ruler, Check, X } from "lucide-react";
 import { cn, getProductColorClass } from "@/shared/lib";
 import { Product, ProductColor } from "@/entities/product/model/types";
 // Import cart state hook according to FSD architecture guidelines
 import { useCartStore } from "@/features/cart/model/cartStore";
+// Import the size calculator feature component safely
+import { SizeCalculatorForm } from "@/features/product-size-calculator/ui/SizeCalculatorForm";
 
 interface ProductDetailsBlockProps {
   product: Product;
@@ -36,6 +38,9 @@ export const ProductDetailsBlock: React.FC<ProductDetailsBlockProps> = ({ produc
   const [activeTab, setActiveTab] = useState<TabType>("description");
   const [isWishlist, setIsWishlist] = useState(false);
   const [isAdded, setIsAdded] = useState(false);
+  
+  // State controller for managing the size calculator modal viewport layer
+  const [isSizeModalOpen, setIsSizeModalOpen] = useState(false);
 
   const availableVariantsForColor = useMemo(() => {
     return product.variants.filter((v) => v.color === selectedColor);
@@ -114,6 +119,16 @@ export const ProductDetailsBlock: React.FC<ProductDetailsBlockProps> = ({ produc
 
     setIsAdded(true);
     setTimeout(() => setIsAdded(false), 2000);
+  };
+
+  // Handle auto-selection when the size calculator suggests a specific valid metric
+  const handleSizeCalculated = (calculatedSize: string) => {
+    // If the suggested size exists in the product options, apply it directly
+    if (uniqueSizes.includes(calculatedSize)) {
+      setSelectedSize(calculatedSize);
+      // Optional: Add a minor microtask delay before closing for better feedback UX
+      setTimeout(() => setIsSizeModalOpen(false), 800);
+    }
   };
 
   return (
@@ -239,8 +254,11 @@ export const ProductDetailsBlock: React.FC<ProductDetailsBlockProps> = ({ produc
           </div>
         )}
 
-        {/* Size Calculator Trigger */}
-        <button className="flex items-center gap-2 text-xs text-[#C8205C] hover:underline cursor-pointer font-medium -mt-1 w-max">
+        {/* Size Calculator Trigger: Opens modal layer smoothly upon click stream intercept */}
+        <button 
+          onClick={() => setIsSizeModalOpen(true)}
+          className="flex items-center gap-2 text-xs text-[#C8205C] hover:underline cursor-pointer font-medium -mt-1 w-max"
+        >
           <Ruler className="w-3.5 h-3.5 transform rotate-45" />
           <span>Підібрати розмір</span>
         </button>
@@ -359,6 +377,49 @@ export const ProductDetailsBlock: React.FC<ProductDetailsBlockProps> = ({ produc
         </div>
 
       </div>
+
+      {/* ==========================================
+          💎 PREMIUM MODAL OVERLAY: SIZE CALCULATOR
+          ========================================== */}
+      {isSizeModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 animate-in fade-in duration-200">
+          {/* Backdrop Dimmer Shield */}
+          <div 
+            onClick={() => setIsSizeModalOpen(false)}
+            className="absolute inset-0 bg-black/40 backdrop-blur-xs transition-opacity" 
+          />
+          
+          {/* Modal Surface Canvas Box */}
+          <div className="relative bg-white w-full max-w-lg rounded-2xl p-6 md:p-8 shadow-2xl border border-zinc-100 z-10 flex flex-col gap-5 animate-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto no-scrollbar font-sans">
+            
+            {/* Header Stage */}
+            <div className="flex justify-between items-start">
+              <div className="flex flex-col gap-1">
+                <h3 className="text-lg font-bold uppercase tracking-wider text-zinc-900">
+                  Підбір ідеального розміру
+                </h3>
+                <p className="text-xs text-zinc-400 font-light leading-snug">
+                  Введіть ваші точні анатомічні заміри в сантиметрах для розрахунку відповідної білизни за канонами нашого бренду.
+                </p>
+              </div>
+              <button
+                onClick={() => setIsSizeModalOpen(false)}
+                className="p-1 rounded-md text-zinc-400 hover:text-zinc-900 hover:bg-zinc-50 transition-all cursor-pointer shrink-0 active:scale-95"
+                aria-label="Close size advisor modal layer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <hr className="border-zinc-100 -mx-6 md:-mx-8" />
+
+            {/* Embedded Size Calculator Interactive Form Core */}
+            <SizeCalculatorForm onSizeCalculated={handleSizeCalculated} />
+
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };
