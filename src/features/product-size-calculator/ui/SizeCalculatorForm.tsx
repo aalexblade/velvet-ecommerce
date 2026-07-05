@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "@/shared/ui";
 import { measurementFields } from "../model/config";
 import { getSuggestedSize } from "../lib/getSuggestedSize";
 import { SuggestedSize } from "../model/types";
@@ -48,7 +47,7 @@ export const SizeCalculatorForm = ({ onSizeCalculated }: SizeCalculatorFormProps
   const isFormFilled = values.overbust !== "" && values.underbust !== "" && values.hips !== "";
 
   return (
-    <div className="flex flex-col w-full max-w-2xl">
+    <div className="flex flex-col w-full max-w-2xl font-sans">
       {/* Vertical Input Stack: 100% width fields */}
       <div className="flex flex-col gap-4 w-full">
         {measurementFields.map((field) => (
@@ -63,13 +62,13 @@ export const SizeCalculatorForm = ({ onSizeCalculated }: SizeCalculatorFormProps
 
       {/* Dynamic Result Display: Positioned between inputs and actions */}
       {hasCalculated && (
-        <div className="mt-6 mb-4 w-full block">
+        <div className="mt-6 mb-4 w-full block animate-in fade-in duration-200">
           {result ? (
-            <p className="text-foreground font-medium text-lg">
-              Ваш розмір: <span className="text-primary font-bold">{result}</span>
+            <p className="text-zinc-900 font-medium text-lg">
+              Ваш розмір: <span className="text-[#C8205C] font-bold text-xl">{result}</span>
             </p>
           ) : (
-            <p className="text-destructive font-medium text-sm md:text-base">
+            <p className="text-red-600 font-medium text-sm md:text-base">
               На жаль, ми не змогли підібрати розмір за вказаними параметрами.
             </p>
           )}
@@ -77,18 +76,18 @@ export const SizeCalculatorForm = ({ onSizeCalculated }: SizeCalculatorFormProps
       )}
 
       {/* Actions Row: Responsive layout with flex-balancing */}
-      <div className="flex flex-col md:flex-row items-center gap-4 mt-6 w-full">
-        <Button
+      <div className="flex flex-col sm:flex-row items-center gap-4 mt-6 w-full">
+        <button
           onClick={handleCalculate}
           disabled={!isFormFilled}
-          className="w-full md:w-auto bg-primary text-primary-foreground hover:bg-primary/90 px-10 h-12 rounded-lg font-semibold transition-all active:scale-95 cursor-pointer"
+          className="w-full sm:w-auto bg-[#C8205C] hover:bg-[#a6174a] disabled:bg-zinc-200 disabled:text-zinc-400 disabled:cursor-not-allowed text-white px-10 h-12 rounded-lg font-semibold transition-all active:scale-95 cursor-pointer uppercase tracking-wider text-xs"
         >
           Розрахувати
-        </Button>
+        </button>
         
         <Link 
           href="/catalog" 
-          className="w-full md:flex-1 flex items-center justify-center px-6 h-12 rounded-lg border border-primary text-foreground font-semibold hover:bg-muted transition-all active:scale-95 text-sm md:text-base whitespace-nowrap"
+          className="w-full sm:flex-1 flex items-center justify-center px-6 h-12 rounded-lg border border-zinc-300 text-zinc-700 font-semibold hover:bg-zinc-50 hover:text-zinc-900 transition-all active:scale-95 text-xs uppercase tracking-wider whitespace-nowrap"
         >
           Знайти мій розмір в каталозі
         </Link>
