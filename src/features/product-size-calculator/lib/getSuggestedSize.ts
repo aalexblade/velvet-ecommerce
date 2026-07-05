@@ -4,11 +4,12 @@ import { SuggestedSize } from '../model/types';
 /**
  * Calculates suggested bra size based on underbust and overbust measurements.
  * Uses a boundary-based lookup matrix for band and cup sizes.
- * * All internal annotations and parameters are strictly in English.
- * * @param underbust - Measurement under the bust in cm
+ * 
+ * All internal annotations and parameters are strictly in English.
+ * @param underbust - Measurement under the bust in cm
  * @param overbust - Measurement across the fullest part of the bust in cm
  * @returns {SuggestedSize} - Formatted size (e.g., "75B") or null if measurements are out of range
- */
+ */ 
 export const getSuggestedSize = (underbust: number, overbust: number): SuggestedSize => {
   if (!underbust || !overbust || overbust <= underbust) {
     return null;
@@ -29,6 +30,6 @@ export const getSuggestedSize = (underbust: number, overbust: number): Suggested
 
   if (!cup) return null;
 
-  // Added explicit type assertion (as SuggestedSize) to fix strict TypeScript template literal type matching
+  // Added explicit type assertion to fix strict TypeScript template literal type matching
   return `${band.value}${cup.value}` as SuggestedSize;
 };
