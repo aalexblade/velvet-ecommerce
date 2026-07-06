@@ -8,7 +8,6 @@ import { Product, ProductColor } from "@/entities/product";
 import { CatalogFilters } from "@/features/filters";
 import { ProductDetailsBlock } from "@/widgets/product-details-block";
 
-// Re-using the identical figma data format from the product page
 const MOCK_DETAILED_PRODUCT: Product = {
   id: "mock-bra-1",
   title: "Корсетний мереживний бра балконет",
@@ -177,9 +176,7 @@ interface CatalogViewProps {
 
 export function CatalogView({ slug, initialProducts }: CatalogViewProps) {
   const [favorites, setFavorites] = useState<string[]>([]);
-  const [selectedQuickView, setSelectedQuickView] = useState<Product | null>(
-    null,
-  );
+  const [selectedQuickView, setSelectedQuickView] = useState<Product | null>(null);
 
   // Synchronize local testing stream by injecting the target figma mockup product
   const localProducts = useMemo(() => {
@@ -284,127 +281,139 @@ export function CatalogView({ slug, initialProducts }: CatalogViewProps) {
       </div>
 
       {/* --- Main Content Area --- */}
-      <div className="mt-8 flex flex-col gap-6">
-        <CatalogFilters />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 flex flex-col gap-6 overflow-visible">
+        
+        {/* Full-width Horizontal Filters View Layer Row */}
+        <div className="w-full shrink-0 overflow-visible">
+          <CatalogFilters />
+        </div>
 
-        {/* Product Grid */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {localProducts.map((product, idx) => {
-              const isFavorite = favorites.includes(product.id);
-              const mainImage =
-                product.images?.[0]?.url ||
-                "https://placehold.co/400x533/f5f5f5/a1a1aa?text=No+Image";
-              const primaryVariant = product.variants?.[0];
-              const currentPrice = primaryVariant?.price || 0;
-              const oldPrice = primaryVariant?.old_price;
-              const uniqueColors = Array.from(
-                new Set(product.variants?.map((v) => v.color) || []),
-              );
-              const hasDiscount = !!oldPrice;
+        {/* Product Grid Area Container Stacked Nicely Below Filters */}
+        <div className="w-full mt-2">
+          {localProducts.length === 0 ? (
+            <div className="text-center py-16 text-zinc-400 text-sm font-light">
+              Не знайдено преміальних товарів за вказаними параметрами фільтрації.
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+              {localProducts.map((product, idx) => {
+                const isFavorite = favorites.includes(product.id);
+                const mainImage =
+                  product.images?.[0]?.url ||
+                  "https://placehold.co/400x533/f5f5f5/a1a1aa?text=No+Image";
+                const primaryVariant = product.variants?.[0];
+                const currentPrice = primaryVariant?.price || 0;
+                const oldPrice = primaryVariant?.old_price;
+                const uniqueColors = Array.from(
+                  new Set(product.variants?.map((v) => v.color) || []),
+                );
+                const hasDiscount = !!oldPrice;
 
-              return (
-                <div
-                  key={product.id}
-                  className="group flex flex-col bg-white rounded-xl border border-zinc-200 shadow-sm overflow-hidden transition-all duration-300 hover:shadow-md"
-                >
-                  <div className="relative w-full aspect-3/4 bg-neutral-100 overflow-hidden">
-                    <Image
-                      src={mainImage}
-                      alt={product.title}
-                      fill
-                      sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
-                      priority={idx < 4}
-                      className="object-cover object-center group-hover:scale-105 transition-transform duration-500"
-                    />
+                return (
+                  <div
+                    key={product.id}
+                    className="group flex flex-col bg-white rounded-xl border border-zinc-200 shadow-sm overflow-hidden transition-all duration-300 hover:shadow-md"
+                  >
+                    <div className="relative w-full aspect-3/4 bg-neutral-100 overflow-hidden">
+                      <Image
+                        src={mainImage}
+                        alt={product.title}
+                        fill
+                        sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
+                        priority={idx < 4}
+                        className="object-cover object-center group-hover:scale-105 transition-transform duration-500"
+                        unoptimized
+                      />
 
-                    <div className="absolute top-3 left-3 flex flex-col gap-1 z-10">
-                      {hasDiscount ? (
-                        <span className="text-[10px] font-bold tracking-wider uppercase px-2.5 py-1 rounded-md text-white bg-[#C8205C]">
-                          Акція
-                        </span>
-                      ) : idx % 3 === 0 ? (
-                        <span className="text-[10px] font-bold tracking-wider uppercase px-2.5 py-1 rounded-md text-zinc-900 bg-white border border-zinc-200 shadow-xs">
-                          Новинка
-                        </span>
-                      ) : null}
-                    </div>
-
-                    <div className="hidden lg:flex absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 items-end justify-center pb-6 z-10">
-                      <button
-                        onClick={() => setSelectedQuickView(product)}
-                        className="flex items-center justify-center bg-white/95 text-zinc-900 font-semibold text-sm px-6 py-2.5 rounded-lg shadow-sm hover:bg-white hover:text-[#C8205C] transition-all transform translate-y-2 group-hover:translate-y-0 cursor-pointer border border-zinc-200"
-                      >
-                        Швидкий перегляд
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="p-4 flex flex-col grow">
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center gap-2">
-                        {uniqueColors.map((colorName, cIdx) => (
-                          <span
-                            key={cIdx}
-                            title={colorName}
-                            className={`w-5 h-5 rounded-md border border-zinc-300 shadow-xs cursor-pointer hover:scale-110 transition-transform ${colorToClass(colorName as ProductColor)}`}
-                          />
-                        ))}
+                      <div className="absolute top-3 left-3 flex flex-col gap-1 z-10">
+                        {hasDiscount ? (
+                          <span className="text-[10px] font-bold tracking-wider uppercase px-2.5 py-1 rounded-md text-white bg-[#C8205C]">
+                            Акція
+                          </span>
+                        ) : idx % 3 === 0 ? (
+                          <span className="text-[10px] font-bold tracking-wider uppercase px-2.5 py-1 rounded-md text-zinc-900 bg-white border border-zinc-200 shadow-xs">
+                            Новинка
+                          </span>
+                        ) : null}
                       </div>
-                      <button
-                        onClick={() => toggleFavorite(product.id)}
-                        className="text-zinc-400 hover:text-[#C8205C] transition-colors p-1 cursor-pointer"
-                      >
-                        <Heart
-                          className={`w-5 h-5 transition-all ${isFavorite ? "fill-[#C8205C] text-[#C8205C] scale-110" : ""}`}
-                        />
-                      </button>
+
+                      <div className="hidden lg:flex absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 items-end justify-center pb-6 z-10">
+                        <button
+                          onClick={() => setSelectedQuickView(product)}
+                          className="flex items-center justify-center bg-white/95 text-zinc-900 font-semibold text-sm px-6 py-2.5 rounded-lg shadow-sm hover:bg-white hover:text-[#C8205C] transition-all transform translate-y-2 group-hover:translate-y-0 cursor-pointer border border-zinc-200"
+                        >
+                          Швидкий перегляд
+                        </button>
+                      </div>
                     </div>
 
-                    <h2 className="text-sm font-semibold text-zinc-900 line-clamp-2 group-hover:text-[#C8205C] transition-colors">
-                      {product.title}
-                    </h2>
+                    <div className="p-4 flex flex-col grow">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-2">
+                          {uniqueColors.map((colorName, cIdx) => (
+                            <span
+                              key={cIdx}
+                              title={colorName}
+                              className={`w-5 h-5 rounded-md border border-zinc-300 shadow-xs cursor-pointer hover:scale-110 transition-transform ${colorToClass(colorName as ProductColor)}`}
+                            />
+                          ))}
+                        </div>
+                        <button
+                          onClick={() => toggleFavorite(product.id)}
+                          className="text-zinc-400 hover:text-[#C8205C] transition-colors p-1 cursor-pointer"
+                        >
+                          <Heart
+                            className={`w-5 h-5 transition-all ${isFavorite ? "fill-[#C8205C] text-[#C8205C] scale-110" : ""}`}
+                          />
+                        </button>
+                      </div>
 
-                    <div className="mt-2 flex items-baseline gap-2 flex-wrap text-sm">
-                      {hasDiscount ? (
-                        <>
-                          <span className="font-bold text-[#C8205C]">
+                      <h2 className="text-sm font-semibold text-zinc-900 line-clamp-2 group-hover:text-[#C8205C] transition-colors">
+                        {product.title}
+                      </h2>
+
+                      <div className="mt-2 flex items-baseline gap-2 flex-wrap text-sm">
+                        {hasDiscount ? (
+                          <>
+                            <span className="font-bold text-[#C8205C]">
+                              {currentPrice} UAH
+                            </span>
+                            <span className="text-xs text-zinc-500 line-through decoration-[#C8205C]/40">
+                              {oldPrice} UAH
+                            </span>
+                          </>
+                        ) : (
+                          <span className="font-bold text-zinc-900">
                             {currentPrice} UAH
                           </span>
-                          <span className="text-xs text-zinc-500 line-through decoration-[#C8205C]/40">
-                            {oldPrice} UAH
-                          </span>
-                        </>
-                      ) : (
-                        <span className="font-bold text-zinc-900">
-                          {currentPrice} UAH
-                        </span>
-                      )}
+                        )}
+                      </div>
                     </div>
                   </div>
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
+          )}
 
           {/* --- Pagination --- */}
           <div className="mt-12">
             <nav className="flex justify-center items-center gap-1">
-              <button className="w-9 h-9 rounded-xl flex items-center justify-center text-sm font-medium border border-border bg-card text-muted-foreground cursor-pointer">
+              <button className="w-9 h-9 rounded-xl flex items-center justify-center text-sm font-medium border border-zinc-200 bg-white text-zinc-400 cursor-pointer">
                 &larr;
               </button>
-              <button className="w-9 h-9 rounded-xl flex items-center justify-center text-sm font-bold bg-accent text-accent-foreground shadow-sm">
+              <button className="w-9 h-9 rounded-xl flex items-center justify-center text-sm font-bold bg-[#C8205C] text-white shadow-sm">
                 1
               </button>
-              <button className="w-9 h-9 rounded-xl flex items-center justify-center text-sm font-medium hover:bg-muted text-foreground transition-colors cursor-pointer">
+              <button className="w-9 h-9 rounded-xl flex items-center justify-center text-sm font-medium hover:bg-zinc-50 text-zinc-700 transition-colors cursor-pointer border border-zinc-200">
                 2
               </button>
-              <button className="w-9 h-9 rounded-xl flex items-center justify-center text-sm font-medium border border-border bg-card text-muted-foreground cursor-pointer">
+              <button className="w-9 h-9 rounded-xl flex items-center justify-center text-sm font-medium border border-zinc-200 bg-white text-zinc-400 cursor-pointer">
                 &rarr;
               </button>
             </nav>
           </div>
         </div>
+
       </div>
 
       {/* --- Quick View Modal System Layer --- */}

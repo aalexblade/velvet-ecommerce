@@ -234,35 +234,35 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
 
   const dropdownContainerClasses =
     "absolute top-full left-0 mt-1 z-50 bg-white border border-zinc-200 shadow-xl rounded-xl opacity-0 pointer-events-none transition-all duration-200 scale-95 origin-top-left group-hover:opacity-100 group-hover:pointer-events-auto group-hover:scale-100 overflow-visible";
+
+  // Luxury branding alignment classes matching the main spec guidelines
   const activeBadgeClasses =
-    "inline-flex items-center justify-center bg-[#b91c56] text-white rounded-lg px-5 py-2.5 text-xs font-bold transition-colors cursor-pointer select-none hover:bg-[#73103a] active:scale-[0.98] shadow-xs";
+    "inline-flex items-center justify-center bg-[#C8205C] text-white rounded-lg px-5 py-2.5 text-xs font-bold transition-colors cursor-pointer select-none hover:bg-[#a6174a] active:scale-[0.98] shadow-xs";
 
   return (
     <div
       className={cn(
-        "w-full bg-white flex flex-col transition-opacity overflow-visible",
+        "w-full bg-white flex flex-col transition-opacity overflow-visible font-sans",
         isPending && "opacity-60 pointer-events-none",
         className,
       )}
     >
-      {/* ========================================================================= */}
-      {/* 💻  (hidden lg:block) */}
-      {/* ========================================================================= */}
+      {/* 💻 DESKTOP FILTERS PANEL LAYER */}
       <div className="border-y border-zinc-200 py-1 overflow-visible hidden lg:block">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 overflow-visible">
           <div className="flex items-center justify-between h-14 overflow-visible">
-            <div className="flex items-center gap-2 text-zinc-900 py-4 font-semibold text-xs uppercase tracking-wider shrink-0 mr-6 select-none cursor-pointer hover:text-pink-600 transition-colors whitespace-nowrap">
-              <Filter className="w-4 h-4 stroke-[2.5px]" />
+            <div className="flex items-center gap-2 text-zinc-900 py-4 font-bold text-xs uppercase tracking-wider shrink-0 mr-6 select-none cursor-pointer hover:text-[#C8205C] transition-colors whitespace-nowrap">
+              <Filter className="w-4 h-4 stroke-[2.5px] text-[#C8205C]" />
               Всі Фільтри
             </div>
 
             <div className="flex items-center gap-x-6 flex-1 overflow-visible h-full">
-              {/* А. name of type */}
+              {/* Name Filter Trigger */}
               <div className="relative group shrink-0 py-4 overflow-visible">
                 <button
                   className={cn(
-                    "flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider transition-colors cursor-pointer group-hover:text-pink-600 whitespace-nowrap",
-                    activeNames.length > 0 ? "text-pink-600" : "text-zinc-500",
+                    "flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider transition-colors cursor-pointer group-hover:text-[#C8205C] whitespace-nowrap",
+                    activeNames.length > 0 ? "text-[#C8205C]" : "text-zinc-500",
                   )}
                 >
                   Назва товару{" "}
@@ -280,9 +280,9 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
                         key={name.id}
                         onClick={() => updateQueryParams("search", name.title)}
                         className={cn(
-                          "w-full text-left px-4 py-2 text-xs transition-colors cursor-pointer font-medium hover:text-pink-600 hover:bg-zinc-50 whitespace-nowrap",
+                          "w-full text-left px-4 py-2 text-xs transition-colors cursor-pointer font-medium hover:text-[#C8205C] hover:bg-zinc-50 whitespace-nowrap",
                           isSelected
-                            ? "text-pink-600 bg-pink-50/50 font-bold"
+                            ? "text-[#C8205C] bg-pink-50/50 font-bold"
                             : "text-zinc-700",
                         )}
                       >
@@ -300,12 +300,12 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
                 </div>
               </div>
 
-              {/* Б. price */}
+              {/* Price Filter Trigger */}
               <div className="relative group shrink-0 py-4 overflow-visible">
                 <button
                   className={cn(
-                    "flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider transition-colors cursor-pointer group-hover:text-pink-600 whitespace-nowrap",
-                    minPrice || maxPrice ? "text-pink-600" : "text-zinc-500",
+                    "flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider transition-colors cursor-pointer group-hover:text-[#C8205C] whitespace-nowrap",
+                    minPrice || maxPrice ? "text-[#C8205C]" : "text-zinc-500",
                   )}
                 >
                   Ціна{" "}
@@ -325,9 +325,9 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
                             handlePricePreset(preset.min, preset.max)
                           }
                           className={cn(
-                            "w-full text-left py-2 px-4 text-xs transition-colors cursor-pointer font-medium hover:text-pink-600 hover:bg-zinc-50 whitespace-nowrap",
+                            "w-full text-left py-2 px-4 text-xs transition-colors cursor-pointer font-medium hover:text-[#C8205C] hover:bg-zinc-50 whitespace-nowrap",
                             isPresetActive
-                              ? "text-pink-600 bg-pink-50/50 font-bold"
+                              ? "text-[#C8205C] bg-pink-50/50 font-bold"
                               : "text-zinc-600",
                           )}
                         >
@@ -339,12 +339,12 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
                 </div>
               </div>
 
-              {/* В. size */}
+              {/* Size Filter Trigger */}
               <div className="relative group shrink-0 py-4 overflow-visible">
                 <button
                   className={cn(
-                    "flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider transition-colors cursor-pointer group-hover:text-pink-600 whitespace-nowrap",
-                    activeSizes.length > 0 ? "text-pink-600" : "text-zinc-500",
+                    "flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider transition-colors cursor-pointer group-hover:text-[#C8205C] whitespace-nowrap",
+                    activeSizes.length > 0 ? "text-[#C8205C]" : "text-zinc-500",
                   )}
                 >
                   Розмір{" "}
@@ -361,9 +361,9 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
                           key={size}
                           onClick={() => updateQueryParams("size", size, true)}
                           className={cn(
-                            "w-full text-left px-5 py-2 text-xs font-semibold transition-colors cursor-pointer hover:text-pink-600 hover:bg-zinc-50 whitespace-nowrap",
+                            "w-full text-left px-5 py-2 text-xs font-semibold transition-colors cursor-pointer hover:text-[#C8205C] hover:bg-zinc-50 whitespace-nowrap",
                             isSelected
-                              ? "text-pink-600 bg-pink-50/50"
+                              ? "text-[#C8205C] bg-pink-50/50"
                               : "text-zinc-800",
                           )}
                         >
@@ -375,12 +375,14 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
                 </div>
               </div>
 
-              {/* Г. color */}
+              {/* Color Filter Trigger */}
               <div className="relative group shrink-0 py-4 overflow-visible">
                 <button
                   className={cn(
-                    "flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider transition-colors cursor-pointer group-hover:text-pink-600 whitespace-nowrap",
-                    activeColors.length > 0 ? "text-pink-600" : "text-zinc-500",
+                    "flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider transition-colors cursor-pointer group-hover:text-[#C8205C] whitespace-nowrap",
+                    activeColors.length > 0
+                      ? "text-[#C8205C]"
+                      : "text-zinc-500",
                   )}
                 >
                   Колір{" "}
@@ -401,9 +403,9 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
                             updateQueryParams("color", color.id, true)
                           }
                           className={cn(
-                            "flex items-center gap-3 w-full py-1.5 px-2 rounded-md transition-colors cursor-pointer text-left text-xs font-medium hover:bg-zinc-50 hover:text-pink-600 whitespace-nowrap",
+                            "flex items-center gap-3 w-full py-1.5 px-2 rounded-md transition-colors cursor-pointer text-left text-xs font-medium hover:bg-zinc-50 hover:text-[#C8205C] whitespace-nowrap",
                             isSelected
-                              ? "text-pink-600 bg-pink-50/40 font-semibold"
+                              ? "text-[#C8205C] bg-pink-50/40 font-semibold"
                               : "text-zinc-700",
                           )}
                         >
@@ -429,12 +431,14 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
                 </div>
               </div>
 
-              {/* Д. type  */}
+              {/* Fabric Type Trigger */}
               <div className="relative group shrink-0 py-4 overflow-visible">
                 <button
                   className={cn(
-                    "flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider transition-colors cursor-pointer group-hover:text-pink-600 whitespace-nowrap",
-                    activeColors.length > 0 ? "text-pink-600" : "text-zinc-500",
+                    "flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider transition-colors cursor-pointer group-hover:text-[#C8205C] whitespace-nowrap",
+                    activeFabrics.length > 0
+                      ? "text-[#C8205C]"
+                      : "text-zinc-500",
                   )}
                 >
                   Тип тканини{" "}
@@ -454,9 +458,9 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
                           updateQueryParams("fabric", fabric.id, true)
                         }
                         className={cn(
-                          "w-full text-left px-5 py-2 text-xs transition-colors cursor-pointer font-medium hover:text-pink-600 hover:bg-zinc-50 whitespace-nowrap",
+                          "w-full text-left px-5 py-2 text-xs transition-colors cursor-pointer font-medium hover:text-[#C8205C] hover:bg-zinc-50 whitespace-nowrap",
                           isSelected
-                            ? "text-pink-600 bg-pink-50/50 font-bold"
+                            ? "text-[#C8205C] bg-pink-50/50 font-bold"
                             : "text-zinc-700",
                         )}
                       >
@@ -467,13 +471,13 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
                 </div>
               </div>
 
-              {/* Е. colection */}
+              {/* Collection Type Trigger */}
               <div className="relative group shrink-0 py-4 overflow-visible">
                 <button
                   className={cn(
-                    "flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider transition-colors cursor-pointer group-hover:text-pink-600 whitespace-nowrap",
+                    "flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider transition-colors cursor-pointer group-hover:text-[#C8205C] whitespace-nowrap",
                     activeCollections.length > 0
-                      ? "text-pink-600"
+                      ? "text-[#C8205C]"
                       : "text-zinc-500",
                   )}
                 >
@@ -494,9 +498,9 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
                           updateQueryParams("collection", col.id, true)
                         }
                         className={cn(
-                          "w-full text-left px-5 py-2 text-xs transition-colors cursor-pointer font-medium hover:text-pink-600 hover:bg-zinc-50 whitespace-nowrap",
+                          "w-full text-left px-5 py-2 text-xs transition-colors cursor-pointer font-medium hover:text-[#C8205C] hover:bg-zinc-50 whitespace-nowrap",
                           isSelected
-                            ? "text-pink-600 bg-pink-50/50 font-bold"
+                            ? "text-[#C8205C] bg-pink-50/50 font-bold"
                             : "text-zinc-700",
                         )}
                       >
@@ -508,12 +512,12 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
               </div>
             </div>
 
-            {/* sort of type */}
+            {/* Core Sorting Layout Block */}
             <div className="flex items-center gap-2 shrink-0 relative group py-4 overflow-visible">
               <label className="text-xs font-medium text-zinc-400 select-none whitespace-nowrap">
                 Сортувати за:
               </label>
-              <button className="flex items-center gap-1 text-xs font-semibold text-zinc-800 hover:text-pink-600 cursor-pointer transition-colors whitespace-nowrap">
+              <button className="flex items-center gap-1 text-xs font-bold text-zinc-800 hover:text-[#C8205C] cursor-pointer transition-colors whitespace-nowrap">
                 {getSortButtonTitle()}{" "}
                 <ChevronDown className="w-3.5 h-3.5 transition-transform duration-300 group-hover:rotate-180" />
               </button>
@@ -525,9 +529,9 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
                       key={opt.id}
                       onClick={() => updateQueryParams("sort", opt.id)}
                       className={cn(
-                        "w-full text-left px-5 py-2 text-xs transition-colors cursor-pointer flex items-center justify-between font-medium hover:text-pink-600 hover:bg-zinc-50 whitespace-nowrap",
+                        "w-full text-left px-5 py-2 text-xs transition-colors cursor-pointer flex items-center justify-between font-medium hover:text-[#C8205C] hover:bg-zinc-50 whitespace-nowrap",
                         isSelected
-                          ? "bg-pink-50/50 text-pink-600 font-bold"
+                          ? "bg-pink-50/50 text-[#C8205C] font-bold"
                           : "text-zinc-700",
                       )}
                     >
@@ -541,9 +545,7 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
         </div>
       </div>
 
-      {/* ========================================================================= */}
-      {/* 📱 React State */}
-      {/* ========================================================================= */}
+      {/* 📱 MOBILE VIEW COMPONENT TRIGGERS */}
       <div className="border-y border-zinc-200 py-3 block lg:hidden bg-white sticky top-0 z-30">
         <div className="px-4 flex items-center justify-between gap-4">
           <button
@@ -553,13 +555,12 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
             }}
             className="flex-1 flex items-center justify-center gap-2 border border-zinc-300 rounded-lg py-3 text-xs font-bold uppercase tracking-wider text-zinc-900 bg-white active:bg-zinc-50 transition-all select-none cursor-pointer"
           >
-            <Menu className="w-4 h-4 stroke-[2.5px] text-[#b91c56]" />
+            <Menu className="w-4 h-4 stroke-[2.5px] text-[#C8205C]" />
             Фільтри{" "}
             {hasActiveFilters &&
               `(${activeSizes.length + activeColors.length + activeFabrics.length + activeCollections.length + activeNames.length})`}
           </button>
 
-          {/* 💎 Контрольоване мобільне сортування без group-hover */}
           <div className="relative flex-1">
             <button
               onClick={() => setIsMobSortOpen(!isMobSortOpen)}
@@ -569,7 +570,7 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
               <ChevronDown
                 className={cn(
                   "w-4 h-4 transition-transform duration-300 shrink-0 text-zinc-400",
-                  isMobSortOpen && "rotate-180 text-[#b91c56]",
+                  isMobSortOpen && "rotate-180 text-[#C8205C]",
                 )}
               />
             </button>
@@ -587,12 +588,12 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
                   key={`mob-sort-${opt.id}`}
                   onClick={() => {
                     updateQueryParams("sort", opt.id);
-                    setIsMobSortOpen(false); // Закриваємо меню після тапу на елемент
+                    setIsMobSortOpen(false);
                   }}
                   className={cn(
                     "w-full text-left px-5 py-3.5 text-xs font-semibold transition-colors flex items-center justify-between border-b border-zinc-50 last:border-0 cursor-pointer",
                     activeSort === opt.id
-                      ? "bg-pink-50/50 text-[#b91c56]"
+                      ? "bg-pink-50/50 text-[#C8205C]"
                       : "text-zinc-700 active:bg-zinc-50",
                   )}
                 >
@@ -604,9 +605,7 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
         </div>
       </div>
 
-      {/* ========================================================================= */}
-      {/* 📥 (DRAWER SHEET) */}
-      {/* ========================================================================= */}
+      {/* 📥 MOBILE DRAWER OVERLAY SHEET LAYER */}
       <div
         className={cn(
           "fixed inset-0 z-50 transition-all duration-300 lg:hidden",
@@ -628,7 +627,7 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
         >
           <div className="p-4 border-b border-zinc-200 flex items-center justify-between bg-zinc-50">
             <div className="flex items-center gap-2 text-zinc-900 font-bold text-xs uppercase tracking-wider">
-              <Filter className="w-4 h-4 text-[#b91c56]" />
+              <Filter className="w-4 h-4 text-[#C8205C]" />
               Панель фільтрів
             </div>
             <button
@@ -640,7 +639,7 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
           </div>
 
           <div className="flex-1 overflow-y-auto p-4 space-y-4 no-scrollbar pb-24">
-            {/* 1.name of type */}
+            {/* Mobile Name Accordion */}
             <div className="border-b border-zinc-100 pb-3">
               <button
                 onClick={() => toggleAccordion("name")}
@@ -653,7 +652,7 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
                 <ChevronDown
                   className={cn(
                     "w-4 h-4 transition-transform duration-200 text-zinc-400",
-                    openAccordion === "name" && "rotate-180 text-[#b91c56]",
+                    openAccordion === "name" && "rotate-180 text-[#C8205C]",
                   )}
                 />
               </button>
@@ -666,7 +665,7 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
                       className={cn(
                         "w-full text-left py-2.5 px-3 rounded-lg text-xs font-medium transition-colors cursor-pointer",
                         activeNames.some((n) => n.id === name.id)
-                          ? "bg-pink-50 text-[#b91c56] font-bold"
+                          ? "bg-pink-50 text-[#C8205C] font-bold"
                           : "text-zinc-600 active:bg-zinc-50",
                       )}
                     >
@@ -677,7 +676,7 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
               )}
             </div>
 
-            {/* 2. price */}
+            {/* Mobile Price Accordion */}
             <div className="border-b border-zinc-100 pb-3">
               <button
                 onClick={() => toggleAccordion("price")}
@@ -687,7 +686,7 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
                 <ChevronDown
                   className={cn(
                     "w-4 h-4 transition-transform duration-200 text-zinc-400",
-                    openAccordion === "price" && "rotate-180 text-[#b91c56]",
+                    openAccordion === "price" && "rotate-180 text-[#C8205C]",
                   )}
                 />
               </button>
@@ -700,7 +699,7 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
                       className={cn(
                         "w-full text-left py-2.5 px-3 rounded-lg text-xs font-medium transition-colors cursor-pointer",
                         minPrice === preset.min && maxPrice === preset.max
-                          ? "bg-pink-50 text-[#b91c56] font-bold"
+                          ? "bg-pink-50 text-[#C8205C] font-bold"
                           : "text-zinc-600 active:bg-zinc-50",
                       )}
                     >
@@ -711,7 +710,7 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
               )}
             </div>
 
-            {/* 3. size */}
+            {/* Mobile Size Accordion */}
             <div className="border-b border-zinc-100 pb-3">
               <button
                 onClick={() => toggleAccordion("size")}
@@ -723,7 +722,7 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
                 <ChevronDown
                   className={cn(
                     "w-4 h-4 transition-transform duration-200 text-zinc-400",
-                    openAccordion === "size" && "rotate-180 text-[#b91c56]",
+                    openAccordion === "size" && "rotate-180 text-[#C8205C]",
                   )}
                 />
               </button>
@@ -738,7 +737,7 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
                         className={cn(
                           "flex items-center justify-center h-11 border rounded-lg text-xs font-bold transition-all cursor-pointer",
                           isSelected
-                            ? "border-[#b91c56] bg-[#b91c56] text-white"
+                            ? "border-[#C8205C] bg-[#C8205C] text-white"
                             : "border-zinc-200 text-zinc-800 active:bg-zinc-50",
                         )}
                       >
@@ -750,7 +749,7 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
               )}
             </div>
 
-            {/* 4. color */}
+            {/* Mobile Color Accordion */}
             <div className="border-b border-zinc-100 pb-3">
               <button
                 onClick={() => toggleAccordion("color")}
@@ -762,7 +761,7 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
                 <ChevronDown
                   className={cn(
                     "w-4 h-4 transition-transform duration-200 text-zinc-400",
-                    openAccordion === "color" && "rotate-180 text-[#b91c56]",
+                    openAccordion === "color" && "rotate-180 text-[#C8205C]",
                   )}
                 />
               </button>
@@ -781,7 +780,7 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
                         className={cn(
                           "flex items-center gap-2.5 p-2 rounded-lg border text-left text-xs font-medium transition-all truncate cursor-pointer",
                           isSelected
-                            ? "border-[#b91c56] bg-pink-50/40 text-[#b91c56] font-semibold"
+                            ? "border-[#C8205C] bg-pink-50/40 text-[#C8205C] font-semibold"
                             : "border-zinc-100 bg-zinc-50 text-zinc-700 active:bg-zinc-100",
                         )}
                       >
@@ -799,7 +798,7 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
               )}
             </div>
 
-            {/* 5. type of fabryc*/}
+            {/* Mobile Fabric Accordion */}
             <div className="border-b border-zinc-100 pb-3">
               <button
                 onClick={() => toggleAccordion("fabric")}
@@ -812,7 +811,7 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
                 <ChevronDown
                   className={cn(
                     "w-4 h-4 transition-transform duration-200 text-zinc-400",
-                    openAccordion === "fabric" && "rotate-180 text-[#b91c56]",
+                    openAccordion === "fabric" && "rotate-180 text-[#C8205C]",
                   )}
                 />
               </button>
@@ -831,7 +830,7 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
                         className={cn(
                           "w-full text-left py-2.5 px-3 rounded-lg text-xs font-medium transition-colors cursor-pointer",
                           isSelected
-                            ? "bg-pink-50 text-[#b91c56] font-bold"
+                            ? "bg-pink-50 text-[#C8205C] font-bold"
                             : "text-zinc-600 active:bg-zinc-50",
                         )}
                       >
@@ -843,7 +842,7 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
               )}
             </div>
 
-            {/* 6. colection */}
+            {/* Mobile Collection Accordion */}
             <div className="border-b border-zinc-100 pb-3">
               <button
                 onClick={() => toggleAccordion("collection")}
@@ -858,7 +857,7 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
                   className={cn(
                     "w-4 h-4 transition-transform duration-200 text-zinc-400",
                     openAccordion === "collection" &&
-                      "rotate-180 text-[#b91c56]",
+                      "rotate-180 text-[#C8205C]",
                   )}
                 />
               </button>
@@ -877,7 +876,7 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
                         className={cn(
                           "w-full text-left py-2.5 px-3 rounded-lg text-xs font-medium transition-colors cursor-pointer",
                           isSelected
-                            ? "bg-pink-50 text-[#b91c56] font-bold"
+                            ? "bg-pink-50 text-[#C8205C] font-bold"
                             : "text-zinc-700 active:bg-zinc-50",
                         )}
                       >
@@ -904,7 +903,7 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
             )}
             <button
               onClick={() => setIsMobileMenuOpen(false)}
-              className="flex-3 bg-[#b91c56] text-white font-bold rounded-lg py-3.5 text-xs uppercase tracking-wider hover:bg-[#73103a] active:scale-[0.99] transition-all text-center cursor-pointer shadow-xs"
+              className="flex-3 bg-[#C8205C] text-white font-bold rounded-lg py-3.5 text-xs uppercase tracking-wider hover:bg-[#a6174a] active:scale-[0.99] transition-all text-center cursor-pointer shadow-xs"
             >
               Застосувати фільтри
             </button>
@@ -912,7 +911,7 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
         </div>
       </div>
 
-      {/* raw active  */}
+      {/* 🏷️ ACTIVE FILTERS HORIZONTAL FLOW CHIPS */}
       {hasActiveFilters && (
         <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-4 flex flex-wrap gap-2.5 items-center animate-in fade-in duration-300 overflow-visible">
           {searchParams.get("search") && (
@@ -978,7 +977,7 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
 
           <button
             onClick={clearAll}
-            className="inline-flex items-center justify-center border border-[#b91c56] text-zinc-900 font-bold rounded-lg px-5 py-2.5 text-xs bg-white cursor-pointer hover:bg-pink-50/60 active:scale-[0.98] transition-all shrink-0 select-none shadow-xs"
+            className="inline-flex items-center justify-center border border-[#C8205C] text-zinc-900 font-bold rounded-lg px-5 py-2.5 text-xs bg-white cursor-pointer hover:bg-pink-50/60 active:scale-[0.98] transition-all shrink-0 select-none shadow-xs"
           >
             Скинути все
           </button>
