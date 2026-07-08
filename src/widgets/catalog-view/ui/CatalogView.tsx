@@ -8,6 +8,15 @@ import { Product, ProductColor } from "@/entities/product";
 import { CatalogFilters } from "@/features/filters";
 import { ProductDetailsBlock } from "@/widgets/product-details-block";
 
+// 1. Defined TypeScript interface contract for incoming real subcategory records
+interface Subcategory {
+  id: number;
+  title: string;
+  slug: string;
+  image: string | null;
+  parent_id: number | null;
+}
+
 const MOCK_DETAILED_PRODUCT: Product = {
   id: "mock-bra-1",
   title: "Корсетний мереживний бра балконет",
@@ -26,22 +35,6 @@ const MOCK_DETAILED_PRODUCT: Product = {
       is_main: true,
       sort_order: 1,
     },
-    {
-      id: 2,
-      product_id: "mock-bra-1",
-      variant_id: null,
-      url: "https://images.unsplash.com/photo-1551488831-00ddcb6c6bd3?q=80&w=600",
-      is_main: false,
-      sort_order: 2,
-    },
-    {
-      id: 3,
-      product_id: "mock-bra-1",
-      variant_id: null,
-      url: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?q=80&w=600",
-      is_main: false,
-      sort_order: 3,
-    },
   ],
   variants: [
     {
@@ -54,87 +47,8 @@ const MOCK_DETAILED_PRODUCT: Product = {
       old_price: null,
       stock: 5,
     },
-    {
-      id: "v-cherry-s",
-      product_id: "mock-bra-1",
-      sku: "565940",
-      color: "Cherry",
-      size: "S",
-      price: 650,
-      old_price: null,
-      stock: 5,
-    },
-    {
-      id: "v-cherry-m",
-      product_id: "mock-bra-1",
-      sku: "565940",
-      color: "Cherry",
-      size: "M",
-      price: 650,
-      old_price: null,
-      stock: 3,
-    },
-    {
-      id: "v-cherry-l",
-      product_id: "mock-bra-1",
-      sku: "565940",
-      color: "Cherry",
-      size: "L",
-      price: 650,
-      old_price: null,
-      stock: 2,
-    },
-    {
-      id: "v-cherry-xl",
-      product_id: "mock-bra-1",
-      sku: "565940",
-      color: "Cherry",
-      size: "XL",
-      price: 650,
-      old_price: null,
-      stock: 4,
-    },
   ],
 };
-
-const MOCK_SUBCATEGORIES = [
-  {
-    id: "push-up",
-    title: "Push-up",
-    count: 42,
-    image: "https://placehold.co/120x120/f5f5f5/a1a1aa?text=Push-up",
-  },
-  {
-    id: "balconette",
-    title: "Balconette",
-    count: 28,
-    image: "https://placehold.co/120x120/f5f5f5/a1a1aa?text=Balconette",
-  },
-  {
-    id: "bralette",
-    title: "Бралети",
-    count: 35,
-    image: "https://placehold.co/120x120/f5f5f5/a1a1aa?text=Bralette",
-  },
-  {
-    id: "soft-cup",
-    title: "М'яка чашка",
-    count: 19,
-    image: "https://placehold.co/120x120/f5f5f5/a1a1aa?text=Soft+Cup",
-  },
-  {
-    id: "corset",
-    title: "Корсети",
-    count: 14,
-    image: "https://placehold.co/120x120/f5f5f5/a1a1aa?text=Corset",
-  },
-  {
-    id: "wireless",
-    title: "Без кісточок",
-    count: 22,
-    image: "https://placehold.co/120x120/f5f5f5/a1a1aa?text=Wireless",
-  },
-];
 
 const colorToClass = (color: ProductColor): string => {
   const map: Record<ProductColor, string> = {
@@ -172,13 +86,14 @@ const colorToClass = (color: ProductColor): string => {
 interface CatalogViewProps {
   slug?: string[];
   initialProducts: Product[];
+  // 2. Added real operational payload array to props definitions
+  initialSubcategories: Subcategory[];
 }
 
-export function CatalogView({ slug, initialProducts }: CatalogViewProps) {
+export function CatalogView({ slug, initialProducts, initialSubcategories }: CatalogViewProps) {
   const [favorites, setFavorites] = useState<string[]>([]);
   const [selectedQuickView, setSelectedQuickView] = useState<Product | null>(null);
 
-  // Synchronize local testing stream by injecting the target figma mockup product
   const localProducts = useMemo(() => {
     return [
       MOCK_DETAILED_PRODUCT,
@@ -220,17 +135,11 @@ export function CatalogView({ slug, initialProducts }: CatalogViewProps) {
       {/* --- Breadcrumbs Navigation --- */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
         <nav className="flex text-xs md:text-sm text-muted-foreground whitespace-nowrap overflow-x-auto no-scrollbar">
-          <Link
-            href="/"
-            className="hover:text-foreground transition-colors cursor-pointer"
-          >
+          <Link href="/" className="hover:text-foreground transition-colors cursor-pointer">
             Головна
           </Link>
           <span className="mx-2">/</span>
-          <Link
-            href="/catalog"
-            className="hover:text-foreground transition-colors cursor-pointer"
-          >
+          <Link href="/catalog" className="hover:text-foreground transition-colors cursor-pointer">
             Білизна
           </Link>
           <span className="mx-2">/</span>
@@ -246,49 +155,50 @@ export function CatalogView({ slug, initialProducts }: CatalogViewProps) {
           {currentCategoryTitle}
         </h1>
         <p className="mt-2 text-sm md:text-base text-muted-foreground max-w-3xl leading-relaxed">
-          Відкрийте для себе ідеальне поєднання витонченого дизайну та
-          бездоганної підтримки.
+          Відкрийте для себе ідеальне поєднання витонченого дизайну та бездоганної підтримки.
         </p>
       </div>
 
-      {/* --- Subcategories Slider --- */}
+      {/* --- Live Subcategories Slider Section --- */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6 md:mt-8">
         <div className="flex gap-4 overflow-x-auto pb-3 pt-1 no-scrollbar snap-x scroll-smooth">
-          {MOCK_SUBCATEGORIES.map((sub, index) => (
-            <div
-              key={sub.id}
-              className="shrink-0 w-24 md:w-28 text-center cursor-pointer group snap-start"
-            >
-              <div className="w-full aspect-square rounded-2xl overflow-hidden bg-muted border border-transparent group-hover:border-muted-foreground/20 transition-all duration-300 shadow-sm relative">
-                <Image
-                  src={sub.image}
-                  alt={sub.title}
-                  fill
-                  sizes="(max-width: 768px) 85px, 110px"
-                  priority={index < 4}
-                  className="object-cover group-hover:scale-105 transition-transform duration-300"
-                />
+          {/* 3. Replaced static mockup with dynamic stream array loop map */}
+          {initialSubcategories.map((sub, index) => {
+            const fallbackImage = "https://placehold.co/120x120/f5f5f5/a1a1aa?text=Velvet";
+            return (
+              <div
+                key={sub.id}
+                className="shrink-0 w-24 md:w-28 text-center cursor-pointer group snap-start"
+              >
+                <div className="w-full aspect-square rounded-2xl overflow-hidden bg-muted border border-transparent group-hover:border-muted-foreground/20 transition-all duration-300 shadow-sm relative">
+                  <Image
+                    src={sub.image || fallbackImage}
+                    alt={sub.title}
+                    fill
+                    sizes="(max-width: 768px) 85px, 110px"
+                    priority={index < 4}
+                    className="object-cover group-hover:scale-105 transition-transform duration-300"
+                    unoptimized
+                  />
+                </div>
+                <h3 className="mt-2 text-xs md:text-sm font-medium text-foreground group-hover:text-accent transition-colors line-clamp-1">
+                  {sub.title}
+                </h3>
+                <p className="text-[10px] md:text-xs text-muted-foreground">
+                  Колекція
+                </p>
               </div>
-              <h3 className="mt-2 text-xs md:text-sm font-medium text-foreground group-hover:text-accent transition-colors line-clamp-1">
-                {sub.title}
-              </h3>
-              <p className="text-[10px] md:text-xs text-muted-foreground">
-                {sub.count} од.
-              </p>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 
       {/* --- Main Content Area --- */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 flex flex-col gap-6 overflow-visible">
-        
-        {/* Full-width Horizontal Filters View Layer Row */}
         <div className="w-full shrink-0 overflow-visible">
           <CatalogFilters />
         </div>
 
-        {/* Product Grid Area Container Stacked Nicely Below Filters */}
         <div className="w-full mt-2">
           {localProducts.length === 0 ? (
             <div className="text-center py-16 text-zinc-400 text-sm font-light">
@@ -413,7 +323,6 @@ export function CatalogView({ slug, initialProducts }: CatalogViewProps) {
             </nav>
           </div>
         </div>
-
       </div>
 
       {/* --- Quick View Modal System Layer --- */}
