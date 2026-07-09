@@ -23,7 +23,7 @@ const MEGA_MENU_LINGERIE = {
   columns: [
     {
       image:
-        "https://images.unsplash.com/photo-1616611910515-b779a527c1cd?q=80&w=300&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1551488831-00ddcb6c6bd3?q=80&w=600",
       links: [
         { label: "Бюстгальтери", href: "/catalog/lingerie/bras" },
         { label: "Чокери (на шию)", href: "/catalog/lingerie/chokers" },
