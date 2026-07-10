@@ -2,7 +2,6 @@
 
 import * as React from "react"
 import { ProductCard, Product } from "@/entities/product"
-import { AddToCartButton } from "@/features/cart"
 import {
   Carousel,
   CarouselContent,
@@ -155,17 +154,6 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
                 <ProductCard
                   key={product.id}
                   product={product}
-                  action={
-                    <AddToCartButton
-                      variantId={product.variants?.[0]?.id || product.id}
-                      productId={product.id}
-                      title={product.title}
-                      price={product.variants?.[0]?.price || 0}
-                      image={product.images?.[0]?.url || ""}
-                      color={product.variants?.[0]?.color}
-                      size={product.variants?.[0]?.size}
-                    />
-                  }
                 />
               ))}
             </div>
@@ -178,17 +166,6 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
                     <CarouselItem key={product.id} className="pl-4 basis-3/4 sm:basis-1/2">
                       <ProductCard
                         product={product}
-                        action={
-                          <AddToCartButton
-                            variantId={product.variants?.[0]?.id || product.id}
-                            productId={product.id}
-                            title={product.title}
-                            price={product.variants?.[0]?.price || 0}
-                            image={product.images?.[0]?.url || ""}
-                            color={product.variants?.[0]?.color}
-                            size={product.variants?.[0]?.size}
-                          />
-                        }
                       />
                     </CarouselItem>
                   ))}
