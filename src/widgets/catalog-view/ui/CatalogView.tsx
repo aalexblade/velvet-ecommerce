@@ -3,12 +3,11 @@
 import React, { useState, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Heart, X } from "lucide-react";
-import { Product, ProductColor } from "@/entities/product";
+import { X } from "lucide-react";
+import { Product, ProductCard } from "@/entities/product";
 import { CatalogFilters } from "@/features/filters";
 import { ProductDetailsBlock } from "@/widgets/product-details-block";
 
-// 1. Defined TypeScript interface contract for incoming real subcategory records
 interface Subcategory {
   id: number;
   title: string;
@@ -17,95 +16,23 @@ interface Subcategory {
   parent_id: number | null;
 }
 
-const MOCK_DETAILED_PRODUCT: Product = {
-  id: "mock-bra-1",
-  title: "Корсетний мереживний бра балконет",
-  slug: "korsetnii-merezhaivnii-bra-balkonet",
-  description:
-    "Елегантне поєднання витонченого стилю та ефектного силуету. Завдяки м'яким формованим чашкам з пуш-ап ефектом, модель делікатно піднімає і підкреслює форму грудей, створюючи привабливу лінію декольте.",
-  category_id: 12,
-  is_active: true,
-  created_at: new Date().toISOString(),
-  images: [
-    {
-      id: 1,
-      product_id: "mock-bra-1",
-      variant_id: null,
-      url: "https://images.unsplash.com/photo-1616606145305-1e755225c56c?q=80&w=600",
-      is_main: true,
-      sort_order: 1,
-    },
-  ],
-  variants: [
-    {
-      id: "v-cherry-xs",
-      product_id: "mock-bra-1",
-      sku: "565940",
-      color: "Cherry",
-      size: "XS",
-      price: 650,
-      old_price: null,
-      stock: 5,
-    },
-  ],
-};
-
-const colorToClass = (color: ProductColor): string => {
-  const map: Record<ProductColor, string> = {
-    Black: "bg-zinc-900",
-    Dark: "bg-zinc-800",
-    White: "bg-zinc-100",
-    "Smoky White": "bg-slate-200",
-    Red: "bg-red-500",
-    Cherry: "bg-red-600",
-    Ruby: "bg-rose-700",
-    "Wine Red": "bg-red-900",
-    Magenta: "bg-fuchsia-600",
-    "Cotton Candy": "bg-pink-200",
-    Peach: "bg-orange-200",
-    Lavender: "bg-purple-200",
-    "Pale Purple": "bg-purple-300",
-    Plum: "bg-purple-900",
-    "Dark Violet": "bg-violet-950",
-    Eggplant: "bg-indigo-950",
-    Cream: "bg-amber-50",
-    "Creamy Yellow": "bg-amber-100",
-    "Creamy Velvet": "bg-yellow-50",
-    "Raw Umber": "bg-amber-800",
-    "Mahogany Brown": "bg-amber-900",
-    "Magic Mint": "bg-emerald-200",
-    Emerald: "bg-emerald-700",
-    "Pearl Green": "bg-teal-600",
-    "Azure Blue": "bg-sky-500",
-    "Denim Blue": "bg-blue-600",
-    "Midnight Blue": "bg-blue-950",
-  };
-  return map[color] || "bg-neutral-400";
-};
-
 interface CatalogViewProps {
   slug?: string[];
   initialProducts: Product[];
-  // 2. Added real operational payload array to props definitions
   initialSubcategories: Subcategory[];
 }
 
-export function CatalogView({ slug, initialProducts, initialSubcategories }: CatalogViewProps) {
-  const [favorites, setFavorites] = useState<string[]>([]);
-  const [selectedQuickView, setSelectedQuickView] = useState<Product | null>(null);
+export function CatalogView({
+  slug,
+  initialProducts,
+  initialSubcategories,
+}: CatalogViewProps) {
+  const [selectedQuickView, setSelectedQuickView] = useState<Product | null>(
+    null,
+  );
 
-  const localProducts = useMemo(() => {
-    return [
-      MOCK_DETAILED_PRODUCT,
-      ...initialProducts.filter((p) => p.id !== MOCK_DETAILED_PRODUCT.id),
-    ];
-  }, [initialProducts]);
-
-  const toggleFavorite = (id: string) => {
-    setFavorites((prev) =>
-      prev.includes(id) ? prev.filter((favId) => favId !== id) : [...prev, id],
-    );
-  };
+  // Використовуємо тільки живі продукти з бази даних Supabase без моків
+  const products = useMemo(() => initialProducts, [initialProducts]);
 
   const currentCategoryTitle = useMemo(() => {
     if (!slug || slug.length === 0) return "Бюстгальтери";
@@ -135,11 +62,17 @@ export function CatalogView({ slug, initialProducts, initialSubcategories }: Cat
       {/* --- Breadcrumbs Navigation --- */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
         <nav className="flex text-xs md:text-sm text-muted-foreground whitespace-nowrap overflow-x-auto no-scrollbar">
-          <Link href="/" className="hover:text-foreground transition-colors cursor-pointer">
+          <Link
+            href="/"
+            className="hover:text-foreground transition-colors cursor-pointer"
+          >
             Головна
           </Link>
           <span className="mx-2">/</span>
-          <Link href="/catalog" className="hover:text-foreground transition-colors cursor-pointer">
+          <Link
+            href="/catalog"
+            className="hover:text-foreground transition-colors cursor-pointer"
+          >
             Білизна
           </Link>
           <span className="mx-2">/</span>
@@ -155,16 +88,17 @@ export function CatalogView({ slug, initialProducts, initialSubcategories }: Cat
           {currentCategoryTitle}
         </h1>
         <p className="mt-2 text-sm md:text-base text-muted-foreground max-w-3xl leading-relaxed">
-          Відкрийте для себе ідеальне поєднання витонченого дизайну та бездоганної підтримки.
+          Відкрийте для себе ідеальне поєднання витонченого дизайну та
+          бездоганної підтримки.
         </p>
       </div>
 
       {/* --- Live Subcategories Slider Section --- */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6 md:mt-8">
         <div className="flex gap-4 overflow-x-auto pb-3 pt-1 no-scrollbar snap-x scroll-smooth">
-          {/* 3. Replaced static mockup with dynamic stream array loop map */}
           {initialSubcategories.map((sub, index) => {
-            const fallbackImage = "https://placehold.co/120x120/f5f5f5/a1a1aa?text=Velvet";
+            const fallbackImage =
+              "https://placehold.co/120x120/f5f5f5/a1a1aa?text=Velvet";
             return (
               <div
                 key={sub.id}
@@ -200,108 +134,16 @@ export function CatalogView({ slug, initialProducts, initialSubcategories }: Cat
         </div>
 
         <div className="w-full mt-2">
-          {localProducts.length === 0 ? (
+          {products.length === 0 ? (
             <div className="text-center py-16 text-zinc-400 text-sm font-light">
-              Не знайдено преміальних товарів за вказаними параметрами фільтрації.
+              Не знайдено преміальних товарів за вказаними параметрами
+              фільтрації.
             </div>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-              {localProducts.map((product, idx) => {
-                const isFavorite = favorites.includes(product.id);
-                const mainImage =
-                  product.images?.[0]?.url ||
-                  "https://placehold.co/400x533/f5f5f5/a1a1aa?text=No+Image";
-                const primaryVariant = product.variants?.[0];
-                const currentPrice = primaryVariant?.price || 0;
-                const oldPrice = primaryVariant?.old_price;
-                const uniqueColors = Array.from(
-                  new Set(product.variants?.map((v) => v.color) || []),
-                );
-                const hasDiscount = !!oldPrice;
-
-                return (
-                  <div
-                    key={product.id}
-                    className="group flex flex-col bg-white rounded-xl border border-zinc-200 shadow-sm overflow-hidden transition-all duration-300 hover:shadow-md"
-                  >
-                    <div className="relative w-full aspect-3/4 bg-neutral-100 overflow-hidden">
-                      <Image
-                        src={mainImage}
-                        alt={product.title}
-                        fill
-                        sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
-                        priority={idx < 4}
-                        className="object-cover object-center group-hover:scale-105 transition-transform duration-500"
-                        unoptimized
-                      />
-
-                      <div className="absolute top-3 left-3 flex flex-col gap-1 z-10">
-                        {hasDiscount ? (
-                          <span className="text-[10px] font-bold tracking-wider uppercase px-2.5 py-1 rounded-md text-white bg-[#C8205C]">
-                            Акція
-                          </span>
-                        ) : idx % 3 === 0 ? (
-                          <span className="text-[10px] font-bold tracking-wider uppercase px-2.5 py-1 rounded-md text-zinc-900 bg-white border border-zinc-200 shadow-xs">
-                            Новинка
-                          </span>
-                        ) : null}
-                      </div>
-
-                      <div className="hidden lg:flex absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 items-end justify-center pb-6 z-10">
-                        <button
-                          onClick={() => setSelectedQuickView(product)}
-                          className="flex items-center justify-center bg-white/95 text-zinc-900 font-semibold text-sm px-6 py-2.5 rounded-lg shadow-sm hover:bg-white hover:text-[#C8205C] transition-all transform translate-y-2 group-hover:translate-y-0 cursor-pointer border border-zinc-200"
-                        >
-                          Швидкий перегляд
-                        </button>
-                      </div>
-                    </div>
-
-                    <div className="p-4 flex flex-col grow">
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center gap-2">
-                          {uniqueColors.map((colorName, cIdx) => (
-                            <span
-                              key={cIdx}
-                              title={colorName}
-                              className={`w-5 h-5 rounded-md border border-zinc-300 shadow-xs cursor-pointer hover:scale-110 transition-transform ${colorToClass(colorName as ProductColor)}`}
-                            />
-                          ))}
-                        </div>
-                        <button
-                          onClick={() => toggleFavorite(product.id)}
-                          className="text-zinc-400 hover:text-[#C8205C] transition-colors p-1 cursor-pointer"
-                        >
-                          <Heart
-                            className={`w-5 h-5 transition-all ${isFavorite ? "fill-[#C8205C] text-[#C8205C] scale-110" : ""}`}
-                          />
-                        </button>
-                      </div>
-
-                      <h2 className="text-sm font-semibold text-zinc-900 line-clamp-2 group-hover:text-[#C8205C] transition-colors">
-                        {product.title}
-                      </h2>
-
-                      <div className="mt-2 flex items-baseline gap-2 flex-wrap text-sm">
-                        {hasDiscount ? (
-                          <>
-                            <span className="font-bold text-[#C8205C]">
-                              {currentPrice} UAH
-                            </span>
-                            <span className="text-xs text-zinc-500 line-through decoration-[#C8205C]/40">
-                              {oldPrice} UAH
-                            </span>
-                          </>
-                        ) : (
-                          <span className="font-bold text-zinc-900">
-                            {currentPrice} UAH
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-8">
+              {products.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
             </div>
           )}
 
