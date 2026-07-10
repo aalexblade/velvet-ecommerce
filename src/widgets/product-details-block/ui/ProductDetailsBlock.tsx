@@ -7,9 +7,7 @@ import useEmblaCarousel from "embla-carousel-react";
 import { Heart, Minus, Plus, Star, Ruler, Check, X } from "lucide-react";
 import { cn, getProductColorClass } from "@/shared/lib";
 import { Product, ProductColor } from "@/entities/product/model/types";
-// Import cart state hook according to FSD architecture guidelines
 import { useCartStore } from "@/features/cart/model/cartStore";
-// Import the size calculator feature component safely
 import { SizeCalculatorForm } from "@/features/product-size-calculator/ui/SizeCalculatorForm";
 
 interface ProductDetailsBlockProps {
@@ -26,20 +24,20 @@ export const ProductDetailsBlock: React.FC<ProductDetailsBlockProps> = ({ produc
   const uniqueSizes = useMemo(() => Array.from(new Set(product.variants.map((v) => v.size))), [product.variants]);
 
   const [selectedColor, setSelectedColor] = useState<ProductColor>(uniqueColors[0] || "White");
-  
-  const initialAvailableVariants = useMemo(() => product.variants.filter((v) => v.color === uniqueColors[0]), [product.variants, uniqueColors]);
-  const initialSize = useMemo(() => {
-    const firstAvailable = initialAvailableVariants.find((v) => v.stock > 0);
-    return firstAvailable ? firstAvailable.size : initialAvailableVariants[0]?.size || "";
-  }, [initialAvailableVariants]);
 
-  const [selectedSize, setSelectedSize] = useState(initialSize);
+  // Helper function to derive the first available size for a given color during runtime transitions
+  const getFirstAvailableSize = useCallback((color: ProductColor) => {
+    const nextVariants = product.variants.filter((v) => v.color === color);
+    const firstAvailable = nextVariants.find((v) => v.stock > 0);
+    return firstAvailable ? firstAvailable.size : nextVariants[0]?.size || "";
+  }, [product.variants]);
+
+  // Safely initialize state directly during the initial render without relying on client effects
+  const [selectedSize, setSelectedSize] = useState(() => getFirstAvailableSize(uniqueColors[0] || "White"));
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState<TabType>("description");
   const [isWishlist, setIsWishlist] = useState(false);
   const [isAdded, setIsAdded] = useState(false);
-  
-  // State controller for managing the size calculator modal viewport layer
   const [isSizeModalOpen, setIsSizeModalOpen] = useState(false);
 
   const availableVariantsForColor = useMemo(() => {
@@ -50,21 +48,22 @@ export const ProductDetailsBlock: React.FC<ProductDetailsBlockProps> = ({ produc
     return product.variants.find((v) => v.color === selectedColor && v.size === selectedSize) || product.variants[0];
   }, [product.variants, selectedColor, selectedSize]);
 
+  // Perform operational atomic transitions directly inside the interaction handler
   const handleColorChange = (color: ProductColor) => {
     setSelectedColor(color);
     setQuantity(1);
     setIsAdded(false);
     
-    const nextVariants = product.variants.filter((v) => v.color === color);
-    const sizeExistsInNewColor = nextVariants.some((v) => v.size === selectedSize && v.stock > 0);
-    
-    if (!sizeExistsInNewColor) {
-      const firstAvailable = nextVariants.find((v) => v.stock > 0);
-      setSelectedSize(firstAvailable ? firstAvailable.size : nextVariants[0]?.size || "");
-    }
+    const nextSize = getFirstAvailableSize(color);
+    setSelectedSize(nextSize);
   };
 
-  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true, duration: 25 });
+  // 1. Ініціалізуємо Embla з точними параметрами
+  const [emblaRef, emblaApi] = useEmblaCarousel({ 
+    loop: true, 
+    duration: 25,
+    watchSlides: true
+  });
   const [selectedIndex, setSelectedIndex] = useState(0);
 
   const onSelect = useCallback(() => {
@@ -87,17 +86,16 @@ export const ProductDetailsBlock: React.FC<ProductDetailsBlockProps> = ({ produc
   }, [emblaApi]);
 
   useEffect(() => {
-    if (!emblaApi) return;
+    if (!emblaApi || !currentVariant) return;
     const variantImageIndex = product.images.findIndex((img) => img.variant_id === currentVariant?.id);
     if (variantImageIndex !== -1) {
       emblaApi.scrollTo(variantImageIndex);
     }
-  }, [selectedColor, currentVariant, emblaApi, product.images]);
+  }, [currentVariant, emblaApi, product.images]);
 
-  const imagesToRender = product.images.length > 0 ? product.images : [{ url: "/placeholder-product.webp", id: 0 }];
+  const imagesToRender = product.images.length > 0 ? product.images : [{ url: "/placeholder-product.webp", id: 0, product_id: "0", variant_id: null, is_main: true, sort_order: 1 }];
   const isOutOfStock = !currentVariant || currentVariant.stock === 0;
 
-  // Intercept checkout click payload pipeline
   const handleAddToCart = () => {
     if (isOutOfStock || !currentVariant) return;
 
@@ -105,7 +103,6 @@ export const ProductDetailsBlock: React.FC<ProductDetailsBlockProps> = ({ produc
       || product.images.find((img) => img.is_main)?.url 
       || imagesToRender[0].url;
 
-    // Dispatches well-formed line item payload parameters into cart store state machine
     addToCart({
       variantId: currentVariant.id,
       productId: product.id,
@@ -121,12 +118,9 @@ export const ProductDetailsBlock: React.FC<ProductDetailsBlockProps> = ({ produc
     setTimeout(() => setIsAdded(false), 2000);
   };
 
-  // Handle auto-selection when the size calculator suggests a specific valid metric
   const handleSizeCalculated = (calculatedSize: string) => {
-    // If the suggested size exists in the product options, apply it directly
     if (uniqueSizes.includes(calculatedSize)) {
       setSelectedSize(calculatedSize);
-      // Optional: Add a minor microtask delay before closing for better feedback UX
       setTimeout(() => setIsSizeModalOpen(false), 800);
     }
   };
@@ -135,7 +129,7 @@ export const ProductDetailsBlock: React.FC<ProductDetailsBlockProps> = ({ produc
     <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 py-2 items-start text-zinc-900">
       
       {/* 📸 LEFT GALLERY ZONE */}
-      <div className="flex flex-col-reverse md:flex-row lg:col-span-7 gap-4 h-full">
+      <div className="flex flex-col-reverse md:flex-row lg:col-span-7 gap-4 h-full w-full overflow-hidden">
         {imagesToRender.length > 1 && (
           <div className="hidden md:flex flex-col gap-2 shrink-0 w-16 overflow-y-auto no-scrollbar max-h-136">
             {imagesToRender.map((img, idx) => (
@@ -153,23 +147,25 @@ export const ProductDetailsBlock: React.FC<ProductDetailsBlockProps> = ({ produc
           </div>
         )}
 
-        <div className="relative aspect-3/4 flex-1 bg-zinc-50 rounded-lg overflow-hidden border border-zinc-100">
-          <div className="w-full h-full overflow-hidden" ref={emblaRef}>
-            <div className="flex h-full touch-pan-y">
-              {imagesToRender.map((img, idx) => (
-                <div className="relative flex-full min-w-0 h-full" key={`main-slide-${img.id || idx}`}>
-                  <Image
-                    src={img.url}
-                    alt={product.title}
-                    fill
-                    className="object-cover object-center"
-                    sizes="(max-width: 1024px) 100vw, 50vw"
-                    priority={idx === 0}
-                    unoptimized
-                  />
-                </div>
-              ))}
-            </div>
+        {/* 🛠️ ЗМІНИ ТУТ: Загортаємо в overflow-hidden viewport та додаємо чіткі flex-параметри для слайдів */}
+        <div className="relative aspect-3/4 flex-1 bg-zinc-50 rounded-lg overflow-hidden border border-zinc-100" ref={emblaRef}>
+          <div className="flex h-full w-full min-w-0 touch-pan-y">
+            {imagesToRender.map((img, idx) => (
+              <div 
+                className="relative flex-[0_0_100%] min-w-0 h-full w-full aspect-3/4" 
+                key={`main-slide-${img.id || idx}`}
+              >
+                <Image
+                  src={img.url}
+                  alt={product.title}
+                  fill
+                  className="object-cover object-center pointer-events-none"
+                  sizes="(max-width: 1024px) 100vw, 50vw"
+                  priority={idx === 0}
+                  unoptimized
+                />
+              </div>
+            ))}
           </div>
         </div>
       </div>
@@ -182,7 +178,7 @@ export const ProductDetailsBlock: React.FC<ProductDetailsBlockProps> = ({ produc
           <h1 className="text-2xl font-medium tracking-tight text-zinc-900 leading-tight">
             {product.title}
           </h1>
-          <span className="text-sm text-zinc-950 font-normal">
+          <span className="text-sm text-zinc-500 font-normal">
             Арт. {currentVariant?.sku || "565940"}
           </span>
         </div>
@@ -191,7 +187,7 @@ export const ProductDetailsBlock: React.FC<ProductDetailsBlockProps> = ({ produc
         <div className="flex items-center gap-2 text-sm">
           <div className="flex items-center text-amber-400">
             {[...Array(5)].map((_, i) => (
-              <Star key={i} className={cn("w-4 h-4 fill-current", i < 3 ? "text-amber-400" : "text-zinc-200 fill-zinc-200")} />
+              <Star key={i} className={cn("w-4 h-4 fill-current", i < 4 ? "text-amber-400" : "text-zinc-200 fill-zinc-200")} />
             ))}
           </div>
           <span className="text-zinc-500 text-xs">(10) відгуків</span>
@@ -254,7 +250,7 @@ export const ProductDetailsBlock: React.FC<ProductDetailsBlockProps> = ({ produc
           </div>
         )}
 
-        {/* Size Calculator Trigger: Opens modal layer smoothly upon click stream intercept */}
+        {/* Size Calculator Trigger */}
         <button 
           onClick={() => setIsSizeModalOpen(true)}
           className="flex items-center gap-2 text-xs text-[#C8205C] hover:underline cursor-pointer font-medium -mt-1 w-max"
@@ -378,21 +374,15 @@ export const ProductDetailsBlock: React.FC<ProductDetailsBlockProps> = ({ produc
 
       </div>
 
-      {/* ==========================================
-          💎 PREMIUM MODAL OVERLAY: SIZE CALCULATOR
-          ========================================== */}
+      {/* 💎 PREMIUM MODAL OVERLAY: SIZE CALCULATOR */}
       {isSizeModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 animate-in fade-in duration-200">
-          {/* Backdrop Dimmer Shield */}
           <div 
             onClick={() => setIsSizeModalOpen(false)}
             className="absolute inset-0 bg-black/40 backdrop-blur-xs transition-opacity" 
           />
           
-          {/* Modal Surface Canvas Box */}
           <div className="relative bg-white w-full max-w-lg rounded-2xl p-6 md:p-8 shadow-2xl border border-zinc-100 z-10 flex flex-col gap-5 animate-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto no-scrollbar font-sans">
-            
-            {/* Header Stage */}
             <div className="flex justify-between items-start">
               <div className="flex flex-col gap-1">
                 <h3 className="text-lg font-bold uppercase tracking-wider text-zinc-900">
@@ -412,10 +402,7 @@ export const ProductDetailsBlock: React.FC<ProductDetailsBlockProps> = ({ produc
             </div>
 
             <hr className="border-zinc-100 -mx-6 md:-mx-8" />
-
-            {/* Embedded Size Calculator Interactive Form Core */}
             <SizeCalculatorForm onSizeCalculated={handleSizeCalculated} />
-
           </div>
         </div>
       )}
