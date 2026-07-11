@@ -17,7 +17,7 @@ import { useCartStore } from "@/features/cart/model/cartStore";
 function CheckoutView() {
   const items = useCartStore((state) => state.items);
 
-  // Обчислюємо загальну вартість
+  // Обчислюємо загальну вартість товарів
   const totalPrice = useMemo(() => {
     return items.reduce((acc, item) => acc + item.price * item.quantity, 0);
   }, [items]);
@@ -28,7 +28,7 @@ function CheckoutView() {
   // Стан, якщо кошик порожній, з урахуванням висоти хедера (pt-32)
   if (items.length === 0) {
     return (
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-20 text-center font-sans animate-in fade-in duration-300">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-20 flex flex-col items-center justify-center text-center font-sans animate-in fade-in duration-300">
         <div className="w-12 h-12 bg-zinc-50 border border-zinc-100 rounded-full flex items-center justify-center text-zinc-400 mx-auto mb-4">
           <ShoppingBag className="w-5 h-5" />
         </div>
@@ -49,7 +49,7 @@ function CheckoutView() {
   }
 
   return (
-    <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-16 font-sans text-zinc-900 animate-in fade-in duration-300">
+    <main className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-16 font-sans text-zinc-900 animate-in fade-in duration-300">
       
       {/* --- КНОПКА ПОВЕРНЕННЯ ДО КОШИКА --- */}
       <div className="mb-6">
@@ -62,14 +62,14 @@ function CheckoutView() {
         </Link>
       </div>
 
-      <h1 className="text-2xl md:text-3xl font-bold tracking-tight uppercase mb-8">
+      <h1 className="text-2xl md:text-3xl font-bold tracking-tight uppercase mb-8 text-left">
         Оформлення замовлення
       </h1>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
+      <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
         
-        {/* 📝 ЛІВА ЗОНА: ФОРМА ДАНИХ КЛІЄНТА (7 колонок) */}
-        <div className="lg:col-span-7 flex flex-col gap-8">
+        {/* 📝 ЛІВА ЗОНА: ФОРМА ДАНИХ КЛІЄНТА (Займає 7 колонок із 12) */}
+        <div className="w-full lg:col-span-7 flex flex-col gap-8">
           
           {/* Секція 1: Контактні дані */}
           <div className="flex flex-col gap-4">
@@ -207,89 +207,93 @@ function CheckoutView() {
           </div>
         </div>
 
-        {/* 📊 ПРАВА ЗОНА: ОГЛЯД ЗАМОВЛЕННЯ (5 колонок) */}
-        <div className="lg:col-span-5 bg-zinc-50 border border-zinc-100 rounded-2xl p-6 md:p-8 lg:sticky lg:top-28">
-          <h2 className="text-sm font-bold uppercase tracking-wider text-zinc-900 mb-6 pb-2 border-b border-zinc-200">
-            Ваше замовлення
-          </h2>
+        {/* 📊 ПРАВА ЗОНА: ОГЛЯД ЗАМОВЛЕННЯ (Займає 5 колонок із 12) */}
+        {/* Загорнули в ізольований flex-контейнер з sticky без розтягування h-full */}
+        <div className="w-full lg:col-span-5 flex flex-col lg:sticky lg:top-28">
+          <div className="w-full bg-zinc-50 border border-zinc-100 rounded-2xl p-6 md:p-8 flex flex-col gap-6">
+            <h2 className="text-sm font-bold uppercase tracking-wider text-zinc-900 pb-2 border-b border-zinc-200">
+              Ваше замовлення
+            </h2>
 
-          {/* Список товарів у замовленні */}
-          <div className="flex flex-col gap-4 max-h-48 overflow-y-auto pr-1 no-scrollbar mb-6 border-b border-zinc-200/60 pb-4">
-            {items.map((item) => (
-              <div
-                key={item.variantId}
-                className="flex items-center gap-3 justify-between text-xs"
-              >
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="relative aspect-3/4 w-10 bg-zinc-200 rounded-md overflow-hidden shrink-0 border border-zinc-200/40">
-                    <Image
-                      src={item.image}
-                      alt={item.title}
-                      fill
-                      className="object-cover"
-                      unoptimized
-                    />
+            {/* Список товарів */}
+            <div className="flex flex-col gap-4 max-h-48 overflow-y-auto pr-1 no-scrollbar border-b border-zinc-200/60 pb-4">
+              {items.map((item) => (
+                <div
+                  key={item.variantId}
+                  className="flex items-center gap-3 justify-between text-xs"
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="relative aspect-3/4 w-10 bg-zinc-200 rounded-md overflow-hidden shrink-0 border border-zinc-200/40">
+                      <Image
+                        src={item.image}
+                        alt={item.title}
+                        fill
+                        className="object-cover"
+                        unoptimized
+                      />
+                    </div>
+                    <div className="flex flex-col min-w-0">
+                      <span className="font-semibold text-zinc-900 truncate">
+                        {item.title}
+                      </span>
+                      <span className="text-[10px] text-zinc-400 font-light mt-0.5">
+                        Розмір: {item.size} • Кіл-ть: {item.quantity}
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex flex-col min-w-0">
-                    <span className="font-semibold text-zinc-900 truncate">
-                      {item.title}
-                    </span>
-                    <span className="text-[10px] text-zinc-400 font-light mt-0.5">
-                      Розмір: {item.size} • Кіл-ть: {item.quantity}
-                    </span>
-                  </div>
+                  <span className="font-bold text-zinc-900 shrink-0 ml-2">
+                    {(item.price * item.quantity).toLocaleString("uk-UA")} UAH
+                  </span>
                 </div>
-                <span className="font-bold text-zinc-900 shrink-0 ml-2">
-                  {(item.price * item.quantity).toLocaleString("uk-UA")} UAH
+              ))}
+            </div>
+
+            {/* Калькуляція підсумку */}
+            <div className="flex flex-col gap-3.5 text-sm border-b border-zinc-200 pb-5">
+              <div className="flex justify-between items-center">
+                <span className="text-zinc-500 font-light">Вартість товарів</span>
+                <span className="font-medium text-zinc-900">
+                  {totalPrice.toLocaleString("uk-UA")} UAH
                 </span>
               </div>
-            ))}
+              <div className="flex justify-between items-center">
+                <span className="text-zinc-500 font-light">Доставка</span>
+                <span className="font-medium text-zinc-900">
+                  {shippingCost === 0 ? "БЕЗКОШТОВНО" : `${shippingCost} UAH`}
+                </span>
+              </div>
+              <div className="flex justify-between items-baseline pt-2">
+                <span className="text-sm font-bold uppercase text-zinc-900">
+                  До сплати
+                </span>
+                <span className="text-lg font-black text-[#C8205C]">
+                  {grandTotal.toLocaleString("uk-UA")} UAH
+                </span>
+              </div>
+            </div>
+
+            {/* Кнопка підтвердження */}
+            <button
+              type="submit"
+              className="w-full h-12 bg-[#C8205C] hover:bg-[#a6174a] text-white text-xs font-bold uppercase tracking-wider rounded-md shadow-sm transition-all flex items-center justify-center gap-2 cursor-pointer"
+            >
+              <ShieldCheck className="w-4 h-4" />
+              <span>Підтвердити замовлення</span>
+            </button>
+
+            <p className="text-[10px] text-zinc-400 font-light leading-relaxed text-center">
+              Здійснюючи покупку, ви підтверджуєте свою згоду та прийняття умов 
+              публічної оферти та правил обслуговування клієнтів нашого бренду.
+            </p>
           </div>
-
-          {/* Калькуляція підсумку */}
-          <div className="flex flex-col gap-3.5 text-sm mb-6 border-b border-zinc-200 pb-5">
-            <div className="flex justify-between items-center">
-              <span className="text-zinc-500 font-light">Вартість товарів</span>
-              <span className="font-medium text-zinc-900">
-                {totalPrice.toLocaleString("uk-UA")} UAH
-              </span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-zinc-500 font-light">Доставка</span>
-              <span className="font-medium text-zinc-900">
-                {shippingCost === 0 ? "БЕЗКОШТОВНО" : `${shippingCost} UAH`}
-              </span>
-            </div>
-            <div className="flex justify-between items-baseline pt-2">
-              <span className="text-sm font-bold uppercase text-zinc-900">
-                До сплати
-              </span>
-              <span className="text-lg font-black text-[#C8205C]">
-                {grandTotal.toLocaleString("uk-UA")} UAH
-              </span>
-            </div>
-          </div>
-
-          {/* Фінальна кнопка підтвердження */}
-          <button
-            type="submit"
-            className="w-full h-12 bg-[#C8205C] hover:bg-[#a6174a] text-white text-xs font-bold uppercase tracking-wider rounded-md shadow-sm transition-all flex items-center justify-center gap-2 cursor-pointer"
-          >
-            <ShieldCheck className="w-4 h-4" />
-            <span>Підтвердити замовлення</span>
-          </button>
-
-          <p className="text-[10px] text-zinc-400 font-light leading-relaxed text-center mt-4">
-            Здійснюючи покупку, ви підтверджуєте свою згоду та прийняття умов 
-            публічної оферти та правил обслуговування клієнтів нашого бренду.
-          </p>
         </div>
+
       </div>
     </main>
   );
 }
 
-// Повністю захищений експорт без SSR для стабільної Next.js App Router збірки
+// Повністю захищений експорт без SSR
 const DynamicCheckoutPage = dynamic(() => Promise.resolve(CheckoutView), {
   ssr: false,
   loading: () => (
