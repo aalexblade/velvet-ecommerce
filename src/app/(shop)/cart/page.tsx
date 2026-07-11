@@ -50,9 +50,9 @@ function CartView() {
         Кошик покупок
       </h1>
 
-      {/* Головна двоколонкова сітка: чіткий розподіл простору на десктопі */}
+      {/* Головна двоколонкова сітка */}
       <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
-        {/* 🛒 ЛІВА ЗОНА: СПИСОК ТОВАРІВ (Займає 7 колонок із 12) */}
+        {/* 🛒 ЛІВА ЗОНА: СПИСОК ТОВАРІВ (Займає 7 колонок) */}
         <div className="w-full lg:col-span-7 flex flex-col gap-6">
           {items.map((item) => (
             <div
@@ -137,63 +137,66 @@ function CartView() {
           ))}
         </div>
 
-        {/* 📊 ПРАВА ЗОНА: БЛОК ПІДСУМКУ ЗАМОВЛЕННЯ (Займає 5 колонок із 12) */}
-        <div className="w-full lg:col-span-5 bg-zinc-50 border border-zinc-100 rounded-2xl p-6 md:p-8 lg:sticky lg:top-28">
-          <h2 className="text-sm font-bold uppercase tracking-wider text-zinc-900 mb-6 pb-2 border-b border-zinc-200">
-            Підсумок замовлення
-          </h2>
+        {/* 📊 ПРАВА ЗОНА: БЛОК ПІДСУМКУ ЗАМОВЛЕННЯ (Займає 5 колонок) */}
+        {/* Прибрали зайву висоту, зафіксували чітку структуру без розтягування h-full */}
+        <div className="w-full lg:col-span-5 flex flex-col lg:sticky lg:top-28">
+          <div className="w-full bg-zinc-50 border border-zinc-100 rounded-2xl p-6 md:p-8 flex flex-col gap-6">
+            <h2 className="text-sm font-bold uppercase tracking-wider text-zinc-900 pb-2 border-b border-zinc-200">
+              Підсумок замовлення
+            </h2>
 
-          <div className="flex flex-col gap-4 text-sm mb-6">
-            <div className="flex justify-between items-center">
-              <span className="text-zinc-500">Вартість товарів</span>
-              <span className="font-semibold text-zinc-900">
-                {totalPrice.toLocaleString("uk-UA")} UAH
-              </span>
-            </div>
-
-            <div className="flex flex-col gap-1.5 pb-4 border-b border-zinc-200">
+            <div className="flex flex-col gap-4 text-sm">
               <div className="flex justify-between items-center">
-                <span className="text-zinc-500">Доставка</span>
+                <span className="text-zinc-500">Вартість товарів</span>
                 <span className="font-semibold text-zinc-900">
-                  {shippingCost === 0 ? "БЕЗКОШТОВНО" : `${shippingCost} UAH`}
+                  {totalPrice.toLocaleString("uk-UA")} UAH
                 </span>
               </div>
-              {shippingCost > 0 && (
-                <p className="text-[11px] text-zinc-400 font-light leading-snug">
-                  Додайте товарів ще на{" "}
-                  <strong className="font-medium text-[#C8205C]">
-                    {(2000 - totalPrice).toLocaleString("uk-UA")} UAH
-                  </strong>
-                  , щоб отримати безкоштовну доставку.
-                </p>
-              )}
+
+              <div className="flex flex-col gap-1.5 pb-4 border-b border-zinc-200">
+                <div className="flex justify-between items-center">
+                  <span className="text-zinc-500">Доставка</span>
+                  <span className="font-semibold text-zinc-900">
+                    {shippingCost === 0 ? "БЕЗКОШТОВНО" : `${shippingCost} UAH`}
+                  </span>
+                </div>
+                {shippingCost > 0 && (
+                  <p className="text-[11px] text-zinc-400 font-light leading-snug">
+                    Додайте товарів ще на{" "}
+                    <strong className="font-medium text-[#C8205C]">
+                      {(2000 - totalPrice).toLocaleString("uk-UA")} UAH
+                    </strong>
+                    , щоб отримати безкоштовну доставку.
+                  </p>
+                )}
+              </div>
+
+              <div className="flex justify-between items-baseline pt-2">
+                <span className="text-base font-bold uppercase text-zinc-900">
+                  Загалом
+                </span>
+                <span className="text-xl font-black text-[#C8205C]">
+                  {grandTotal.toLocaleString("uk-UA")} UAH
+                </span>
+              </div>
             </div>
 
-            <div className="flex justify-between items-baseline pt-2">
-              <span className="text-base font-bold uppercase text-zinc-900">
-                Загалом
-              </span>
-              <span className="text-xl font-black text-[#C8205C]">
-                {grandTotal.toLocaleString("uk-UA")} UAH
-              </span>
-            </div>
-          </div>
-
-          <Link
-            href="/checkout"
-            className="w-full h-12 bg-[#C8205C] hover:bg-[#a6174a] text-white text-xs font-bold uppercase tracking-wider rounded-md shadow-sm transition-all flex items-center justify-center gap-2 cursor-pointer group"
-          >
-            <span>Оформити замовлення</span>
-            <ArrowRight className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" />
-          </Link>
-
-          <div className="mt-6 text-center">
             <Link
-              href="/catalog"
-              className="text-xs text-zinc-400 hover:text-zinc-900 transition-colors font-medium underline underline-offset-4 cursor-pointer"
+              href="/checkout"
+              className="w-full h-12 bg-[#C8205C] hover:bg-[#a6174a] text-white text-xs font-bold uppercase tracking-wider rounded-md shadow-sm transition-all flex items-center justify-center gap-2 cursor-pointer group mt-2"
             >
-              Продовжити покупки
+              <span>Оформити замовлення</span>
+              <ArrowRight className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" />
             </Link>
+
+            <div className="text-center">
+              <Link
+                href="/catalog"
+                className="text-xs text-zinc-400 hover:text-zinc-900 transition-colors font-medium underline underline-offset-4 cursor-pointer"
+              >
+                Продовжити покупки
+              </Link>
+            </div>
           </div>
         </div>
       </div>
@@ -201,7 +204,7 @@ function CartView() {
   );
 }
 
-// Завантажуємо кошик виключно на клієнті для запобігання помилок гідратації
+// Завантажуємо кошик виключно на клієнті
 const DynamicCartPage = dynamic(() => Promise.resolve(CartView), {
   ssr: false,
   loading: () => (
