@@ -23,7 +23,7 @@ function CartView() {
   // Стан порожнього кошика
   if (items.length === 0) {
     return (
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 flex flex-col items-center justify-center text-center font-sans animate-in fade-in duration-300">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 md:pt-28 pb-20 flex flex-col items-center justify-center text-center font-sans animate-in fade-in duration-300">
         <div className="w-16 h-16 bg-zinc-50 border border-zinc-100 rounded-full flex items-center justify-center text-zinc-400 mb-6 shadow-xs">
           <ShoppingBag className="w-6 h-6" />
         </div>
@@ -44,7 +44,7 @@ function CartView() {
   }
 
   return (
-    <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 font-sans text-zinc-900 animate-in fade-in duration-300">
+    <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 md:pt-28 pb-8 font-sans text-zinc-900 animate-in fade-in duration-300">
       <h1 className="text-2xl md:text-3xl font-bold tracking-tight uppercase mb-8">
         Кошик покупок
       </h1>
@@ -181,7 +181,7 @@ function CartView() {
   );
 }
 
-// Рендеримо кошик виключно на клієнті, що повністю знімає проблему помилок гідратації без використання useEffect
+// Рендеримо кошик виключно на клієнті, що повністю знімає проблему помилок гідратації
 const DynamicCartPage = dynamic(() => Promise.resolve(CartView), {
   ssr: false,
   loading: () => (
