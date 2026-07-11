@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { usePathname } from "next/navigation"; // 🌟 Імпортуємо хук для відстеження URL
 import {
   Search,
   Heart,
@@ -67,10 +68,14 @@ const NAV_LINKS = [
 ];
 
 export function Header() {
+  const pathname = usePathname(); // 🌟 Отримуємо поточний шлях
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMobileLingerieOpen, setIsMobileLingerieOpen] = useState(false);
   const [isMegaHovered, setIsMegaHovered] = useState(false);
+
+  // Перевіряємо, чи користувач знаходиться на сторінці кошика
+  const isCartPage = pathname === "/cart";
 
   // Fetch reactive items stream from Zustand store state machine
   const cartItems = useCartStore((state) => state.items);
@@ -96,7 +101,8 @@ export function Header() {
       <header
         className={cn(
           "fixed top-0 left-0 right-0 z-50 transition-all duration-300 select-none",
-          isScrolled || isMegaHovered
+          // 🌟 Додаємо перевірку isCartPage. Якщо це кошик — шапка завжди видима й темна
+          isScrolled || isMegaHovered || isCartPage
             ? "bg-background text-foreground shadow-sm border-b border-muted py-3"
             : "bg-transparent text-white py-5",
         )}
@@ -178,11 +184,6 @@ export function Header() {
               >
                 <ShoppingBag size={20} />
 
-                {/* 
-                  Fixed cascading render linter exception: 
-                  Render items counter overlay only when the value evaluates directly to > 0 
-                  safely handled via Next.js client-side Zustand synchronization streams
-                */}
                 {totalCartCount > 0 && (
                   <span className="absolute -top-0.5 -right-0.5 min-w-4.5 h-4.5 bg-[#C8205C] text-white text-[9px] font-bold rounded-full flex items-center justify-center px-1 border-2 border-white shadow-xs">
                     {totalCartCount}
