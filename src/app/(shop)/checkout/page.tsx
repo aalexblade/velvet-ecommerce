@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useMemo } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import dynamic from "next/dynamic";
 import {
   ArrowLeft,
   CreditCard,
@@ -12,116 +13,98 @@ import {
 } from "lucide-react";
 import { useCartStore } from "@/features/cart/model/cartStore";
 
-export default function CheckoutPage() {
-  // Safe token state to bypass raw synchronous layout effect linter rules
-  const [renderToken, setRenderToken] = useState("loading");
-
-  // Extract reactive items collection matrix directly from the Zustand store
+// Головний внутрішній компонент оформлення замовлення
+function CheckoutView() {
   const items = useCartStore((state) => state.items);
 
-  // Defer state update to the next execution tick to avoid cascading render cycles
-  useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      setRenderToken("ready");
-    }, 0);
+  // Обчислюємо загальну вартість
+  const totalPrice = useMemo(() => {
+    return items.reduce((acc, item) => acc + item.price * item.quantity, 0);
+  }, [items]);
 
-    return () => clearTimeout(timeoutId);
-  }, []);
-
-  // Compute live subtotal aggregation safely across the active store item nodes
-  const totalPrice = items.reduce(
-    (acc, item) => acc + item.price * item.quantity,
-    0,
-  );
   const shippingCost = totalPrice >= 2000 ? 0 : 150;
   const grandTotal = totalPrice + shippingCost;
 
-  // Intercept blank state conditions before building fields
-  if (renderToken === "loading") {
-    return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center text-zinc-400 font-sans">
-        Initializing secure checkout layer...
-      </div>
-    );
-  }
-
-  // Fallback state if user hits /checkout with an empty cart
+  // Стан, якщо кошик порожній, з урахуванням висоти хедера (pt-32)
   if (items.length === 0) {
     return (
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center font-sans animate-in fade-in duration-300">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-20 text-center font-sans animate-in fade-in duration-300">
         <div className="w-12 h-12 bg-zinc-50 border border-zinc-100 rounded-full flex items-center justify-center text-zinc-400 mx-auto mb-4">
           <ShoppingBag className="w-5 h-5" />
         </div>
         <h2 className="text-lg font-bold text-zinc-900 uppercase tracking-wider mb-2">
-          No Items For Checkout
+          Немає товарів для оформлення
         </h2>
         <p className="text-sm text-zinc-500 mb-6">
-          Please add beautiful items to your shopping bag before ordering.
+          Будь ласка, додайте вишукані товари до вашого кошика перед покупкою.
         </p>
         <Link
           href="/catalog"
           className="inline-block bg-[#C8205C] hover:bg-[#a6174a] text-white text-xs font-bold uppercase tracking-wider px-6 py-3 rounded-md transition-all cursor-pointer"
         >
-          Go To Catalog
+          Перейти до каталогу
         </Link>
       </main>
     );
   }
 
   return (
-    <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 font-sans text-zinc-900 animate-in fade-in duration-300">
-      {/* --- BACK NAVIGATION ROUTE BAR --- */}
+    <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-16 font-sans text-zinc-900 animate-in fade-in duration-300">
+      
+      {/* --- КНОПКА ПОВЕРНЕННЯ ДО КОШИКА --- */}
       <div className="mb-6">
         <Link
           href="/cart"
           className="inline-flex items-center gap-2 text-xs font-medium text-zinc-500 hover:text-zinc-900 transition-colors group cursor-pointer"
         >
           <ArrowLeft className="w-3.5 h-3.5 transform group-hover:-translate-x-0.5 transition-transform" />
-          <span>Return to Shopping Bag</span>
+          <span>Повернутися до кошика</span>
         </Link>
       </div>
 
       <h1 className="text-2xl md:text-3xl font-bold tracking-tight uppercase mb-8">
-        Secure Checkout
+        Оформлення замовлення
       </h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
-        {/* 📝 LEFT ZONE: CUSTOMER INFORMATION INPUT FORM */}
+        
+        {/* 📝 ЛІВА ЗОНА: ФОРМА ДАНИХ КЛІЄНТА (7 колонок) */}
         <div className="lg:col-span-7 flex flex-col gap-8">
-          {/* Section 1: Contact Details */}
+          
+          {/* Секція 1: Контактні дані */}
           <div className="flex flex-col gap-4">
             <h2 className="text-sm font-bold uppercase tracking-wider text-zinc-900 flex items-center gap-2 pb-2 border-b border-zinc-100">
               <span className="w-5 h-5 rounded-full bg-zinc-900 text-white text-[10px] flex items-center justify-center font-bold">
                 1
               </span>
-              <span>Contact Information</span>
+              <span>Контактна інформація</span>
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="flex flex-col gap-1.5">
                 <label className="text-xs font-medium text-zinc-600">
-                  First Name *
+                  Ім'я *
                 </label>
                 <input
                   type="text"
                   required
-                  placeholder="Enter first name"
+                  placeholder="Введіть ім'я"
                   className="h-10 px-3 border border-zinc-200 rounded-md text-sm focus:outline-none focus:border-[#C8205C] transition-colors"
                 />
               </div>
               <div className="flex flex-col gap-1.5">
                 <label className="text-xs font-medium text-zinc-600">
-                  Last Name *
+                  Прізвище *
                 </label>
                 <input
                   type="text"
                   required
-                  placeholder="Enter last name"
+                  placeholder="Введіть прізвище"
                   className="h-10 px-3 border border-zinc-200 rounded-md text-sm focus:outline-none focus:border-[#C8205C] transition-colors"
                 />
               </div>
               <div className="flex flex-col gap-1.5 sm:col-span-2">
                 <label className="text-xs font-medium text-zinc-600">
-                  Phone Number *
+                  Номер телефону *
                 </label>
                 <input
                   type="tel"
@@ -133,13 +116,13 @@ export default function CheckoutPage() {
             </div>
           </div>
 
-          {/* Section 2: Shipping Method Selection */}
+          {/* Секція 2: Спосіб доставки */}
           <div className="flex flex-col gap-4">
             <h2 className="text-sm font-bold uppercase tracking-wider text-zinc-900 flex items-center gap-2 pb-2 border-b border-zinc-100">
               <span className="w-5 h-5 rounded-full bg-zinc-900 text-white text-[10px] flex items-center justify-center font-bold">
                 2
               </span>
-              <span>Delivery Details</span>
+              <span>Деталі доставки</span>
             </h2>
             <div className="grid grid-cols-1 gap-3">
               <label className="flex items-center justify-between p-4 border border-[#C8205C] bg-white rounded-xl cursor-pointer shadow-2xs">
@@ -152,51 +135,50 @@ export default function CheckoutPage() {
                   />
                   <div className="flex flex-col">
                     <span className="text-sm font-semibold flex items-center gap-1.5">
-                      <Truck className="w-4 h-4 text-zinc-700" /> Nova Poshta
-                      (Warehouse)
+                      <Truck className="w-4 h-4 text-zinc-700" /> Нова Пошта (Відділення)
                     </span>
                     <span className="text-xs text-zinc-500 mt-0.5 font-light">
-                      Delivery to your preferred department across Ukraine.
+                      Доставка до будь-якого зручного відділення по всій Україні.
                     </span>
                   </div>
                 </div>
               </label>
             </div>
 
-            {/* Shipping Destination Specifics */}
+            {/* Пункти призначення */}
             <div className="grid grid-cols-1 gap-4 mt-1">
               <div className="flex flex-col gap-1.5">
                 <label className="text-xs font-medium text-zinc-600">
-                  City *
+                  Місто *
                 </label>
                 <input
                   type="text"
                   required
-                  placeholder="Specify city"
+                  placeholder="Вкажіть місто"
                   className="h-10 px-3 border border-zinc-200 rounded-md text-sm focus:outline-none focus:border-[#C8205C] transition-colors"
                 />
               </div>
               <div className="flex flex-col gap-1.5">
                 <label className="text-xs font-medium text-zinc-600">
-                  Nova Poshta Office Department *
+                  № Відділення Нової Пошти *
                 </label>
                 <input
                   type="text"
                   required
-                  placeholder="e.g., Department №15"
+                  placeholder="Наприклад: Відділення №15"
                   className="h-10 px-3 border border-zinc-200 rounded-md text-sm focus:outline-none focus:border-[#C8205C] transition-colors"
                 />
               </div>
             </div>
           </div>
 
-          {/* Section 3: Secure Financial Settlements */}
+          {/* Секція 3: Спосіб оплати */}
           <div className="flex flex-col gap-4">
             <h2 className="text-sm font-bold uppercase tracking-wider text-zinc-900 flex items-center gap-2 pb-2 border-b border-zinc-100">
               <span className="w-5 h-5 rounded-full bg-zinc-900 text-white text-[10px] flex items-center justify-center font-bold">
                 3
               </span>
-              <span>Payment Options</span>
+              <span>Варіанти оплати</span>
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <label className="flex items-center gap-3 p-4 border border-[#C8205C] bg-white rounded-xl cursor-pointer shadow-2xs">
@@ -208,7 +190,7 @@ export default function CheckoutPage() {
                 />
                 <div className="flex items-center gap-2 text-sm font-semibold">
                   <CreditCard className="w-4 h-4 text-zinc-700" />
-                  <span>Card / Apple Pay</span>
+                  <span>Картка / Apple Pay</span>
                 </div>
               </label>
               <label className="flex items-center gap-3 p-4 border border-zinc-200 hover:border-zinc-400 bg-white rounded-xl cursor-pointer transition-colors">
@@ -218,20 +200,20 @@ export default function CheckoutPage() {
                   className="accent-[#C8205C]"
                 />
                 <div className="flex items-center gap-2 text-sm font-semibold text-zinc-700">
-                  <span>Cash on Delivery</span>
+                  <span>Накладений платіж</span>
                 </div>
               </label>
             </div>
           </div>
         </div>
 
-        {/* 📊 RIGHT ZONE: EXQUISITE ORDER SUMMARY & LINE-ITEMS INSIGHTS */}
-        <div className="lg:col-span-5 bg-zinc-50 border border-zinc-100 rounded-2xl p-6 md:p-8 sticky top-24">
+        {/* 📊 ПРАВА ЗОНА: ОГЛЯД ЗАМОВЛЕННЯ (5 колонок) */}
+        <div className="lg:col-span-5 bg-zinc-50 border border-zinc-100 rounded-2xl p-6 md:p-8 lg:sticky lg:top-28">
           <h2 className="text-sm font-bold uppercase tracking-wider text-zinc-900 mb-6 pb-2 border-b border-zinc-200">
-            Review Your Order
+            Ваше замовлення
           </h2>
 
-          {/* Nested Tiny Scrollable Items Review Stream Container */}
+          {/* Список товарів у замовленні */}
           <div className="flex flex-col gap-4 max-h-48 overflow-y-auto pr-1 no-scrollbar mb-6 border-b border-zinc-200/60 pb-4">
             {items.map((item) => (
               <div
@@ -253,57 +235,71 @@ export default function CheckoutPage() {
                       {item.title}
                     </span>
                     <span className="text-[10px] text-zinc-400 font-light mt-0.5">
-                      Size: {item.size} • Qty: {item.quantity}
+                      Розмір: {item.size} • Кіл-ть: {item.quantity}
                     </span>
                   </div>
                 </div>
                 <span className="font-bold text-zinc-900 shrink-0 ml-2">
-                  {item.price * item.quantity} UAH
+                  {(item.price * item.quantity).toLocaleString("uk-UA")} UAH
                 </span>
               </div>
             ))}
           </div>
 
-          {/* Balance Metrics Computations Breakdown Row */}
+          {/* Калькуляція підсумку */}
           <div className="flex flex-col gap-3.5 text-sm mb-6 border-b border-zinc-200 pb-5">
             <div className="flex justify-between items-center">
-              <span className="text-zinc-500 font-light">Subtotal</span>
+              <span className="text-zinc-500 font-light">Вартість товарів</span>
               <span className="font-medium text-zinc-900">
-                {totalPrice} UAH
+                {totalPrice.toLocaleString("uk-UA")} UAH
               </span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-zinc-500 font-light">Shipping</span>
+              <span className="text-zinc-500 font-light">Доставка</span>
               <span className="font-medium text-zinc-900">
-                {shippingCost === 0 ? "FREE" : `${shippingCost} UAH`}
+                {shippingCost === 0 ? "БЕЗКОШТОВНО" : `${shippingCost} UAH`}
               </span>
             </div>
             <div className="flex justify-between items-baseline pt-2">
               <span className="text-sm font-bold uppercase text-zinc-900">
-                Total Due
+                До сплати
               </span>
               <span className="text-lg font-black text-[#C8205C]">
-                {grandTotal} UAH
+                {grandTotal.toLocaleString("uk-UA")} UAH
               </span>
             </div>
           </div>
 
-          {/* Checkout Final Validation Trigger Action */}
+          {/* Фінальна кнопка підтвердження */}
           <button
             type="submit"
             className="w-full h-12 bg-[#C8205C] hover:bg-[#a6174a] text-white text-xs font-bold uppercase tracking-wider rounded-md shadow-sm transition-all flex items-center justify-center gap-2 cursor-pointer"
           >
             <ShieldCheck className="w-4 h-4" />
-            <span>Complete Order</span>
+            <span>Підтвердити замовлення</span>
           </button>
 
           <p className="text-[10px] text-zinc-400 font-light leading-relaxed text-center mt-4">
-            By executing this purchase agreement request pipeline sequence, you
-            confirm compliance and acceptance of our dynamic brand consumer
-            service conditions guidelines rulesets.
+            Здійснюючи покупку, ви підтверджуєте свою згоду та прийняття умов 
+            публічної оферти та правил обслуговування клієнтів нашого бренду.
           </p>
         </div>
       </div>
     </main>
   );
 }
+
+// Повністю захищений експорт без SSR для стабільної Next.js App Router збірки
+const DynamicCheckoutPage = dynamic(() => Promise.resolve(CheckoutView), {
+  ssr: false,
+  loading: () => (
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32 text-center text-zinc-400 font-sans">
+      <div className="animate-pulse flex flex-col items-center justify-center gap-4">
+        <div className="w-12 h-12 bg-zinc-100 rounded-full" />
+        <div className="h-4 bg-zinc-100 w-48 rounded" />
+      </div>
+    </div>
+  )
+});
+
+export default DynamicCheckoutPage;
