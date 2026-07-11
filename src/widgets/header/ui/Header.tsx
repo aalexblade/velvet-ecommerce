@@ -68,14 +68,14 @@ const NAV_LINKS = [
 ];
 
 export function Header() {
-  const pathname = usePathname(); // 🌟 Отримуємо поточний шлях
+  const pathname = usePathname(); 
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMobileLingerieOpen, setIsMobileLingerieOpen] = useState(false);
   const [isMegaHovered, setIsMegaHovered] = useState(false);
 
-  // Перевіряємо, чи користувач знаходиться на сторінці кошика
-  const isCartPage = pathname === "/cart";
+  // Перевіряємо, чи ми на сторінці кошика АБО чекауту
+  const isWhiteHeaderPage = pathname === "/cart" || pathname === "/checkout";
 
   // Fetch reactive items stream from Zustand store state machine
   const cartItems = useCartStore((state) => state.items);
@@ -101,8 +101,8 @@ export function Header() {
       <header
         className={cn(
           "fixed top-0 left-0 right-0 z-50 transition-all duration-300 select-none",
-          // 🌟 Додаємо перевірку isCartPage. Якщо це кошик — шапка завжди видима й темна
-          isScrolled || isMegaHovered || isCartPage
+          // 🌟 Використовуємо правильну змінну isWhiteHeaderPage
+          isScrolled || isMegaHovered || isWhiteHeaderPage
             ? "bg-background text-foreground shadow-sm border-b border-muted py-3"
             : "bg-transparent text-white py-5",
         )}
