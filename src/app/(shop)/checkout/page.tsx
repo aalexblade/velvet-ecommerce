@@ -15,17 +15,12 @@ import {
 } from "lucide-react";
 import { useCartStore } from "@/features/cart/model/cartStore";
 import { createOrder } from "@/entities/order";
-import {
-  fetchNPCities,
-  fetchNPWarehouses,
-  NPCity,
-  NPWarehouse,
-} from "@/shared/api/novaposhta/deliveryService";
+import { fetchNPCities, fetchNPWarehouses, NPCity, NPWarehouse } from "@/shared/api/novaposhta/deliveryService";
 
 function CheckoutView() {
   const router = useRouter();
   const { items, clearCart } = useCartStore();
-
+  
   // State managers for managing async lifecycle metrics
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -34,11 +29,11 @@ function CheckoutView() {
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
-    phone: "+380",
+    phone: "+380", 
     city: "",
     cityRef: "",
     warehouse: "",
-    paymentMethod: "card",
+    paymentMethod: "card", 
   });
 
   // Delivery integration state management blocks
@@ -103,9 +98,7 @@ function CheckoutView() {
   const grandTotal = totalPrice + shippingCost;
 
   // React state synchronous tracking callback change pipeline handler
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
-  ) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
@@ -114,7 +107,7 @@ function CheckoutView() {
   const handleCityInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setCityInput(value);
-
+    
     if (value.length < 2) {
       setCitiesList([]);
       setShowCityDropdown(false);
@@ -132,10 +125,10 @@ function CheckoutView() {
       ...prev,
       city: city.Description,
       cityRef: city.Ref,
-      warehouse: "",
+      warehouse: "", 
     }));
     setCityInput(city.Description);
-    setCitiesList([]);
+    setCitiesList([]); 
     setShowCityDropdown(false);
   };
 
@@ -145,10 +138,15 @@ function CheckoutView() {
     setIsSubmitting(true);
     setErrorMessage(null);
 
+    // Validate phone number completeness securely before network requests
+    if (!formData.phone || formData.phone.trim() === "+380" || formData.phone.length < 13) {
+      setErrorMessage("Будь ласка, введіть коректний та повний номер телефону (наприклад, +380931234567).");
+      setIsSubmitting(false);
+      return;
+    }
+
     if (!formData.cityRef || !formData.warehouse) {
-      setErrorMessage(
-        "Будь ласка, оберіть коректне місто та відділення Нової Пошти зі списку.",
-      );
+      setErrorMessage("Будь ласка, оберіть коректне місто та відділення Нової Пошти зі списку.");
       setIsSubmitting(false);
       return;
     }
@@ -184,16 +182,16 @@ function CheckoutView() {
       // 4. Reset checkout lifecycle data matrices inside global client Zustand state streams
       clearCart();
 
-      // 5. Direct client view stream to fallback routes upon complete workflow success validation
-      router.push("/?ordered=true");
+      // 5. Trigger alert synchronously and halt immediate unmounting route redirects
       alert("Дякуємо! Ваше замовлення успішно оформлено.");
+      
+      // 6. Direct client view stream to target fallback home route only after alert acknowledgment
+      router.push("/?ordered=true");
     } catch (error: unknown) {
       if (error instanceof Error) {
         setErrorMessage(error.message);
       } else {
-        setErrorMessage(
-          "An error occurred while processing your order request pipeline.",
-        );
+        setErrorMessage("An error occurred while processing your order request pipeline.");
       }
     } finally {
       setIsSubmitting(false);
@@ -224,6 +222,7 @@ function CheckoutView() {
 
   return (
     <main className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-16 font-sans text-zinc-900 animate-in fade-in duration-300">
+      
       {/* --- BACK NAVIGATION ROUTE BAR --- */}
       <div className="mb-6">
         <Link
@@ -245,12 +244,11 @@ function CheckoutView() {
         </div>
       )}
 
-      <form
-        onSubmit={handleSubmit}
-        className="w-full grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start"
-      >
+      <form onSubmit={handleSubmit} className="w-full grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
+        
         {/* 📝 LEFT ZONE: CUSTOMER INFORMATION FORM BLOCK */}
         <div className="w-full lg:col-span-7 flex flex-col gap-8">
+          
           {/* Section 1: Contact Details */}
           <div className="flex flex-col gap-4">
             <h2 className="text-sm font-bold uppercase tracking-wider text-zinc-900 flex items-center gap-2 pb-2 border-b border-zinc-100">
@@ -261,9 +259,7 @@ function CheckoutView() {
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-medium text-zinc-600">
-                  Ім&#39;я *
-                </label>
+                <label className="text-xs font-medium text-zinc-600">Ім&#39;я *</label>
                 <input
                   type="text"
                   name="firstName"
@@ -275,9 +271,7 @@ function CheckoutView() {
                 />
               </div>
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-medium text-zinc-600">
-                  Прізвище *
-                </label>
+                <label className="text-xs font-medium text-zinc-600">Прізвище *</label>
                 <input
                   type="text"
                   name="lastName"
@@ -289,9 +283,7 @@ function CheckoutView() {
                 />
               </div>
               <div className="flex flex-col gap-1.5 sm:col-span-2">
-                <label className="text-xs font-medium text-zinc-600">
-                  Номер телефону *
-                </label>
+                <label className="text-xs font-medium text-zinc-600">Номер телефону *</label>
                 <input
                   type="tel"
                   name="phone"
@@ -332,12 +324,10 @@ function CheckoutView() {
                   />
                   <div className="flex flex-col">
                     <span className="text-sm font-semibold flex items-center gap-1.5">
-                      <Truck className="w-4 h-4 text-zinc-700" /> Нова Пошта
-                      (Відділення)
+                      <Truck className="w-4 h-4 text-zinc-700" /> Нова Пошта (Відділення)
                     </span>
                     <span className="text-xs text-zinc-500 mt-0.5 font-light">
-                      Доставка до будь-якого зручного відділення по всій
-                      Україні.
+                      Доставка до будь-якого зручного відділення по всій Україні.
                     </span>
                   </div>
                 </div>
@@ -347,18 +337,14 @@ function CheckoutView() {
             <div className="grid grid-cols-1 gap-4 mt-1 relative">
               {/* Interactive Autocomplete City Input Element */}
               <div className="flex flex-col gap-1.5 relative">
-                <label className="text-xs font-medium text-zinc-600">
-                  Місто *
-                </label>
+                <label className="text-xs font-medium text-zinc-600">Місто *</label>
                 <div className="relative">
                   <input
                     type="text"
                     required
                     value={cityInput}
                     onChange={handleCityInputChange}
-                    onFocus={() =>
-                      citiesList.length > 0 && setShowCityDropdown(true)
-                    }
+                    onFocus={() => citiesList.length > 0 && setShowCityDropdown(true)}
                     placeholder="Почніть вводити місто (напр. Київ)"
                     className="w-full h-10 px-3 pr-10 border border-zinc-200 rounded-md text-sm focus:outline-none focus:border-[#C8205C] transition-colors"
                   />
@@ -385,9 +371,7 @@ function CheckoutView() {
 
               {/* Dynamic Selective Dropdown for Warehouses Rows mapping */}
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-medium text-zinc-600">
-                  № Відділення Нової Пошти *
-                </label>
+                <label className="text-xs font-medium text-zinc-600">№ Відділення Нової Пошти *</label>
                 <div className="relative">
                   <select
                     name="warehouse"
@@ -398,11 +382,11 @@ function CheckoutView() {
                     className="w-full h-10 px-3 border border-zinc-200 rounded-md text-sm bg-white focus:outline-none focus:border-[#C8205C] transition-colors disabled:opacity-50 disabled:bg-zinc-50 cursor-pointer appearance-none"
                   >
                     <option value="">
-                      {isSearchingWarehouses
-                        ? "Завантаження відділень..."
-                        : !formData.cityRef
-                          ? "Спочатку оберіть місто"
-                          : "Оберіть відділення зі списку"}
+                      {isSearchingWarehouses 
+                        ? "Завантаження відділень..." 
+                        : !formData.cityRef 
+                        ? "Спочатку оберіть місто" 
+                        : "Оберіть відділення зі списку"}
                     </option>
                     {warehousesList.map((wh) => (
                       <option key={wh.Ref} value={wh.Description}>
@@ -480,24 +464,13 @@ function CheckoutView() {
 
             <div className="flex flex-col gap-4 max-h-48 overflow-y-auto pr-1 no-scrollbar border-b border-zinc-200/60 pb-4">
               {items.map((item) => (
-                <div
-                  key={item.variantId}
-                  className="flex items-center gap-3 justify-between text-xs"
-                >
+                <div key={item.variantId} className="flex items-center gap-3 justify-between text-xs">
                   <div className="flex items-center gap-3 min-w-0">
                     <div className="relative aspect-3/4 w-10 bg-zinc-200 rounded-md overflow-hidden shrink-0 border border-zinc-200/40">
-                      <Image
-                        src={item.image}
-                        alt={item.title}
-                        fill
-                        className="object-cover"
-                        unoptimized
-                      />
+                      <Image src={item.image} alt={item.title} fill className="object-cover" unoptimized />
                     </div>
                     <div className="flex flex-col min-w-0">
-                      <span className="font-semibold text-zinc-900 truncate">
-                        {item.title}
-                      </span>
+                      <span className="font-semibold text-zinc-900 truncate">{item.title}</span>
                       <span className="text-[10px] text-zinc-400 font-light mt-0.5">
                         Розмір: {item.size} • Кіл-ть: {item.quantity}
                       </span>
@@ -512,12 +485,8 @@ function CheckoutView() {
 
             <div className="flex flex-col gap-3.5 text-sm border-b border-zinc-200 pb-5">
               <div className="flex justify-between items-center">
-                <span className="text-zinc-500 font-light">
-                  Вартість товарів
-                </span>
-                <span className="font-medium text-zinc-900">
-                  {totalPrice.toLocaleString("uk-UA")} UAH
-                </span>
+                <span className="text-zinc-500 font-light">Вартість товарів</span>
+                <span className="font-medium text-zinc-900">{totalPrice.toLocaleString("uk-UA")} UAH</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-zinc-500 font-light">Доставка</span>
@@ -526,12 +495,8 @@ function CheckoutView() {
                 </span>
               </div>
               <div className="flex justify-between items-baseline pt-2">
-                <span className="text-sm font-bold uppercase text-zinc-900">
-                  До сплати
-                </span>
-                <span className="text-lg font-black text-[#C8205C]">
-                  {grandTotal.toLocaleString("uk-UA")} UAH
-                </span>
+                <span className="text-sm font-bold uppercase text-zinc-900">До сплати</span>
+                <span className="text-lg font-black text-[#C8205C]">{grandTotal.toLocaleString("uk-UA")} UAH</span>
               </div>
             </div>
 
@@ -545,17 +510,16 @@ function CheckoutView() {
               ) : (
                 <ShieldCheck className="w-4 h-4" />
               )}
-              <span>
-                {isSubmitting ? "Обробка..." : "Підтвердити замовлення"}
-              </span>
+              <span>{isSubmitting ? "Обробка..." : "Підтвердити замовлення"}</span>
             </button>
 
             <p className="text-[10px] text-zinc-400 font-light leading-relaxed text-center">
-              Здійснюючи покупку, ви підтверджуєте свою згоду та прийняття умов
+              Здійснюючи покупку, vi підтверджуєте свою згоду та прийняття умов 
               публічної оферти та правил обслуговування клієнтів нашого бренду.
             </p>
           </div>
         </div>
+
       </form>
     </main>
   );
