@@ -1,23 +1,40 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import dynamic from "next/dynamic";
+import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
   CreditCard,
   Truck,
   ShieldCheck,
   ShoppingBag,
+  Loader2,
 } from "lucide-react";
 import { useCartStore } from "@/features/cart/model/cartStore";
+import { createOrder } from "@/entities/order";
 
-// Головний внутрішній компонент оформлення замовлення
 function CheckoutView() {
-  const items = useCartStore((state) => state.items);
+  const router = useRouter();
+  const { items, clearCart } = useCartStore();
+  
+  // State managers for managing async lifecycle metrics
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  // Обчислюємо загальну вартість товарів
+  // Consolidated tracking matrix for the form elements state
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    phone: "",
+    city: "",
+    warehouse: "",
+    paymentMethod: "card", 
+  });
+
+  // Calculate billing parameters across active shopping bag line items
   const totalPrice = useMemo(() => {
     return items.reduce((acc, item) => acc + item.price * item.quantity, 0);
   }, [items]);
@@ -25,10 +42,73 @@ function CheckoutView() {
   const shippingCost = totalPrice >= 2000 ? 0 : 150;
   const grandTotal = totalPrice + shippingCost;
 
-  // Стан, якщо кошик порожній, з урахуванням висоти хедера (pt-32)
+  // React state synchronous tracking callback change pipeline handler
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  // State transaction coordinator for dynamic toggle of payment configurations
+  const handlePaymentChange = (method: string) => {
+    setFormData((prev) => ({ ...prev, paymentMethod: method }));
+  };
+
+  // Main submission pipeline workflow to commit state changes directly into Supabase instances
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setErrorMessage(null);
+
+    try {
+      // 1. Construct parent data record structure payload for orders table mapping
+      const orderPayload = {
+        first_name: formData.firstName,
+        last_name: formData.lastName,
+        phone: formData.phone,
+        city: formData.city,
+        delivery_warehouse: formData.warehouse,
+        payment_method: formData.paymentMethod,
+        total_price: totalPrice,
+        shipping_cost: shippingCost,
+        grand_total: grandTotal,
+      };
+
+      // 2. Map responsive frontend collections into atomic bulk line-item data structures
+      const itemsPayload = items.map((item) => ({
+        variant_id: item.variantId,
+        title: item.title,
+        color: item.color || "Default",
+        size: item.size || "Default",
+        price: item.price,
+        quantity: item.quantity,
+        image: item.image,
+      }));
+
+      // 3. Fire atomic multi-table persistence transaction sequence via entities layer service
+      await createOrder(orderPayload, itemsPayload);
+
+      // 4. Reset checkout lifecycle data matrices inside global client Zustand state streams
+      clearCart();
+
+      // 5. Direct client view stream to fallback routes upon complete workflow success validation
+      router.push("/?ordered=true");
+      alert("Дякуємо! Ваше замовлення успішно оформлено.");
+ } catch (error: unknown) {
+      // Safely extract error message mapping without raw any implications
+      if (error instanceof Error) {
+        setErrorMessage(error.message);
+      } else {
+        setErrorMessage("An error occurred while processing your order request pipeline.");
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Render blank safe fallback block matrix if shopping collection resolves to empty state parameters
   if (items.length === 0) {
     return (
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-20 flex flex-col items-center justify-center text-center font-sans animate-in fade-in duration-300">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-20 text-center font-sans animate-in fade-in duration-300">
         <div className="w-12 h-12 bg-zinc-50 border border-zinc-100 rounded-full flex items-center justify-center text-zinc-400 mx-auto mb-4">
           <ShoppingBag className="w-5 h-5" />
         </div>
@@ -51,7 +131,7 @@ function CheckoutView() {
   return (
     <main className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-16 font-sans text-zinc-900 animate-in fade-in duration-300">
       
-      {/* --- КНОПКА ПОВЕРНЕННЯ ДО КОШИКА --- */}
+      {/* --- BACK NAVIGATION ROUTE BAR --- */}
       <div className="mb-6">
         <Link
           href="/cart"
@@ -66,12 +146,20 @@ function CheckoutView() {
         Оформлення замовлення
       </h1>
 
-      <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
+      {/* Conditional visual error layer stage banner */}
+      {errorMessage && (
+        <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-600 rounded-md text-sm">
+          {errorMessage}
+        </div>
+      )}
+
+      {/* Main interactive form layout wrapper to catch implicit validation cycles */}
+      <form onSubmit={handleSubmit} className="w-full grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
         
-        {/* 📝 ЛІВА ЗОНА: ФОРМА ДАНИХ КЛІЄНТА (Займає 7 колонок із 12) */}
+        {/* 📝 LEFT ZONE: CUSTOMER INFORMATION FORM BLOCK */}
         <div className="w-full lg:col-span-7 flex flex-col gap-8">
           
-          {/* Секція 1: Контактні дані */}
+          {/* Section 1: Contact Details */}
           <div className="flex flex-col gap-4">
             <h2 className="text-sm font-bold uppercase tracking-wider text-zinc-900 flex items-center gap-2 pb-2 border-b border-zinc-100">
               <span className="w-5 h-5 rounded-full bg-zinc-900 text-white text-[10px] flex items-center justify-center font-bold">
@@ -81,34 +169,37 @@ function CheckoutView() {
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-medium text-zinc-600">
-                  Ім&#39;я *
-                </label>
+                <label className="text-xs font-medium text-zinc-600">Ім&#39;я *</label>
                 <input
                   type="text"
+                  name="firstName"
                   required
+                  value={formData.firstName}
+                  onChange={handleInputChange}
                   placeholder="Введіть ім'я"
                   className="h-10 px-3 border border-zinc-200 rounded-md text-sm focus:outline-none focus:border-[#C8205C] transition-colors"
                 />
               </div>
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-medium text-zinc-600">
-                  Прізвище *
-                </label>
+                <label className="text-xs font-medium text-zinc-600">Прізвище *</label>
                 <input
                   type="text"
+                  name="lastName"
                   required
+                  value={formData.lastName}
+                  onChange={handleInputChange}
                   placeholder="Введіть прізвище"
                   className="h-10 px-3 border border-zinc-200 rounded-md text-sm focus:outline-none focus:border-[#C8205C] transition-colors"
                 />
               </div>
               <div className="flex flex-col gap-1.5 sm:col-span-2">
-                <label className="text-xs font-medium text-zinc-600">
-                  Номер телефону *
-                </label>
+                <label className="text-xs font-medium text-zinc-600">Номер телефону *</label>
                 <input
                   type="tel"
+                  name="phone"
                   required
+                  value={formData.phone}
+                  onChange={handleInputChange}
                   placeholder="+380"
                   className="h-10 px-3 border border-zinc-200 rounded-md text-sm focus:outline-none focus:border-[#C8205C] transition-colors"
                 />
@@ -116,7 +207,7 @@ function CheckoutView() {
             </div>
           </div>
 
-          {/* Секція 2: Спосіб доставки */}
+          {/* Section 2: Delivery Specifics */}
           <div className="flex flex-col gap-4">
             <h2 className="text-sm font-bold uppercase tracking-wider text-zinc-900 flex items-center gap-2 pb-2 border-b border-zinc-100">
               <span className="w-5 h-5 rounded-full bg-zinc-900 text-white text-[10px] flex items-center justify-center font-bold">
@@ -145,26 +236,27 @@ function CheckoutView() {
               </label>
             </div>
 
-            {/* Пункти призначення */}
             <div className="grid grid-cols-1 gap-4 mt-1">
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-medium text-zinc-600">
-                  Місто *
-                </label>
+                <label className="text-xs font-medium text-zinc-600">Місто *</label>
                 <input
                   type="text"
+                  name="city"
                   required
+                  value={formData.city}
+                  onChange={handleInputChange}
                   placeholder="Вкажіть місто"
                   className="h-10 px-3 border border-zinc-200 rounded-md text-sm focus:outline-none focus:border-[#C8205C] transition-colors"
                 />
               </div>
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-medium text-zinc-600">
-                  № Відділення Нової Пошти *
-                </label>
+                <label className="text-xs font-medium text-zinc-600">№ Відділення Нової Пошти *</label>
                 <input
                   type="text"
+                  name="warehouse"
                   required
+                  value={formData.warehouse}
+                  onChange={handleInputChange}
                   placeholder="Наприклад: Відділення №15"
                   className="h-10 px-3 border border-zinc-200 rounded-md text-sm focus:outline-none focus:border-[#C8205C] transition-colors"
                 />
@@ -172,7 +264,7 @@ function CheckoutView() {
             </div>
           </div>
 
-          {/* Секція 3: Спосіб оплати */}
+          {/* Section 3: Payment Type Selectors */}
           <div className="flex flex-col gap-4">
             <h2 className="text-sm font-bold uppercase tracking-wider text-zinc-900 flex items-center gap-2 pb-2 border-b border-zinc-100">
               <span className="w-5 h-5 rounded-full bg-zinc-900 text-white text-[10px] flex items-center justify-center font-bold">
@@ -181,61 +273,66 @@ function CheckoutView() {
               <span>Варіанти оплати</span>
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <label className="flex items-center gap-3 p-4 border border-[#C8205C] bg-white rounded-xl cursor-pointer shadow-2xs">
+              <div
+                onClick={() => handlePaymentChange("card")}
+                className={`flex items-center gap-3 p-4 border rounded-xl cursor-pointer transition-all ${
+                  formData.paymentMethod === "card"
+                    ? "border-[#C8205C] bg-white shadow-2xs"
+                    : "border-zinc-200 bg-white hover:border-zinc-400"
+                }`}
+              >
                 <input
                   type="radio"
-                  name="payment"
-                  defaultChecked
+                  name="paymentMethod"
+                  checked={formData.paymentMethod === "card"}
+                  onChange={() => {}}
                   className="accent-[#C8205C]"
                 />
                 <div className="flex items-center gap-2 text-sm font-semibold">
                   <CreditCard className="w-4 h-4 text-zinc-700" />
                   <span>Картка / Apple Pay</span>
                 </div>
-              </label>
-              <label className="flex items-center gap-3 p-4 border border-zinc-200 hover:border-zinc-400 bg-white rounded-xl cursor-pointer transition-colors">
+              </div>
+
+              <div
+                onClick={() => handlePaymentChange("cash")}
+                className={`flex items-center gap-3 p-4 border rounded-xl cursor-pointer transition-all ${
+                  formData.paymentMethod === "cash"
+                    ? "border-[#C8205C] bg-white shadow-2xs"
+                    : "border-zinc-200 bg-white hover:border-zinc-400"
+                }`}
+              >
                 <input
                   type="radio"
-                  name="payment"
+                  name="paymentMethod"
+                  checked={formData.paymentMethod === "cash"}
+                  onChange={() => {}}
                   className="accent-[#C8205C]"
                 />
                 <div className="flex items-center gap-2 text-sm font-semibold text-zinc-700">
                   <span>Накладений платіж</span>
                 </div>
-              </label>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* 📊 ПРАВА ЗОНА: ОГЛЯД ЗАМОВЛЕННЯ (Займає 5 колонок із 12) */}
-        {/* Загорнули в ізольований flex-контейнер з sticky без розтягування h-full */}
+        {/* 📊 RIGHT ZONE: LIVE REALTIME ORDER BILLING INSIGHTS CARD */}
         <div className="w-full lg:col-span-5 flex flex-col lg:sticky lg:top-28">
           <div className="w-full bg-zinc-50 border border-zinc-100 rounded-2xl p-6 md:p-8 flex flex-col gap-6">
             <h2 className="text-sm font-bold uppercase tracking-wider text-zinc-900 pb-2 border-b border-zinc-200">
               Ваше замовлення
             </h2>
 
-            {/* Список товарів */}
             <div className="flex flex-col gap-4 max-h-48 overflow-y-auto pr-1 no-scrollbar border-b border-zinc-200/60 pb-4">
               {items.map((item) => (
-                <div
-                  key={item.variantId}
-                  className="flex items-center gap-3 justify-between text-xs"
-                >
+                <div key={item.variantId} className="flex items-center gap-3 justify-between text-xs">
                   <div className="flex items-center gap-3 min-w-0">
                     <div className="relative aspect-3/4 w-10 bg-zinc-200 rounded-md overflow-hidden shrink-0 border border-zinc-200/40">
-                      <Image
-                        src={item.image}
-                        alt={item.title}
-                        fill
-                        className="object-cover"
-                        unoptimized
-                      />
+                      <Image src={item.image} alt={item.title} fill className="object-cover" unoptimized />
                     </div>
                     <div className="flex flex-col min-w-0">
-                      <span className="font-semibold text-zinc-900 truncate">
-                        {item.title}
-                      </span>
+                      <span className="font-semibold text-zinc-900 truncate">{item.title}</span>
                       <span className="text-[10px] text-zinc-400 font-light mt-0.5">
                         Розмір: {item.size} • Кіл-ть: {item.quantity}
                       </span>
@@ -248,13 +345,10 @@ function CheckoutView() {
               ))}
             </div>
 
-            {/* Калькуляція підсумку */}
             <div className="flex flex-col gap-3.5 text-sm border-b border-zinc-200 pb-5">
               <div className="flex justify-between items-center">
                 <span className="text-zinc-500 font-light">Вартість товарів</span>
-                <span className="font-medium text-zinc-900">
-                  {totalPrice.toLocaleString("uk-UA")} UAH
-                </span>
+                <span className="font-medium text-zinc-900">{totalPrice.toLocaleString("uk-UA")} UAH</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-zinc-500 font-light">Доставка</span>
@@ -263,22 +357,23 @@ function CheckoutView() {
                 </span>
               </div>
               <div className="flex justify-between items-baseline pt-2">
-                <span className="text-sm font-bold uppercase text-zinc-900">
-                  До сплати
-                </span>
-                <span className="text-lg font-black text-[#C8205C]">
-                  {grandTotal.toLocaleString("uk-UA")} UAH
-                </span>
+                <span className="text-sm font-bold uppercase text-zinc-900">До сплати</span>
+                <span className="text-lg font-black text-[#C8205C]">{grandTotal.toLocaleString("uk-UA")} UAH</span>
               </div>
             </div>
 
-            {/* Кнопка підтвердження */}
+            {/* Dynamic submission block tracking state machine with Lucide spinning loaders */}
             <button
               type="submit"
-              className="w-full h-12 bg-[#C8205C] hover:bg-[#a6174a] text-white text-xs font-bold uppercase tracking-wider rounded-md shadow-sm transition-all flex items-center justify-center gap-2 cursor-pointer"
+              disabled={isSubmitting}
+              className="w-full h-12 bg-[#C8205C] hover:bg-[#a6174a] text-white text-xs font-bold uppercase tracking-wider rounded-md shadow-sm transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <ShieldCheck className="w-4 h-4" />
-              <span>Підтвердити замовлення</span>
+              {isSubmitting ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <ShieldCheck className="w-4 h-4" />
+              )}
+              <span>{isSubmitting ? "Обробка..." : "Підтвердити замовлення"}</span>
             </button>
 
             <p className="text-[10px] text-zinc-400 font-light leading-relaxed text-center">
@@ -288,12 +383,12 @@ function CheckoutView() {
           </div>
         </div>
 
-      </div>
+      </form>
     </main>
   );
 }
 
-// Повністю захищений експорт без SSR
+// Strict compilation validation bypass with dynamic server side execution disabling
 const DynamicCheckoutPage = dynamic(() => Promise.resolve(CheckoutView), {
   ssr: false,
   loading: () => (
@@ -303,7 +398,7 @@ const DynamicCheckoutPage = dynamic(() => Promise.resolve(CheckoutView), {
         <div className="h-4 bg-zinc-100 w-48 rounded" />
       </div>
     </div>
-  )
+  ),
 });
 
 export default DynamicCheckoutPage;
