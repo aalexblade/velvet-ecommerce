@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import dynamic from "next/dynamic";
@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { useCartStore } from "@/features/cart/model/cartStore";
 import { createOrder } from "@/entities/order";
+import { fetchNPCities, fetchNPWarehouses, NPCity, NPWarehouse } from "@/shared/api/novaposhta/deliveryService";
 
 function CheckoutView() {
   const router = useRouter();
@@ -30,9 +31,63 @@ function CheckoutView() {
     lastName: "",
     phone: "",
     city: "",
+    cityRef: "",
     warehouse: "",
     paymentMethod: "card", 
   });
+
+  // Delivery integration state management blocks
+  const [cityInput, setCityInput] = useState("");
+  const [citiesList, setCitiesList] = useState<NPCity[]>([]);
+  const [warehousesList, setWarehousesList] = useState<NPWarehouse[]>([]);
+  const [isSearchingCities, setIsSearchingCities] = useState(false);
+  const [isSearchingWarehouses, setIsSearchingWarehouses] = useState(false);
+  const [showCityDropdown, setShowCityDropdown] = useState(false);
+
+  // Debounce API tracking sequence for real-time city keyword updates
+  useEffect(() => {
+    // Keep the effect focused purely on async synchronization
+    if (cityInput.length < 2 || cityInput === formData.city) {
+      return;
+    }
+
+    // Set searching state safely inside the asynchronous debounce timer to avoid cascading renders
+    const delayDebounceId = setTimeout(async () => {
+      setIsSearchingCities(true);
+      try {
+        const data = await fetchNPCities(cityInput);
+        setCitiesList(data);
+        setShowCityDropdown(data.length > 0);
+      } catch (err) {
+        console.error("Error fetching cities:", err);
+      } finally {
+        setIsSearchingCities(false);
+      }
+    }, 400);
+
+    return () => clearTimeout(delayDebounceId);
+  }, [cityInput, formData.city]);
+
+  // Sync and fetch warehouses whenever a valid city selection reference alters
+  useEffect(() => {
+    if (!formData.cityRef) {
+      return;
+    }
+
+    const loadWarehouses = async () => {
+      setIsSearchingWarehouses(true);
+      try {
+        const data = await fetchNPWarehouses(formData.cityRef);
+        setWarehousesList(data);
+      } catch (err) {
+        console.error("Error fetching warehouses:", err);
+      } finally {
+        setIsSearchingWarehouses(false);
+      }
+    };
+
+    loadWarehouses();
+  }, [formData.cityRef]);
 
   // Calculate billing parameters across active shopping bag line items
   const totalPrice = useMemo(() => {
@@ -43,9 +98,20 @@ function CheckoutView() {
   const grandTotal = totalPrice + shippingCost;
 
   // React state synchronous tracking callback change pipeline handler
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  // Dedicated handler for city input text changes to safely update lists outside effects
+  const handleCityInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setCityInput(value);
+    
+    if (value.length < 2) {
+      setCitiesList([]);
+      setShowCityDropdown(false);
+    }
   };
 
   // State transaction coordinator for dynamic toggle of payment configurations
@@ -53,11 +119,30 @@ function CheckoutView() {
     setFormData((prev) => ({ ...prev, paymentMethod: method }));
   };
 
+  // Callback context to map exact selection row for requested city entities
+  const handleSelectCity = (city: NPCity) => {
+    setFormData((prev) => ({
+      ...prev,
+      city: city.Description,
+      cityRef: city.Ref,
+      warehouse: "", 
+    }));
+    setCityInput(city.Description);
+    setCitiesList([]); 
+    setShowCityDropdown(false);
+  };
+
   // Main submission pipeline workflow to commit state changes directly into Supabase instances
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     setErrorMessage(null);
+
+    if (!formData.cityRef || !formData.warehouse) {
+      setErrorMessage("Будь ласка, оберіть коректне місто та відділення Нової Пошти зі списку.");
+      setIsSubmitting(false);
+      return;
+    }
 
     try {
       // 1. Construct parent data record structure payload for orders table mapping
@@ -93,8 +178,7 @@ function CheckoutView() {
       // 5. Direct client view stream to fallback routes upon complete workflow success validation
       router.push("/?ordered=true");
       alert("Дякуємо! Ваше замовлення успішно оформлено.");
- } catch (error: unknown) {
-      // Safely extract error message mapping without raw any implications
+    } catch (error: unknown) {
       if (error instanceof Error) {
         setErrorMessage(error.message);
       } else {
@@ -105,7 +189,6 @@ function CheckoutView() {
     }
   };
 
-  // Render blank safe fallback block matrix if shopping collection resolves to empty state parameters
   if (items.length === 0) {
     return (
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-20 text-center font-sans animate-in fade-in duration-300">
@@ -146,14 +229,12 @@ function CheckoutView() {
         Оформлення замовлення
       </h1>
 
-      {/* Conditional visual error layer stage banner */}
       {errorMessage && (
         <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-600 rounded-md text-sm">
           {errorMessage}
         </div>
       )}
 
-      {/* Main interactive form layout wrapper to catch implicit validation cycles */}
       <form onSubmit={handleSubmit} className="w-full grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
         
         {/* 📝 LEFT ZONE: CUSTOMER INFORMATION FORM BLOCK */}
@@ -236,30 +317,70 @@ function CheckoutView() {
               </label>
             </div>
 
-            <div className="grid grid-cols-1 gap-4 mt-1">
-              <div className="flex flex-col gap-1.5">
+            <div className="grid grid-cols-1 gap-4 mt-1 relative">
+              {/* Interactive Autocomplete City Input Element */}
+              <div className="flex flex-col gap-1.5 relative">
                 <label className="text-xs font-medium text-zinc-600">Місто *</label>
-                <input
-                  type="text"
-                  name="city"
-                  required
-                  value={formData.city}
-                  onChange={handleInputChange}
-                  placeholder="Вкажіть місто"
-                  className="h-10 px-3 border border-zinc-200 rounded-md text-sm focus:outline-none focus:border-[#C8205C] transition-colors"
-                />
+                <div className="relative">
+                  <input
+                    type="text"
+                    required
+                    value={cityInput}
+                    onChange={handleCityInputChange}
+                    onFocus={() => citiesList.length > 0 && setShowCityDropdown(true)}
+                    placeholder="Почніть вводити місто (напр. Київ)"
+                    className="w-full h-10 px-3 pr-10 border border-zinc-200 rounded-md text-sm focus:outline-none focus:border-[#C8205C] transition-colors"
+                  />
+                  {isSearchingCities && (
+                    <Loader2 className="w-4 h-4 animate-spin absolute right-3 top-3 text-zinc-400" />
+                  )}
+                </div>
+
+                {/* City Selection Dropdown Floating Panel */}
+                {showCityDropdown && citiesList.length > 0 && (
+                  <div className="absolute left-0 right-0 top-full mt-1 bg-white border border-zinc-200 rounded-md shadow-lg max-h-48 overflow-y-auto z-50">
+                    {citiesList.map((city) => (
+                      <div
+                        key={city.Ref}
+                        onClick={() => handleSelectCity(city)}
+                        className="px-3 py-2 text-sm hover:bg-zinc-50 cursor-pointer text-zinc-900 border-b border-zinc-100 last:border-0"
+                      >
+                        {city.Description}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
+
+              {/* Dynamic Selective Dropdown for Warehouses Rows mapping */}
               <div className="flex flex-col gap-1.5">
                 <label className="text-xs font-medium text-zinc-600">№ Відділення Нової Пошти *</label>
-                <input
-                  type="text"
-                  name="warehouse"
-                  required
-                  value={formData.warehouse}
-                  onChange={handleInputChange}
-                  placeholder="Наприклад: Відділення №15"
-                  className="h-10 px-3 border border-zinc-200 rounded-md text-sm focus:outline-none focus:border-[#C8205C] transition-colors"
-                />
+                <div className="relative">
+                  <select
+                    name="warehouse"
+                    required
+                    disabled={!formData.cityRef || isSearchingWarehouses}
+                    value={formData.warehouse}
+                    onChange={handleInputChange}
+                    className="w-full h-10 px-3 border border-zinc-200 rounded-md text-sm bg-white focus:outline-none focus:border-[#C8205C] transition-colors disabled:opacity-50 disabled:bg-zinc-50 cursor-pointer appearance-none"
+                  >
+                    <option value="">
+                      {isSearchingWarehouses 
+                        ? "Завантаження відділень..." 
+                        : !formData.cityRef 
+                        ? "Спочатку оберіть місто" 
+                        : "Оберіть відділення зі списку"}
+                    </option>
+                    {warehousesList.map((wh) => (
+                      <option key={wh.Ref} value={wh.Description}>
+                        {wh.Description}
+                      </option>
+                    ))}
+                  </select>
+                  {isSearchingWarehouses && (
+                    <Loader2 className="w-4 h-4 animate-spin absolute right-3 top-3 text-zinc-400" />
+                  )}
+                </div>
               </div>
             </div>
           </div>
@@ -362,7 +483,6 @@ function CheckoutView() {
               </div>
             </div>
 
-            {/* Dynamic submission block tracking state machine with Lucide spinning loaders */}
             <button
               type="submit"
               disabled={isSubmitting}
@@ -388,7 +508,6 @@ function CheckoutView() {
   );
 }
 
-// Strict compilation validation bypass with dynamic server side execution disabling
 const DynamicCheckoutPage = dynamic(() => Promise.resolve(CheckoutView), {
   ssr: false,
   loading: () => (
