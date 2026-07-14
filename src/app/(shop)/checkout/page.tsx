@@ -211,11 +211,46 @@ function CheckoutView() {
       const order = await createOrder(orderPayload, itemsPayload);
 
       // Extract generated sequence key / order token safely if present
+      let orderId = "";
       if (order && order.id) {
         setCreatedOrderId(order.id);
+        orderId = order.id;
       }
 
-      // 4. Trigger state success visibility modal display
+      // 4. Send Instant Telegram CRM Alert
+      try {
+        await fetch("/api/telegram", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            orderId: orderId || "NEW_ORDER",
+            firstName: formData.firstName,
+            lastName: formData.lastName,
+            phone: formData.phone,
+            city: formData.city,
+            warehouse: formData.warehouse,
+            paymentMethod: formData.paymentMethod,
+            totalPrice: totalPrice,
+            shippingCost: shippingCost,
+            grandTotal: grandTotal,
+            items: items.map((item) => ({
+              title: item.title,
+              color: item.color || "Default",
+              size: item.size || "Default",
+              quantity: item.quantity,
+              price: item.price,
+            })),
+          }),
+        });
+      } catch (telegramErr) {
+        // Log locally so that a third-party Telegram API failure does not disrupt the main purchase flow
+        console.error(
+          "Failed to transmit Telegram webhook alert:",
+          telegramErr,
+        );
+      }
+
+      // 5. Trigger state success visibility modal display
       setIsSuccessModalOpen(true);
     } catch (error: unknown) {
       if (error instanceof Error) {
@@ -329,11 +364,13 @@ function CheckoutView() {
                   value={formData.phone}
                   onChange={(e) => {
                     setPhoneError(false);
-                    const value = e.target.value;
-                    if (value.startsWith("+380")) {
-                      handleInputChange(e);
-                    } else if (value.length < 4) {
-                      setFormData((prev) => ({ ...prev, phone: "+380" }));
+                    let value = e.target.value;
+                    value = value.replace(/(?!^\+)[^\d]/g, "");
+                    if (!value.startsWith("+380")) {
+                      value = "+380";
+                    }
+                    if (value.length <= 13) {
+                      setFormData((prev) => ({ ...prev, phone: value }));
                     }
                   }}
                   placeholder="+380"
