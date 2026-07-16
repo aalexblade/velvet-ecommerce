@@ -1,6 +1,5 @@
 import { createSupabaseBrowserClient } from "@/shared/api/supabase/browserClient";
 
-// 🌟 Initialize the browser client instance securely
 const supabase = createSupabaseBrowserClient();
 
 export interface AdminOrderItem {
@@ -31,14 +30,15 @@ export interface AdminOrder {
   order_items?: AdminOrderItem[];
 }
 
-// 1. Отримання всіх замовлень разом із замовленими товарами (JOIN)
 export async function fetchAdminOrders(): Promise<AdminOrder[]> {
   const { data, error } = await supabase
     .from("orders")
-    .select(`
+    .select(
+      `
       *,
       order_items (*)
-    `)
+    `,
+    )
     .order("created_at", { ascending: false });
 
   if (error) {
@@ -49,10 +49,9 @@ export async function fetchAdminOrders(): Promise<AdminOrder[]> {
   return data as AdminOrder[];
 }
 
-// 2. Оновлення статусу конкретного замовлення
 export async function updateOrderStatus(
-  orderId: string, 
-  status: AdminOrder["status"]
+  orderId: string,
+  status: AdminOrder["status"],
 ): Promise<void> {
   const { error } = await supabase
     .from("orders")
