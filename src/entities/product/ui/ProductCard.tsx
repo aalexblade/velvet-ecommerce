@@ -26,7 +26,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       : [{ url: "/placeholder-product.webp", id: 0 }];
   }, [product.images]);
 
-  // Ініціалізуємо Embla карусель без автогортання та перетягування мишкою на десктопі
+
   const [emblaRef, emblaApi] = useEmblaCarousel({
     loop: true,
     duration: 25,
