@@ -26,7 +26,6 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       : [{ url: "/placeholder-product.webp", id: 0 }];
   }, [product.images]);
 
-
   const [emblaRef, emblaApi] = useEmblaCarousel({
     loop: true,
     duration: 25,
@@ -81,7 +80,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   return (
     <>
       <div className="group/card relative flex flex-col h-full bg-white transition-all duration-300 font-sans text-zinc-900">
-        {/* 1. ЗОНА ФОТО (Карусель зі стрілками при ховері) */}
+        {/* 1. PHOTO ZONE (Carousel with arrows when hovering) */}
         <div className="relative aspect-3/4 w-full overflow-hidden bg-neutral-50 rounded-xl border border-zinc-100 mb-3">
           <div className="w-full h-full overflow-hidden" ref={emblaRef}>
             <div className="flex h-full touch-pan-y">
@@ -104,13 +103,13 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             </div>
           </div>
 
-          {/* Клікабельний лінк на детальну сторінку по всій площі */}
+          {/*Clickable link to detailed page across the entire area */}
           <Link
             href={`/product/${product.id}`}
             className="absolute inset-0 z-10"
           />
 
-          {/* Елегантні брендові рожеві стрілки навігації, що з'являються при ховері */}
+          {/* Elegant branded pink navigation arrows that appear on hover */}
           {imagesToRender.length > 1 && (
             <div className="absolute inset-x-2 top-1/2 -translate-y-1/2 z-20 flex justify-between pointer-events-none opacity-0 group-hover/card:opacity-100 transition-opacity duration-300">
               <button
@@ -130,7 +129,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             </div>
           )}
 
-          {/* Кнопка «Швидкий перегляд» — Напівпрозора, розмита та витончена за макетом */}
+          {/* Quick View Button — Semi-transparent, blurred, and elegant in layout*/}
           <div className="absolute bottom-4 left-0 right-0 z-20 flex justify-center px-4 opacity-0 group-hover/card:opacity-100 transition-opacity duration-300">
             <button
               onClick={(e) => {
@@ -145,9 +144,9 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           </div>
         </div>
 
-        {/* 2. ІНФО-БЛОК (Порядок елементів чітко за макетом Figma) */}
+        {/* 2. INFO BLOCK (The order of elements is clearly according to the Figma layout) */}
         <div className="flex flex-col gap-1.5 px-1 grow">
-          {/* Рядок кольорів та дій */}
+          {/*A row of colors and actions */}
           <div className="flex items-center justify-between w-full min-h-6">
             <div className="flex items-center gap-1.5">
               {uniqueColors.map((color, cIdx) => (
@@ -189,21 +188,21 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             </div>
           </div>
 
-          {/* Назва продукту */}
+          {/* name products */}
           <Link href={`/product/${product.id}`} className="block">
             <h2 className="text-sm font-normal text-zinc-800 line-clamp-1 group-hover/card:text-[#C8205C] transition-colors tracking-tight">
               {product.title}
             </h2>
           </Link>
 
-          {/* Ціна */}
+          {/* Ptice */}
           <div className="text-sm font-bold text-zinc-900">
             {price.toLocaleString("uk-UA")} UAH
           </div>
         </div>
       </div>
 
-      {/* --- МОДАЛКА ШВИДКОГО ПЕРЕГЛЯДУ --- */}
+      {/* --- QUICK VIEW MODULE--- */}
       {isQuickViewOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-6 animate-in fade-in duration-200">
           <div
