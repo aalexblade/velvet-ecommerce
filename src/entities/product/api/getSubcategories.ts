@@ -22,7 +22,7 @@ export async function getSubcategories(parentSlug: string): Promise<Subcategory[
     .from("categories")
     .select("id")
     .eq("slug", parentSlug)
-    .single(); // .single() повертає один об'єкт замість масиву
+    .single(); 
 
   if (parentError || !parentCategory) {
     console.error(`Parent category with slug "${parentSlug}" not found:`, parentError?.message);
@@ -34,7 +34,7 @@ export async function getSubcategories(parentSlug: string): Promise<Subcategory[
     .from("categories")
     .select("*")
     .eq("parent_id", parentCategory.id)
-    .order("id", { ascending: true }); // сортуємо за ID по порядку
+    .order("id", { ascending: true }); 
 
   if (subError || !subcategories) {
     console.error("Failed to fetch subcategories:", subError?.message);
