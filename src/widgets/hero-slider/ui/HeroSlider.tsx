@@ -27,7 +27,6 @@ interface HeroSlide {
   display_order: number
 }
 
-// Створюємо екземпляр клієнта поза компонентом
 const supabase = createSupabaseBrowserClient()
 
 export const HeroSlider = () => {
@@ -96,92 +95,90 @@ export const HeroSlider = () => {
   if (slides.length === 0) return null
 
   return (
-    <section className="relative w-full h-[85vh] sm:h-[90vh] md:h-screen overflow-hidden bg-primary font-sans">
+    <section className="relative w-full h-screen min-h-125 overflow-hidden bg-primary font-sans">
       <Carousel
         setApi={setApi}
-        className="w-full h-full"
+        className="w-full h-full [&>div]:h-full"
         opts={{ loop: true }}
         plugins={plugins}
       >
         <CarouselContent className="ml-0 h-full">
           {slides.map((slide) => (
-            <CarouselItem key={slide.id} className="pl-0 h-full relative">
-              <div className="relative h-full w-full flex items-center justify-center sm:justify-start">
-                
-                {/* 1. Десктопна та планшетна картинка (від sm: / 640px) */}
-                <div className="absolute inset-0 hidden sm:block">
-                  <Image
-                    src={slide.image_url}
-                    alt={slide.title}
-                    fill
-                    priority
-                    className="object-cover object-center"
-                    unoptimized
-                  />
-                </div>
-
-                {/* 2. Вертикальна мобільна картинка (< 640px) */}
-                <div className="absolute inset-0 block sm:hidden">
-                  <Image
-                    src={slide.mobile_image_url || slide.image_url}
-                    alt={slide.title}
-                    fill
-                    priority
-                    className="object-cover object-center"
-                    unoptimized
-                  />
-                </div>
-
-                {/* 3. Оновлений Tailwind v4 градієнт */}
-                <div
-                  className="absolute inset-0 bg-linear-to-t from-black/80 via-black/40 to-black/30 sm:bg-linear-to-r sm:from-black/75 sm:via-black/35 sm:to-transparent z-10"
-                  aria-hidden="true"
+            <CarouselItem key={slide.id} className="pl-0 h-full w-full relative basis-full">
+              
+              {/* 1. Десктопна картинка */}
+              <div className="absolute inset-0 hidden sm:block h-full w-full">
+                <Image
+                  src={slide.image_url}
+                  alt={slide.title}
+                  fill
+                  priority
+                  className="object-cover object-center"
+                  unoptimized
                 />
+              </div>
 
-                {/* 4. Контент слайда */}
-                <div className="container relative z-20 mx-auto px-6 sm:px-12 lg:px-20 pt-16 sm:pt-20">
-                  <div className="max-w-xl text-center sm:text-left text-primary-foreground space-y-4 sm:space-y-6">
-                    <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.15]">
-                      {slide.title}
-                    </h1>
-                    <p className="text-sm sm:text-base md:text-lg text-primary-foreground/90 font-medium leading-relaxed max-w-md mx-auto sm:mx-0">
-                      {slide.description}
-                    </p>
-                    <div className="pt-2 sm:pt-4">
-                      <Button
-                        asChild
-                        className="bg-accent hover:bg-accent/90 text-accent-foreground font-medium tracking-wide px-8 py-6 rounded-md text-sm md:text-base transition-all duration-300 shadow-xl cursor-pointer"
-                      >
-                        <Link href={slide.link || "/catalog"}>
-                          {slide.button_text || "Дивитися колекцію"}
-                        </Link>
-                      </Button>
-                    </div>
+              {/* 2. Мобільна картинка */}
+              <div className="absolute inset-0 block sm:hidden h-full w-full">
+                <Image
+                  src={slide.mobile_image_url || slide.image_url}
+                  alt={slide.title}
+                  fill
+                  priority
+                  className="object-cover object-center"
+                  unoptimized
+                />
+              </div>
+
+              {/* 3. Градієнт для читабельності тексту */}
+              <div
+                className="absolute inset-0 bg-linear-to-t from-black/70 via-black/30 to-black/20 sm:bg-linear-to-r sm:from-black/70 sm:via-black/30 sm:to-transparent z-10"
+                aria-hidden="true"
+              />
+
+              {/* 4. Контент слайда */}
+              <div className="relative z-20 h-full container mx-auto px-6 sm:px-12 lg:px-20 flex items-center justify-center sm:justify-start pt-12">
+                <div className="max-w-xl text-center sm:text-left text-primary-foreground space-y-4 sm:space-y-6">
+                  <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.15]">
+                    {slide.title}
+                  </h1>
+                  <p className="text-sm sm:text-base md:text-lg text-primary-foreground/90 font-medium leading-relaxed max-w-md mx-auto sm:mx-0">
+                    {slide.description}
+                  </p>
+                  <div className="pt-2 sm:pt-4">
+                    <Button
+                      asChild
+                      className="bg-accent hover:bg-accent/90 text-accent-foreground font-medium tracking-wide px-8 py-6 rounded-md text-sm md:text-base transition-all duration-300 shadow-xl cursor-pointer"
+                    >
+                      <Link href={slide.link || "/catalog"}>
+                        {slide.button_text || "Дивитися колекцію"}
+                      </Link>
+                    </Button>
                   </div>
                 </div>
-
               </div>
+
             </CarouselItem>
           ))}
         </CarouselContent>
-
-        {/* Навігаційні смужки */}
-        <div className="absolute bottom-6 sm:bottom-10 left-1/2 -translate-x-1/2 flex gap-2 sm:gap-3 z-30">
-          {slides.map((_, index) => (
-            <button
-              key={index}
-              onClick={() => api?.scrollTo(index)}
-              className={cn(
-                "h-1 rounded-full transition-all duration-500 ease-in-out cursor-pointer",
-                current === index
-                  ? "w-10 sm:w-14 bg-primary-foreground"
-                  : "w-4 sm:w-6 bg-primary-foreground/30 hover:bg-primary-foreground/60"
-              )}
-              aria-label={`Перейти до слайду ${index + 1}`}
-            />
-          ))}
-        </div>
       </Carousel>
+
+      {/* 5. Рожеві індикатори */}
+      <div className="absolute bottom-6 sm:bottom-8 left-1/2 -translate-x-1/2 flex gap-2 sm:gap-3 z-30 pointer-events-auto">
+        {slides.map((_, index) => (
+          <button
+            key={index}
+            onClick={() => api?.scrollTo(index)}
+            className={cn(
+              "h-1 rounded-full transition-all duration-500 ease-in-out cursor-pointer",
+              current === index
+                ? "w-10 sm:w-14 bg-accent"
+                : "w-4 sm:w-6 bg-white/40 hover:bg-white/70"
+            )}
+            aria-label={`Перейти до слайду ${index + 1}`}
+          />
+        ))}
+      </div>
     </section>
   )
 }
