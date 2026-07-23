@@ -41,10 +41,10 @@ export interface Category {
 const STATIC_NAV_LINKS = [
   { label: "Новинки", href: "/catalog/novynky", slug: "novynky" },
   { label: "Білизна", href: "/catalog/bilyzna", slug: "bilyzna" },
-  { label: "Домашній одяг", href: "/catalog/homewear" },
-  { label: "Акції", href: "/catalog/sale" },
-  { label: "Про нас", href: "/about" },
-  { label: "Блог", href: "/blog" },
+  { label: "Домашній одяг", href: "/catalog/homewear", slug: "homewear" },
+  { label: "Акції", href: "/catalog/sale", slug: "sale" },
+  { label: "Про нас", href: "/about", slug: "about" },
+  { label: "Блог", href: "/blog", slug: "blog" },
 ];
 
 export function Header() {
@@ -104,10 +104,10 @@ export function Header() {
     <>
       <header
         className={cn(
-          "fixed top-0 left-0 right-0 z-50 transition-all duration-300 select-none",
+          "fixed top-0 left-0 right-0 z-50 transition-all duration-500 select-none",
           isScrolled || isMegaHovered || isWhiteHeaderPage
-            ? "bg-background text-foreground shadow-xs border-b border-muted/50 py-3"
-            : "bg-linear-to-b from-black/60 via-black/25 to-transparent text-white py-4 hover:bg-black/40",
+            ? "bg-background/90 text-foreground backdrop-blur-xl shadow-xs border-b border-muted py-3"
+            : "bg-black/25 backdrop-blur-2xl border-b border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.3)] text-white py-4",
         )}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -130,15 +130,18 @@ export function Header() {
             </Link>
 
             {/* --- DESKTOP NAV BAR --- */}
-            <nav className="hidden lg:flex items-center gap-6 xl:gap-7 h-full">
-              {STATIC_NAV_LINKS.map((link) => {
+            <nav className="hidden lg:flex items-center gap-6 xl:gap-8 h-full">
+              {STATIC_NAV_LINKS.map((link, linkIdx) => {
                 const categoryData = getCategoryData(link.slug);
                 const hasMega = Boolean(categoryData);
+                const isHovered = Boolean(
+                  link.slug && hoveredCategory?.slug === link.slug,
+                );
 
                 return (
                   <div
-                    key={link.label}
-                    className="h-full flex items-center"
+                    key={`${link.href}-${linkIdx}`}
+                    className="h-full flex items-center group relative"
                     onMouseEnter={() =>
                       hasMega && setHoveredCategory(categoryData)
                     }
@@ -147,19 +150,27 @@ export function Header() {
                     <Link
                       href={link.href}
                       className={cn(
-                        "text-xs font-semibold tracking-widest uppercase flex items-center gap-1 py-2 hover:opacity-75 transition-all cursor-pointer",
-                        hasMega && "pr-0.5",
+                        "text-xs md:text-sm font-semibold tracking-wider uppercase flex items-center gap-1 py-2 transition-colors duration-300 relative cursor-pointer",
+                        isHovered ? "text-accent" : "hover:text-accent",
                       )}
                     >
                       {link.label}
                       {hasMega && (
                         <ChevronDown
                           className={cn(
-                            "w-3 h-3 opacity-80 transition-transform duration-200",
-                            hoveredCategory?.slug === link.slug && "rotate-180",
+                            "w-3.5 h-3.5 transition-transform duration-300",
+                            isHovered && "rotate-180",
                           )}
                         />
                       )}
+
+                      {/* Тоненька риска h-[1px] з анімацією виїзду зліва направо */}
+                      <span
+                        className={cn(
+                          "absolute bottom-0 left-0 w-full h-px bg-accent transition-transform duration-300 origin-left scale-x-0 group-hover:scale-x-100",
+                          isHovered && "scale-x-100",
+                        )}
+                      />
                     </Link>
                   </div>
                 );
@@ -190,7 +201,7 @@ export function Header() {
                 <ShoppingBag size={19} strokeWidth={1.75} />
 
                 {totalCartCount > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 min-w-4 h-4 bg-[#C8205C] text-white text-[9px] font-bold rounded-full flex items-center justify-center px-1 border border-white shadow-xs">
+                  <span className="absolute -top-0.5 -right-0.5 min-w-4 h-4 bg-accent text-white text-[9px] font-bold rounded-full flex items-center justify-center px-1 border border-white shadow-xs">
                     {totalCartCount}
                   </span>
                 )}
@@ -203,7 +214,7 @@ export function Header() {
                 <User size={19} strokeWidth={1.75} />
               </button>
 
-              {/* --- BURGER TRIGGER FOR MOBILE/TABLET --- */}
+              {/* --- BURGER TRIGGER FOR MOBILE/TABLET (СПРАВА) --- */}
               <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                 className="lg:hidden p-1.5 -mr-1 hover:opacity-70 transition-opacity cursor-pointer ml-1"
@@ -224,7 +235,7 @@ export function Header() {
           }
           onMouseLeave={() => setHoveredCategory(null)}
           className={cn(
-            "hidden lg:block absolute left-0 right-0 top-full bg-background border-b border-muted transition-all duration-200 shadow-xl overflow-hidden z-40 text-foreground",
+            "hidden lg:block absolute left-0 right-0 top-full bg-background border-b border-muted transition-all duration-300 shadow-xl overflow-hidden z-40 text-foreground",
             isMegaHovered
               ? "max-h-125 opacity-100 py-8"
               : "max-h-0 opacity-0 py-0 pointer-events-none",
@@ -264,7 +275,7 @@ export function Header() {
       </header>
 
       {/* ==========================================
-          MOBILE / TABLET BURGER DRAWER
+          MOBILE / TABLET BURGER DRAWER (СПРАВА)
           ========================================== */}
       <div
         className={cn(
