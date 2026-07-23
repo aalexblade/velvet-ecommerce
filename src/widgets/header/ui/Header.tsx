@@ -112,14 +112,22 @@ export function Header() {
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-11">
-            
             {/* --- BRAND LOGO --- */}
-            <div className="text-left font-medium tracking-[0.2em] uppercase transition-opacity hover:opacity-85">
-              <Link href="/" className="flex flex-col leading-none">
-                <span className="text-base md:text-lg font-bold tracking-[0.25em]">VELVET</span>
-                <span className="text-[9px] md:text-[10px] font-normal tracking-[0.38em] text-white/80 -mt-0.5">SECRETS</span>
-              </Link>
-            </div>
+            <Link href="/" className="relative flex items-center shrink-0">
+              <Image
+                src={
+                  isScrolled || isMegaHovered || isWhiteHeaderPage
+                    ? "https://mylhoikievakodeutzsi.supabase.co/storage/v1/object/public/assets/logo/logo-black.png"
+                    : "https://mylhoikievakodeutzsi.supabase.co/storage/v1/object/public/assets/logo/logo-white.png"
+                }
+                alt="Velvet Secrets Logo"
+                width={150}
+                height={32}
+                priority
+                className="h-6 md:h-8 w-auto object-contain transition-opacity hover:opacity-85"
+                unoptimized
+              />
+            </Link>
 
             {/* --- DESKTOP NAV BAR --- */}
             <nav className="hidden lg:flex items-center gap-6 xl:gap-7 h-full">
@@ -131,7 +139,9 @@ export function Header() {
                   <div
                     key={link.label}
                     className="h-full flex items-center"
-                    onMouseEnter={() => hasMega && setHoveredCategory(categoryData)}
+                    onMouseEnter={() =>
+                      hasMega && setHoveredCategory(categoryData)
+                    }
                     onMouseLeave={() => hasMega && setHoveredCategory(null)}
                   >
                     <Link
@@ -209,7 +219,9 @@ export function Header() {
             DESKTOP MEGA MENU CANVAS OVERLAY
             ========================================== */}
         <div
-          onMouseEnter={() => hoveredCategory && setHoveredCategory(hoveredCategory)}
+          onMouseEnter={() =>
+            hoveredCategory && setHoveredCategory(hoveredCategory)
+          }
           onMouseLeave={() => setHoveredCategory(null)}
           className={cn(
             "hidden lg:block absolute left-0 right-0 top-full bg-background border-b border-muted transition-all duration-200 shadow-xl overflow-hidden z-40 text-foreground",
@@ -270,7 +282,9 @@ export function Header() {
       >
         <div className="space-y-6 overflow-y-auto no-scrollbar pt-2">
           <div className="flex justify-between items-center pb-4 border-b border-muted">
-            <span className="text-xs font-bold uppercase tracking-[0.2em]">Меню</span>
+            <span className="text-xs font-bold uppercase tracking-[0.2em]">
+              Меню
+            </span>
             <button
               onClick={() => setIsMobileMenuOpen(false)}
               className="p-1 hover:opacity-60 transition-opacity cursor-pointer"
@@ -287,7 +301,10 @@ export function Header() {
 
               if (hasMega && categoryData) {
                 return (
-                  <div key={link.label} className="border-b border-muted/60 pb-2">
+                  <div
+                    key={link.label}
+                    className="border-b border-muted/60 pb-2"
+                  >
                     <button
                       onClick={() =>
                         setOpenMobileSlug(isOpen ? null : link.slug || null)
