@@ -141,7 +141,7 @@ export function Header() {
                 return (
                   <div
                     key={`${link.href}-${linkIdx}`}
-                    className="h-full flex items-center group relative"
+                    className="h-full flex items-center group relative" 
                     onMouseEnter={() =>
                       hasMega && setHoveredCategory(categoryData)
                     }
