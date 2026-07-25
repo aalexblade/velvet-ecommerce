@@ -164,7 +164,7 @@ export function Header() {
                         />
                       )}
 
-                      {/* Тоненька риска h-[1px] з анімацією виїзду зліва направо */}
+                      {/* littel line */}
                       <span
                         className={cn(
                           "absolute bottom-0 left-0 w-full h-px bg-accent transition-transform duration-300 origin-left scale-x-0 group-hover:scale-x-100",
