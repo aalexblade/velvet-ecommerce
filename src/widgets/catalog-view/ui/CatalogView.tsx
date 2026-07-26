@@ -3,7 +3,7 @@
 import React, { useState, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { X } from "lucide-react";
+import { ChevronRight, X } from "lucide-react";
 import { Product, ProductCard } from "@/entities/product";
 import { CatalogFilters } from "@/features/filters";
 import { ProductDetailsBlock } from "@/widgets/product-details-block";
@@ -33,85 +33,102 @@ export function CatalogView({
 
   const products = useMemo(() => initialProducts, [initialProducts]);
 
+  // Page title mapping according to the design mockup
   const currentCategoryTitle = useMemo(() => {
     if (!slug || slug.length === 0) return "Бюстгальтери";
     const lastSegment = slug[slug.length - 1].toLowerCase();
     const registry: Record<string, string> = {
       biusthaltery: "Бюстгальтери",
-      bralette: "Бралети",
-      "push-up": "Push-up",
+      bralette: "Бралета",
       balconette: "Балконет",
-      bilyzna: "Білизна",
+      bilyzna: "Бюстгальтери", // Override default bilyzna slug to display "Бюстгальтери"
       corset: "Корсети",
+      wireless: "Без кісточок",
+      sports: "Спортивні",
+      "size-guide": "Підібрати розмір",
     };
     return registry[lastSegment] || "Бюстгальтери";
   }, [slug]);
 
   return (
     <div className="min-h-screen bg-background text-foreground antialiased pt-28 md:pt-32 pb-16">
-      {/* --- Breadcrumbs Navigation --- */}
+      {/* --- Breadcrumbs Navigation (Matching Figma with Chevron Icons) --- */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <nav className="flex text-xs md:text-sm text-muted-foreground whitespace-nowrap overflow-x-auto no-scrollbar">
+        <nav className="flex items-center gap-2 text-xs md:text-sm text-muted-foreground whitespace-nowrap overflow-x-auto no-scrollbar">
           <Link
             href="/"
             className="hover:text-foreground transition-colors cursor-pointer"
           >
             Головна
           </Link>
-          <span className="mx-2">/</span>
+          <ChevronRight className="w-3.5 h-3.5 shrink-0 text-muted-foreground/60" />
           <Link
-            href="/catalog"
+            href="/catalog/bilyzna"
             className="hover:text-foreground transition-colors cursor-pointer"
           >
             Білизна
           </Link>
-          <span className="mx-2">/</span>
+          <ChevronRight className="w-3.5 h-3.5 shrink-0 text-muted-foreground/60" />
           <span className="text-foreground font-medium">
             {currentCategoryTitle}
           </span>
         </nav>
       </div>
 
-      {/* --- Category Title --- */}
+      {/* --- Category Header & Description --- */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4 md:mt-6">
-        <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-foreground uppercase mb-1">
+        <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">
           {currentCategoryTitle}
         </h1>
-        <p className="mt-2 text-sm md:text-base text-muted-foreground max-w-3xl leading-relaxed">
-          Відкрийте для себе ідеальне поєднання витонченого дизайну та
-          бездоганної підтримки.
+        <p className="mt-2 text-sm md:text-base text-muted-foreground max-w-2xl leading-relaxed">
+          Комфорт, підтримка й краса — в нашій колекції бюстгальтерів ти знайдеш
+          саме те, що підходить для тебе.
         </p>
       </div>
 
-      {/* --- Live Subcategories Slider Section --- */}
+      {/* --- Subcategories Grid / Slider Section --- */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6 md:mt-8">
-        <div className="flex gap-4 overflow-x-auto pb-3 pt-1 no-scrollbar snap-x scroll-smooth">
+        <div className="flex gap-4 overflow-x-auto pb-4 pt-1 no-scrollbar snap-x scroll-smooth">
           {initialSubcategories.map((sub, index) => {
+            const isSizeGuide = sub.slug === "size-guide";
             const fallbackImage =
-              "https://placehold.co/120x120/f5f5f5/a1a1aa?text=Velvet";
+              "https://mylhoikievakodeutzsi.supabase.co/storage/v1/object/public/assets/categories/bralette.jpg";
+
+            // Open size guide modal or handle navigation
+            const handleClick = (e: React.MouseEvent) => {
+              if (isSizeGuide) {
+                e.preventDefault();
+                console.log("Open size calculator modal");
+              }
+            };
+
             return (
-              <div
+              <Link
                 key={sub.id}
-                className="shrink-0 w-24 md:w-28 text-center cursor-pointer group snap-start"
+                href={isSizeGuide ? "#" : `/catalog/bilyzna/${sub.slug}`}
+                onClick={handleClick}
+                className="shrink-0 w-36 sm:w-44 md:w-48 bg-card rounded-xl overflow-hidden border border-border/50 shadow-xs hover:shadow-md transition-all duration-300 group snap-start flex flex-col cursor-pointer"
               >
-                <div className="w-full aspect-square rounded-2xl overflow-hidden bg-muted border border-transparent group-hover:border-border transition-all duration-300 shadow-xs relative">
+                {/* Image Box Container - Full cover without internal paddings */}
+                <div className="w-full aspect-square relative bg-muted/20 overflow-hidden">
                   <Image
                     src={sub.image || fallbackImage}
                     alt={sub.title}
                     fill
-                    sizes="(max-width: 768px) 85px, 110px"
-                    priority={index < 4}
+                    sizes="(max-width: 768px) 150px, 200px"
+                    priority={index < 5}
                     className="object-cover group-hover:scale-105 transition-transform duration-300"
                     unoptimized
                   />
                 </div>
-                <h3 className="mt-2 text-xs md:text-sm font-medium text-foreground group-hover:text-accent transition-colors line-clamp-1">
-                  {sub.title}
-                </h3>
-                <p className="text-[10px] md:text-xs text-muted-foreground">
-                  Колекція
-                </p>
-              </div>
+
+                {/* Subcategory Label Box */}
+                <div className="p-3 bg-card border-t border-border/40">
+                  <h3 className="text-xs sm:text-sm font-medium text-foreground group-hover:text-accent transition-colors line-clamp-1">
+                    {sub.title}
+                  </h3>
+                </div>
+              </Link>
             );
           })}
         </div>
