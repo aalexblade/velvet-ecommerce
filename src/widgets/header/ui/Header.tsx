@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
@@ -56,6 +56,9 @@ export function Header() {
   const [hoveredCategory, setHoveredCategory] = useState<Category | null>(null);
   const [openMobileSlug, setOpenMobileSlug] = useState<string | null>(null);
 
+  // Реф для зберігання таймера затримки закриття
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
   const isWhiteHeaderPage = pathname === "/cart" || pathname === "/checkout";
 
   const cartItems = useCartStore((state) => state.items);
@@ -96,6 +99,23 @@ export function Header() {
         (c) => c.slug === slug && c.menu_columns && c.menu_columns.length > 0,
       ) || null
     );
+  };
+
+  // Функції управління ховером із плавним таймером
+  const handleMouseEnter = (categoryData: Category | null) => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+    setHoveredCategory(categoryData);
+  };
+
+  const handleMouseLeave = () => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+    timeoutRef.current = setTimeout(() => {
+      setHoveredCategory(null);
+    }, 150); // 150ms затримки дає ідеальний комфорт для переміщення мишки
   };
 
   const isMegaHovered = Boolean(hoveredCategory);
@@ -141,16 +161,16 @@ export function Header() {
                 return (
                   <div
                     key={`${link.href}-${linkIdx}`}
-                    className="h-full flex items-center group relative" 
+                    className="h-full flex items-center group relative"
                     onMouseEnter={() =>
-                      hasMega && setHoveredCategory(categoryData)
+                      hasMega && handleMouseEnter(categoryData)
                     }
-                    onMouseLeave={() => hasMega && setHoveredCategory(null)}
+                    onMouseLeave={() => hasMega && handleMouseLeave()}
                   >
                     <Link
                       href={link.href}
                       className={cn(
-                        "text-xs md:text-sm font-semibold tracking-wider uppercase flex items-center gap-1 py-2 transition-colors duration-300 relative cursor-pointer",
+                        "text-xs md:text-sm font-semibold tracking-wider uppercase flex items-center gap-1 h-full transition-colors duration-300 relative cursor-pointer",
                         isHovered ? "text-accent" : "hover:text-accent",
                       )}
                     >
@@ -164,7 +184,7 @@ export function Header() {
                         />
                       )}
 
-                      {/* littel line */}
+                      {/* Тоненька риска підкреслення */}
                       <span
                         className={cn(
                           "absolute bottom-0 left-0 w-full h-px bg-accent transition-transform duration-300 origin-left scale-x-0 group-hover:scale-x-100",
@@ -214,7 +234,7 @@ export function Header() {
                 <User size={19} strokeWidth={1.75} />
               </button>
 
-              {/* --- BURGER TRIGGER FOR MOBILE/TABLET (СПРАВА) --- */}
+              {/* --- BURGER TRIGGER FOR MOBILE/TABLET --- */}
               <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                 className="lg:hidden p-1.5 -mr-1 hover:opacity-70 transition-opacity cursor-pointer ml-1"
@@ -231,9 +251,9 @@ export function Header() {
             ========================================== */}
         <div
           onMouseEnter={() =>
-            hoveredCategory && setHoveredCategory(hoveredCategory)
+            hoveredCategory && handleMouseEnter(hoveredCategory)
           }
-          onMouseLeave={() => setHoveredCategory(null)}
+          onMouseLeave={handleMouseLeave}
           className={cn(
             "hidden lg:block absolute left-0 right-0 top-full bg-background border-b border-muted transition-all duration-300 shadow-xl overflow-hidden z-40 text-foreground",
             isMegaHovered
@@ -275,7 +295,7 @@ export function Header() {
       </header>
 
       {/* ==========================================
-          MOBILE / TABLET BURGER DRAWER (СПРАВА)
+          MOBILE / TABLET BURGER DRAWER
           ========================================== */}
       <div
         className={cn(
