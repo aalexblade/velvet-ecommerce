@@ -31,7 +31,6 @@ export function CatalogView({
     null,
   );
 
-  // Використовуємо тільки живі продукти з бази даних Supabase без моків
   const products = useMemo(() => initialProducts, [initialProducts]);
 
   const currentCategoryTitle = useMemo(() => {
@@ -49,18 +48,9 @@ export function CatalogView({
   }, [slug]);
 
   return (
-    <div className="min-h-screen bg-background text-foreground antialiased pb-12">
-      <style
-        dangerouslySetInnerHTML={{
-          __html: `
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-      `,
-        }}
-      />
-
+    <div className="min-h-screen bg-background text-foreground antialiased pt-28 md:pt-32 pb-16">
       {/* --- Breadcrumbs Navigation --- */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <nav className="flex text-xs md:text-sm text-muted-foreground whitespace-nowrap overflow-x-auto no-scrollbar">
           <Link
             href="/"
@@ -104,7 +94,7 @@ export function CatalogView({
                 key={sub.id}
                 className="shrink-0 w-24 md:w-28 text-center cursor-pointer group snap-start"
               >
-                <div className="w-full aspect-square rounded-2xl overflow-hidden bg-muted border border-transparent group-hover:border-muted-foreground/20 transition-all duration-300 shadow-sm relative">
+                <div className="w-full aspect-square rounded-2xl overflow-hidden bg-muted border border-transparent group-hover:border-border transition-all duration-300 shadow-xs relative">
                   <Image
                     src={sub.image || fallbackImage}
                     alt={sub.title}
@@ -135,7 +125,7 @@ export function CatalogView({
 
         <div className="w-full mt-2">
           {products.length === 0 ? (
-            <div className="text-center py-16 text-zinc-400 text-sm font-light">
+            <div className="text-center py-16 text-muted-foreground text-sm font-light">
               Не знайдено преміальних товарів за вказаними параметрами
               фільтрації.
             </div>
@@ -150,16 +140,16 @@ export function CatalogView({
           {/* --- Pagination --- */}
           <div className="mt-12">
             <nav className="flex justify-center items-center gap-1">
-              <button className="w-9 h-9 rounded-xl flex items-center justify-center text-sm font-medium border border-zinc-200 bg-white text-zinc-400 cursor-pointer">
+              <button className="w-9 h-9 rounded-xl flex items-center justify-center text-sm font-medium border border-border bg-card text-muted-foreground hover:text-foreground cursor-pointer transition-colors">
                 &larr;
               </button>
-              <button className="w-9 h-9 rounded-xl flex items-center justify-center text-sm font-bold bg-[#C8205C] text-white shadow-sm">
+              <button className="w-9 h-9 rounded-xl flex items-center justify-center text-sm font-bold bg-accent text-accent-foreground shadow-xs">
                 1
               </button>
-              <button className="w-9 h-9 rounded-xl flex items-center justify-center text-sm font-medium hover:bg-zinc-50 text-zinc-700 transition-colors cursor-pointer border border-zinc-200">
+              <button className="w-9 h-9 rounded-xl flex items-center justify-center text-sm font-medium border border-border bg-card text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer">
                 2
               </button>
-              <button className="w-9 h-9 rounded-xl flex items-center justify-center text-sm font-medium border border-zinc-200 bg-white text-zinc-400 cursor-pointer">
+              <button className="w-9 h-9 rounded-xl flex items-center justify-center text-sm font-medium border border-border bg-card text-muted-foreground hover:text-foreground cursor-pointer transition-colors">
                 &rarr;
               </button>
             </nav>
@@ -175,10 +165,10 @@ export function CatalogView({
             className="absolute inset-0 bg-black/40 backdrop-blur-md transition-opacity cursor-pointer"
           />
 
-          <div className="relative bg-white w-full max-w-5xl rounded-3xl shadow-2xl border border-zinc-100 overflow-y-auto no-scrollbar max-h-[90vh] p-6 md:p-8 z-10 scale-in duration-300">
+          <div className="relative bg-background text-foreground w-full max-w-5xl rounded-3xl shadow-2xl border border-border overflow-y-auto no-scrollbar max-h-[90vh] p-6 md:p-8 z-10 scale-in duration-300">
             <button
               onClick={() => setSelectedQuickView(null)}
-              className="absolute top-4 right-4 md:top-6 md:right-6 p-2 rounded-full border border-zinc-100 text-zinc-400 hover:text-zinc-900 hover:bg-zinc-50 cursor-pointer transition-all z-30"
+              className="absolute top-4 right-4 md:top-6 md:right-6 p-2 rounded-full border border-border text-muted-foreground hover:text-foreground hover:bg-muted cursor-pointer transition-all z-30"
               aria-label="Закрити вікно"
             >
               <X className="w-4 h-4" />
