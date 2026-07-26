@@ -1,6 +1,5 @@
 import { CatalogView } from "@/widgets/catalog-view";
 import { getProducts } from "@/entities/product/api/getProducts";
-// 1. Імпортуємо наш новий інструмент фетчингу субкатегорій
 import { getSubcategories } from "@/entities/product/api/getSubcategories";
 
 interface CatalogPageProps {
@@ -27,11 +26,9 @@ export async function CatalogPage({
     sort: typeof searchParams.sort === "string" ? searchParams.sort : undefined,
   };
 
-  // 2. Викликаємо обидва запити паралельно або послідовно на сервері
   const products = await getProducts(safeSlug, filters);
   const subcategories = await getSubcategories("bilyzna");
 
-  // 3. Передаємо завантажені з Supabase субкатегорії у пропси компоненті
   return (
     <CatalogView 
       slug={safeSlug} 
