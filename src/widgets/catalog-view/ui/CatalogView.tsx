@@ -7,6 +7,7 @@ import { ChevronRight, X } from "lucide-react";
 import { Product, ProductCard } from "@/entities/product";
 import { CatalogFilters } from "@/features/filters";
 import { ProductDetailsBlock } from "@/widgets/product-details-block";
+import { SizeCalculatorForm } from "@/features/product-size-calculator";
 
 interface Subcategory {
   id: number;
@@ -30,6 +31,8 @@ export function CatalogView({
   const [selectedQuickView, setSelectedQuickView] = useState<Product | null>(
     null,
   );
+  // State for controlling size calculator modal visibility
+  const [isSizeGuideOpen, setIsSizeGuideOpen] = useState(false);
 
   const products = useMemo(() => initialProducts, [initialProducts]);
 
@@ -98,7 +101,8 @@ export function CatalogView({
             const handleClick = (e: React.MouseEvent) => {
               if (isSizeGuide) {
                 e.preventDefault();
-                console.log("Open size calculator modal");
+                e.stopPropagation();
+                setIsSizeGuideOpen(true);
               }
             };
 
@@ -192,6 +196,48 @@ export function CatalogView({
             </button>
 
             <ProductDetailsBlock product={selectedQuickView} />
+          </div>
+        </div>
+      )}
+
+      {/* --- Size Calculator Modal Layer --- */}
+      {isSizeGuideOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-6 animate-in fade-in duration-200">
+          {/* Backdrop (Only clicking here closes the modal) */}
+          <div
+            onClick={() => setIsSizeGuideOpen(false)}
+            className="absolute inset-0 bg-black/40 backdrop-blur-xs transition-opacity cursor-pointer"
+          />
+
+          {/* Modal Container (Event propagation blocked) */}
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="relative bg-background text-foreground w-full max-w-lg rounded-2xl shadow-2xl border border-border/40 overflow-hidden p-6 md:p-8 z-10 scale-in duration-200"
+          >
+            <button
+              type="button"
+              onClick={() => setIsSizeGuideOpen(false)}
+              className="absolute top-5 right-5 text-muted-foreground hover:text-foreground cursor-pointer transition-colors"
+              aria-label="Закрити вікно"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="mb-6">
+              <h2 className="text-lg md:text-xl font-bold tracking-tight text-foreground uppercase">
+                Підбір ідеального розміру
+              </h2>
+              <p className="mt-1 text-xs md:text-sm text-muted-foreground leading-relaxed">
+                Введіть ваші точні анатомічні заміри в сантиметрах для розрахунку відповідної білизни за канонами нашого бренду.
+              </p>
+            </div>
+
+            <SizeCalculatorForm
+              onApplyFilter={(size) => {
+                setIsSizeGuideOpen(false);
+                console.log("Apply filter size:", size);
+              }}
+            />
           </div>
         </div>
       )}
