@@ -44,7 +44,7 @@ export function CatalogView({
       biusthaltery: "Бюстгальтери",
       bralette: "Бралета",
       balconette: "Балконет",
-      bilyzna: "Бюстгальтери", // Override default bilyzna slug to display "Бюстгальтери"
+      bilyzna: "Бюстгальтери",
       corset: "Корсети",
       wireless: "Без кісточок",
       sports: "Спортивні",
