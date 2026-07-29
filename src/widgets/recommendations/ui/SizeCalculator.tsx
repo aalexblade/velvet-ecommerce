@@ -15,9 +15,19 @@ export interface SizeCalculatorProps {
  * Mobile/Tablet (<lg): Header (1) -> Image (2) -> Form (3) in a single column.
  * Desktop (>=lg): Balanced two-column grid.
  */
-export const SizeCalculator: React.FC<SizeCalculatorProps> = ({ onSizeCalculated }) => {      
+export const SizeCalculator: React.FC<SizeCalculatorProps> = ({
+  onSizeCalculated,
+}) => {
   const modelImageUrl =
     "https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=1200";
+
+  const scrollToHowTo = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    const element = document.getElementById("size-how-to");
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth" });
+    }
+  };
 
   return (
     <section className="w-full bg-background py-12 md:py-20 overflow-hidden">
@@ -27,12 +37,13 @@ export const SizeCalculator: React.FC<SizeCalculatorProps> = ({ onSizeCalculated
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4 tracking-tight">
             Обери свій ідеальний розмір
           </h2>
-          <p className="text-base text-muted-foreground mb-4 leading-relaxed">
+          <p className="text-base text-muted-foreground mb-2 leading-relaxed">
             Введіть свої мірки, щоб дізнатися свій точний розмір.
           </p>
           <a
-            href="#instruction"
-            className="text-primary font-semibold underline underline-offset-4 text-base mb-8 inline-block hover:opacity-80 transition-opacity"
+            href="#size-how-to"
+            onClick={scrollToHowTo}
+            className="text-accent font-semibold underline underline-offset-4 text-sm md:text-base mb-6 inline-block hover:opacity-80 transition-opacity cursor-pointer"
           >
             Інструкція
           </a>
@@ -61,7 +72,10 @@ export const SizeCalculator: React.FC<SizeCalculatorProps> = ({ onSizeCalculated
 
         {/* 3. Form Feature: Bottom on mobile (order-3), Bottom-Right on Desktop */}
         <div className="order-3 lg:col-start-2 lg:row-start-2 w-full">
-          <SizeCalculatorForm onSizeCalculated={onSizeCalculated} />
+          <SizeCalculatorForm
+            onSizeCalculated={onSizeCalculated}
+            showHowToAccordion={false}
+          />
         </div>
       </div>
     </section>
