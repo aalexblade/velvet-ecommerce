@@ -5,15 +5,18 @@ import { measurementFields } from "../model/config";
 import { getSuggestedSize } from "../lib/getSuggestedSize";
 import { SuggestedSize } from "../model/types";
 import { MeasurementInput } from "./MeasurementInput";
+import { SizeGuideHowToAccordion } from "./SizeGuideHowToAccordion";
 
 export interface SizeCalculatorFormProps {
   onSizeCalculated?: (size: string) => void;
   onApplyFilter?: (size: string) => void;
+  showHowToAccordion?: boolean; // Прапорець для відображення акордеону
 }
 
 export const SizeCalculatorForm = ({
   onSizeCalculated,
   onApplyFilter,
+  showHowToAccordion = true, // За замовчуванням показуємо (для модалок)
 }: SizeCalculatorFormProps) => {
   const [values, setValues] = useState<Record<string, string>>({
     overbust: "",
@@ -29,10 +32,8 @@ export const SizeCalculatorForm = ({
   };
 
   const handleCalculate = (e: React.MouseEvent<HTMLButtonElement>) => {
-    // Prevent form submission and page refresh
     e.preventDefault();
 
-    // Collect all valid numerical inputs regardless of dynamic key order
     const numericValues = Object.values(values)
       .map((v) => parseFloat(v))
       .filter((n) => !isNaN(n) && n > 0);
@@ -65,6 +66,9 @@ export const SizeCalculatorForm = ({
           />
         ))}
       </div>
+
+      {/* Показуємо акордеон ТІЛЬКИ якщо showHowToAccordion === true */}
+      {showHowToAccordion && <SizeGuideHowToAccordion />}
 
       {/* Dynamic Result Display */}
       {hasCalculated && (
