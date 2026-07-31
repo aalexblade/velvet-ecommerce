@@ -28,20 +28,15 @@ export const Pagination: React.FC<PaginationProps> = ({
       <PaginationContent className="gap-2">
         {/* Кнопка "Назад" */}
         <PaginationItem>
-          <a
-            href="#"
-            onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
-              e.preventDefault();
-              if (currentPage > 1) onPageChange(currentPage - 1);
-            }}
-            aria-disabled={currentPage === 1}
-            className={`w-9 h-9 flex items-center justify-center rounded-lg transition-colors cursor-pointer text-zinc-500 hover:bg-zinc-100 hover:text-zinc-800 ${
-              currentPage === 1 ? "pointer-events-none opacity-30" : ""
-            }`}
+          <button
+            type="button"
+            onClick={() => currentPage > 1 && onPageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+            className="w-9 h-9 flex items-center justify-center rounded-lg transition-colors cursor-pointer text-zinc-500 hover:bg-zinc-100 hover:text-zinc-800 disabled:pointer-events-none disabled:opacity-30"
             aria-label="Попередня сторінка"
           >
             <ChevronLeft className="w-4 h-4" />
-          </a>
+          </button>
         </PaginationItem>
 
         {/* Номери сторінок */}
@@ -49,12 +44,10 @@ export const Pagination: React.FC<PaginationProps> = ({
           const isActive = page === currentPage;
           return (
             <PaginationItem key={page}>
-              <a
-                href="#"
-                onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
-                  e.preventDefault();
-                  onPageChange(page);
-                }}
+              <button
+                type="button"
+                onClick={() => onPageChange(page)}
+                disabled={isActive}
                 className={`w-9 h-9 flex items-center justify-center rounded-lg text-sm font-medium transition-all cursor-pointer ${
                   isActive
                     ? "border border-[#C8102E] text-[#C8102E] bg-white cursor-default"
@@ -62,27 +55,24 @@ export const Pagination: React.FC<PaginationProps> = ({
                 }`}
               >
                 {page}
-              </a>
+              </button>
             </PaginationItem>
           );
         })}
 
         {/* Кнопка "Вперед" */}
         <PaginationItem>
-          <a
-            href="#"
-            onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
-              e.preventDefault();
-              if (currentPage < totalPages) onPageChange(currentPage + 1);
-            }}
-            aria-disabled={currentPage === totalPages}
-            className={`w-9 h-9 flex items-center justify-center rounded-lg transition-colors cursor-pointer text-zinc-500 hover:bg-zinc-100 hover:text-zinc-800 ${
-              currentPage === totalPages ? "pointer-events-none opacity-30" : ""
-            }`}
+          <button
+            type="button"
+            onClick={() =>
+              currentPage < totalPages && onPageChange(currentPage + 1)
+            }
+            disabled={currentPage === totalPages}
+            className="w-9 h-9 flex items-center justify-center rounded-lg transition-colors cursor-pointer text-zinc-500 hover:bg-zinc-100 hover:text-zinc-800 disabled:pointer-events-none disabled:opacity-30"
             aria-label="Наступна сторінка"
           >
             <ChevronRight className="w-4 h-4" />
-          </a>
+          </button>
         </PaginationItem>
       </PaginationContent>
     </PaginationRoot>
