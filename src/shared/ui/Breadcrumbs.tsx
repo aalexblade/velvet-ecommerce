@@ -1,39 +1,32 @@
-import React from 'react';
-import Link from 'next/link';
-import { ChevronRight } from 'lucide-react';
-import { cn } from '@/shared/lib/utils';
+import React from "react";
+import Link from "next/link";
+import { ChevronRight } from "lucide-react";
+import { cn } from "@/shared/lib/utils";
 
-/**
- * Represents an individual step in the navigational trail.
- */
 export interface PathSegment {
   pageTitle: string;
   targetUrl?: string;
 }
 
-/**
- * Properties for the Breadcrumbs component.
- * @property navigationPath - The sequence of pages leading to the current location.
- */
 export interface BreadcrumbsProps {
-  navigationPath: PathSegment[];
+  navigationPath?: PathSegment[]; // Робимо опціональним із фолбеком
   className?: string;
 }
 
-/**
- * A descriptive and responsive breadcrumb navigation component.
- * Follows FSD architectural patterns and utilizes theme-aware design tokens.
- */
-export const Breadcrumbs: React.FC<BreadcrumbsProps> = ({ 
-  navigationPath, 
-  className = '' 
+export const Breadcrumbs: React.FC<BreadcrumbsProps> = ({
+  navigationPath = [], // Захист від undefined
+  className = "",
 }) => {
+  if (!navigationPath || navigationPath.length === 0) {
+    return null;
+  }
+
   return (
-    <nav 
-      aria-label="Breadcrumb Navigation" 
+    <nav
+      aria-label="Breadcrumb Navigation"
       className={cn(
         "flex items-center flex-wrap gap-2 py-4 text-sm md:text-base text-left w-full",
-        className
+        className,
       )}
     >
       <ol className="flex items-center flex-wrap gap-2">
@@ -42,7 +35,10 @@ export const Breadcrumbs: React.FC<BreadcrumbsProps> = ({
           const hasValidLink = segment.targetUrl && !isLastSegment;
 
           return (
-            <li key={`${segment.pageTitle}-${index}`} className="flex items-center gap-2">
+            <li
+              key={`${segment.pageTitle}-${index}`}
+              className="flex items-center gap-2"
+            >
               {hasValidLink ? (
                 <>
                   <Link
@@ -51,14 +47,14 @@ export const Breadcrumbs: React.FC<BreadcrumbsProps> = ({
                   >
                     {segment.pageTitle}
                   </Link>
-                  <ChevronRight 
-                    className="text-border w-3.5 h-3.5 shrink-0" 
-                    aria-hidden="true" 
+                  <ChevronRight
+                    className="text-border w-3.5 h-3.5 shrink-0"
+                    aria-hidden="true"
                   />
                 </>
               ) : (
-                <span 
-                  className="text-foreground font-medium" 
+                <span
+                  className="text-foreground font-medium"
                   aria-current="page"
                 >
                   {segment.pageTitle}
