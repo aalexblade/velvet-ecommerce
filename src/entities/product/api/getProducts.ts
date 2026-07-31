@@ -37,17 +37,24 @@ interface DBProductResponse {
   product_images: DBProductImage[];
 }
 
+export interface GetProductsResult {
+  products: Product[];
+  totalCount: number;
+  totalPages: number;
+}
+
 /**
- * Server-side function to fetch products based on URL slug criteria and filters.
- * Refactored to fetch live operational data directly from Supabase with relational mapping.
+ * Server-side function to fetch paginated products based on URL slug criteria and filters.
  */
 export async function getProducts(
   slug: string[],
   filters?: ProductFilters,
-): Promise<Product[]> {
+  page: number = 1,
+  limit: number = 12
+): Promise<GetProductsResult> {
   const supabase = await createSupabaseServerClient();
 
-  // Запитуємо дані з чітким зазначенням реляційних таблиць
+  // 1. Отримуємо всі активні товари
   const { data, error } = await supabase
     .from("products")
     .select(
@@ -55,22 +62,23 @@ export async function getProducts(
       *,
       product_variants (*),
       product_images (*)
-    `,
+    `
     )
-    .eq("is_active", true);
+    .eq("is_active", true)
+    .order("id", { ascending: true });
 
   if (error || !data) {
     console.error("Supabase getProducts execution failure:", error?.message);
-    return [];
+    return { products: [], totalCount: 0, totalPages: 1 };
   }
 
   const rawProducts = data as unknown as DBProductResponse[];
 
-  // МАПУВАННЯ: перетворюємо product_images -> images, а product_variants -> variants
+  // 2. МАПУВАННЯ
   let products: Product[] = rawProducts.map((prod) => {
     const rawImages = prod.product_images || [];
     const sortedImages = [...rawImages].sort(
-      (a, b) => a.sort_order - b.sort_order,
+      (a, b) => a.sort_order - b.sort_order
     );
 
     return {
@@ -102,18 +110,7 @@ export async function getProducts(
     };
   });
 
-  // Логіка фільтрації за категоріями (slug)
-  // if (slug && slug.length > 0) {
-  //   const targetCategory = slug[slug.length - 1].toLowerCase();
-
-  //   if (targetCategory !== "catalog" && targetCategory !== "bilyzna") {
-  //     products = products.filter((product) =>
-  //       product.slug?.toLowerCase().includes(targetCategory)
-  //     );
-  //   }
-  // }
-
-  // Логіка фільтрації за параметрами UI
+  // 3. ФІЛЬТРАЦІЯ
   if (filters) {
     if (filters.color) {
       const colors = Array.isArray(filters.color)
@@ -121,7 +118,7 @@ export async function getProducts(
         : [filters.color.toLowerCase()];
 
       products = products.filter((product) =>
-        product.variants?.some((v) => colors.includes(v.color.toLowerCase())),
+        product.variants?.some((v) => colors.includes(v.color.toLowerCase()))
       );
     }
 
@@ -131,10 +128,20 @@ export async function getProducts(
         : [filters.size.toLowerCase()];
 
       products = products.filter((product) =>
-        product.variants?.some((v) => sizes.includes(v.size.toLowerCase())),
+        product.variants?.some((v) => sizes.includes(v.size.toLowerCase()))
       );
     }
   }
 
-  return products;
+  // 4. ПАГІНАЦІЯ В ПАМ'ЯТІ (зрізаємо відповідно до поточного page)
+  const totalCount = products.length;
+  const totalPages = Math.ceil(totalCount / limit) || 1;
+  const startIndex = (page - 1) * limit;
+  const paginatedProducts = products.slice(startIndex, startIndex + limit);
+
+  return {
+    products: paginatedProducts,
+    totalCount,
+    totalPages,
+  };
 }
