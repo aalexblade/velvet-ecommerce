@@ -3,11 +3,13 @@
 import React, { useState, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { ChevronRight, X } from "lucide-react";
 import { Product, ProductCard } from "@/entities/product";
 import { CatalogFilters } from "@/features/filters";
 import { ProductDetailsBlock } from "@/widgets/product-details-block";
 import { SizeCalculatorForm } from "@/features/product-size-calculator";
+import { Pagination } from "@/shared/ui/Pagination";
 
 interface Subcategory {
   id: number;
@@ -21,20 +23,35 @@ interface CatalogViewProps {
   slug?: string[];
   initialProducts: Product[];
   initialSubcategories: Subcategory[];
+  currentPage?: number;
+  totalPages?: number;
 }
 
 export function CatalogView({
   slug,
   initialProducts,
   initialSubcategories,
+  currentPage = 1,
+  totalPages = 1,
 }: CatalogViewProps) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
   const [selectedQuickView, setSelectedQuickView] = useState<Product | null>(
-    null,
+    null
   );
   // State for controlling size calculator modal visibility
   const [isSizeGuideOpen, setIsSizeGuideOpen] = useState(false);
 
   const products = useMemo(() => initialProducts, [initialProducts]);
+
+  // Handle pagination navigation retaining current search params
+  const handlePageChange = (page: number) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("page", page.toString());
+    router.push(`${pathname}?${params.toString()}`);
+  };
 
   // Page title mapping according to the design mockup
   const currentCategoryTitle = useMemo(() => {
@@ -158,23 +175,16 @@ export function CatalogView({
             </div>
           )}
 
-          {/* --- Pagination --- */}
-          <div className="mt-12">
-            <nav className="flex justify-center items-center gap-1">
-              <button className="w-9 h-9 rounded-xl flex items-center justify-center text-sm font-medium border border-border bg-card text-muted-foreground hover:text-foreground cursor-pointer transition-colors">
-                &larr;
-              </button>
-              <button className="w-9 h-9 rounded-xl flex items-center justify-center text-sm font-bold bg-accent text-accent-foreground shadow-xs">
-                1
-              </button>
-              <button className="w-9 h-9 rounded-xl flex items-center justify-center text-sm font-medium border border-border bg-card text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer">
-                2
-              </button>
-              <button className="w-9 h-9 rounded-xl flex items-center justify-center text-sm font-medium border border-border bg-card text-muted-foreground hover:text-foreground cursor-pointer transition-colors">
-                &rarr;
-              </button>
-            </nav>
-          </div>
+          {/* --- Dynamic Pagination Component --- */}
+          {totalPages > 1 && (
+            <div className="mt-12 flex justify-center">
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={handlePageChange}
+              />
+            </div>
+          )}
         </div>
       </div>
 
