@@ -14,11 +14,9 @@ interface CatalogPageProps {
   };
 }
 
-export async function CatalogPage({
-  slug,
-  searchParams,
-}: CatalogPageProps) {
+export async function CatalogPage({ slug, searchParams }: CatalogPageProps) {
   const safeSlug = slug ?? [];
+  const currentPage = Number(searchParams.page) || 1;
 
   const filters = {
     color: searchParams.color,
@@ -26,14 +24,22 @@ export async function CatalogPage({
     sort: typeof searchParams.sort === "string" ? searchParams.sort : undefined,
   };
 
-  const products = await getProducts(safeSlug, filters);
+  const { products, totalPages } = await getProducts(
+    safeSlug,
+    filters,
+    currentPage,
+    12,
+  );
+
   const subcategories = await getSubcategories("bilyzna");
 
   return (
-    <CatalogView 
-      slug={safeSlug} 
-      initialProducts={products} 
-      initialSubcategories={subcategories} 
+    <CatalogView
+      slug={safeSlug}
+      initialProducts={products}
+      initialSubcategories={subcategories}
+      currentPage={currentPage}
+      totalPages={totalPages}
     />
   );
 }
