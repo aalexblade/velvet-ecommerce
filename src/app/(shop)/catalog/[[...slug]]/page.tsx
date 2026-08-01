@@ -1,19 +1,23 @@
 import { CatalogPage } from "@/views/catalog";
 
-interface Props {
+interface PageProps {
   params: Promise<{ slug?: string[] }>;
-
   searchParams: Promise<{
     category?: string;
-    size?: string;
-    color?: string;
+    size?: string | string[];
+    color?: string | string[];
     sort?: string;
     page?: string;
-    [key: string]: string | undefined;
+    minPrice?: string;
+    maxPrice?: string;
+    search?: string | string[];
+    fabric?: string | string[];
+    collection?: string | string[];
+    [key: string]: string | string[] | undefined;
   }>;
 }
 
-export default async function Page({ params, searchParams }: Props) {
+export default async function Page({ params, searchParams }: PageProps) {
   const resolvedParams = await params;
   const resolvedSearchParams = await searchParams;
 
