@@ -226,8 +226,8 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
   const hasActiveFilters =
     activeSizes.length > 0 ||
     activeColors.length > 0 ||
-    minPrice ||
-    maxPrice ||
+    Boolean(minPrice) ||
+    Boolean(maxPrice) ||
     activeFabrics.length > 0 ||
     activeCollections.length > 0 ||
     activeNames.length > 0;
@@ -235,9 +235,8 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
   const dropdownContainerClasses =
     "absolute top-full left-0 mt-1 z-50 bg-white border border-zinc-200 shadow-xl rounded-xl opacity-0 pointer-events-none transition-all duration-200 scale-95 origin-top-left group-hover:opacity-100 group-hover:pointer-events-auto group-hover:scale-100 overflow-visible";
 
-  // Luxury branding alignment classes matching the main spec guidelines
   const activeBadgeClasses =
-    "inline-flex items-center justify-center bg-[#C8205C] text-white rounded-lg px-5 py-2.5 text-xs font-bold transition-colors cursor-pointer select-none hover:bg-[#a6174a] active:scale-[0.98] shadow-xs";
+    "inline-flex items-center justify-center gap-1.5 bg-[#C8205C] text-white rounded-lg px-4 py-2 text-xs font-bold transition-colors cursor-pointer select-none hover:bg-[#a6174a] active:scale-[0.98] shadow-sm";
 
   return (
     <div
@@ -260,6 +259,7 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
               {/* Name Filter Trigger */}
               <div className="relative group shrink-0 py-4 overflow-visible">
                 <button
+                  type="button"
                   className={cn(
                     "flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider transition-colors cursor-pointer group-hover:text-[#C8205C] whitespace-nowrap",
                     activeNames.length > 0 ? "text-[#C8205C]" : "text-zinc-500",
@@ -278,6 +278,7 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
                     return (
                       <button
                         key={name.id}
+                        type="button"
                         onClick={() => updateQueryParams("search", name.title)}
                         className={cn(
                           "w-full text-left px-4 py-2 text-xs transition-colors cursor-pointer font-medium hover:text-[#C8205C] hover:bg-zinc-50 whitespace-nowrap",
@@ -292,6 +293,7 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
                   })}
                   <div className="border-t border-zinc-100 my-1" />
                   <button
+                    type="button"
                     onClick={() => updateQueryParams("search", "")}
                     className="w-full text-left px-4 py-2 text-xs font-semibold text-zinc-400 hover:text-zinc-900 hover:bg-zinc-50 cursor-pointer transition-colors whitespace-nowrap"
                   >
@@ -303,6 +305,7 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
               {/* Price Filter Trigger */}
               <div className="relative group shrink-0 py-4 overflow-visible">
                 <button
+                  type="button"
                   className={cn(
                     "flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider transition-colors cursor-pointer group-hover:text-[#C8205C] whitespace-nowrap",
                     minPrice || maxPrice ? "text-[#C8205C]" : "text-zinc-500",
@@ -321,6 +324,7 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
                       return (
                         <button
                           key={preset.label}
+                          type="button"
                           onClick={() =>
                             handlePricePreset(preset.min, preset.max)
                           }
@@ -342,6 +346,7 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
               {/* Size Filter Trigger */}
               <div className="relative group shrink-0 py-4 overflow-visible">
                 <button
+                  type="button"
                   className={cn(
                     "flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider transition-colors cursor-pointer group-hover:text-[#C8205C] whitespace-nowrap",
                     activeSizes.length > 0 ? "text-[#C8205C]" : "text-zinc-500",
@@ -359,6 +364,7 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
                       return (
                         <button
                           key={size}
+                          type="button"
                           onClick={() => updateQueryParams("size", size, true)}
                           className={cn(
                             "w-full text-left px-5 py-2 text-xs font-semibold transition-colors cursor-pointer hover:text-[#C8205C] hover:bg-zinc-50 whitespace-nowrap",
@@ -378,6 +384,7 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
               {/* Color Filter Trigger */}
               <div className="relative group shrink-0 py-4 overflow-visible">
                 <button
+                  type="button"
                   className={cn(
                     "flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider transition-colors cursor-pointer group-hover:text-[#C8205C] whitespace-nowrap",
                     activeColors.length > 0
@@ -399,6 +406,7 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
                       return (
                         <button
                           key={color.id}
+                          type="button"
                           onClick={() =>
                             updateQueryParams("color", color.id, true)
                           }
@@ -411,7 +419,7 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
                         >
                           <span
                             className={cn(
-                              "w-4 h-4 rounded-[5px] shrink-0 shadow-xs",
+                              "w-4 h-4 rounded-[5px] shrink-0 shadow-sm",
                               color.bgClass,
                             )}
                           />
@@ -422,10 +430,11 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
                   </div>
                   <div className="border-t border-zinc-100 my-2" />
                   <button
+                    type="button"
                     onClick={() => updateQueryParams("color", "")}
                     className="flex items-center gap-3 w-full py-1.5 px-2 rounded-md text-left text-xs font-semibold text-zinc-400 hover:text-zinc-900 hover:bg-zinc-50 cursor-pointer transition-colors whitespace-nowrap"
                   >
-                    <span className="w-4 h-4 rounded-[5px] shrink-0 bg-linear-to-tr from-blue-500 via-yellow-400 to-red-500 shadow-xs" />{" "}
+                    <span className="w-4 h-4 rounded-[5px] shrink-0 bg-linear-to-tr from-blue-500 via-yellow-400 to-red-500 shadow-sm" />{" "}
                     Всі кольори...
                   </button>
                 </div>
@@ -434,6 +443,7 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
               {/* Fabric Type Trigger */}
               <div className="relative group shrink-0 py-4 overflow-visible">
                 <button
+                  type="button"
                   className={cn(
                     "flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider transition-colors cursor-pointer group-hover:text-[#C8205C] whitespace-nowrap",
                     activeFabrics.length > 0
@@ -454,6 +464,7 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
                     return (
                       <button
                         key={fabric.id}
+                        type="button"
                         onClick={() =>
                           updateQueryParams("fabric", fabric.id, true)
                         }
@@ -474,6 +485,7 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
               {/* Collection Type Trigger */}
               <div className="relative group shrink-0 py-4 overflow-visible">
                 <button
+                  type="button"
                   className={cn(
                     "flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider transition-colors cursor-pointer group-hover:text-[#C8205C] whitespace-nowrap",
                     activeCollections.length > 0
@@ -494,6 +506,7 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
                     return (
                       <button
                         key={col.id}
+                        type="button"
                         onClick={() =>
                           updateQueryParams("collection", col.id, true)
                         }
@@ -517,7 +530,10 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
               <label className="text-xs font-medium text-zinc-400 select-none whitespace-nowrap">
                 Сортувати за:
               </label>
-              <button className="flex items-center gap-1 text-xs font-bold text-zinc-800 hover:text-[#C8205C] cursor-pointer transition-colors whitespace-nowrap">
+              <button
+                type="button"
+                className="flex items-center gap-1 text-xs font-bold text-zinc-800 hover:text-[#C8205C] cursor-pointer transition-colors whitespace-nowrap"
+              >
                 {getSortButtonTitle()}{" "}
                 <ChevronDown className="w-3.5 h-3.5 transition-transform duration-300 group-hover:rotate-180" />
               </button>
@@ -527,6 +543,7 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
                   return (
                     <button
                       key={opt.id}
+                      type="button"
                       onClick={() => updateQueryParams("sort", opt.id)}
                       className={cn(
                         "w-full text-left px-5 py-2 text-xs transition-colors cursor-pointer flex items-center justify-between font-medium hover:text-[#C8205C] hover:bg-zinc-50 whitespace-nowrap",
@@ -549,6 +566,7 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
       <div className="border-y border-zinc-200 py-3 block lg:hidden bg-white sticky top-0 z-30">
         <div className="px-4 flex items-center justify-between gap-4">
           <button
+            type="button"
             onClick={() => {
               setIsMobileMenuOpen(true);
               setIsMobSortOpen(false);
@@ -558,11 +576,18 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
             <Menu className="w-4 h-4 stroke-[2.5px] text-[#C8205C]" />
             Фільтри{" "}
             {hasActiveFilters &&
-              `(${activeSizes.length + activeColors.length + activeFabrics.length + activeCollections.length + activeNames.length})`}
+              `(${
+                activeSizes.length +
+                activeColors.length +
+                activeFabrics.length +
+                activeCollections.length +
+                activeNames.length
+              })`}
           </button>
 
           <div className="relative flex-1">
             <button
+              type="button"
               onClick={() => setIsMobSortOpen(!isMobSortOpen)}
               className="w-full flex items-center justify-center gap-1.5 border border-zinc-300 rounded-lg py-3 text-xs font-bold uppercase tracking-wider text-zinc-900 bg-white active:bg-zinc-50 transition-all select-none cursor-pointer"
             >
@@ -586,6 +611,7 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
               {SORT_OPTIONS.map((opt) => (
                 <button
                   key={`mob-sort-${opt.id}`}
+                  type="button"
                   onClick={() => {
                     updateQueryParams("sort", opt.id);
                     setIsMobSortOpen(false);
@@ -616,12 +642,12 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
       >
         <div
           onClick={() => setIsMobileMenuOpen(false)}
-          className="absolute inset-0 bg-black/40 backdrop-blur-xs"
+          className="absolute inset-0 bg-black/40 backdrop-blur-sm"
         />
 
         <div
           className={cn(
-            "absolute top-0 right-0 bottom-0 w-[90%] max-w-100 bg-white shadow-2xl flex flex-col transition-transform duration-300 transform",
+            "absolute top-0 right-0 bottom-0 w-[90%] max-w-md bg-white shadow-2xl flex flex-col transition-transform duration-300 transform",
             isMobileMenuOpen ? "translate-x-0" : "translate-x-full",
           )}
         >
@@ -631,6 +657,7 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
               Панель фільтрів
             </div>
             <button
+              type="button"
               onClick={() => setIsMobileMenuOpen(false)}
               className="p-1 rounded-md text-zinc-400 hover:text-zinc-900 active:bg-zinc-200 transition-colors cursor-pointer"
             >
@@ -638,10 +665,11 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
             </button>
           </div>
 
-          <div className="flex-1 overflow-y-auto p-4 space-y-4 no-scrollbar pb-24">
+          <div className="flex-1 overflow-y-auto p-4 space-y-4 pb-24">
             {/* Mobile Name Accordion */}
             <div className="border-b border-zinc-100 pb-3">
               <button
+                type="button"
                 onClick={() => toggleAccordion("name")}
                 className="w-full flex items-center justify-between text-xs font-bold uppercase tracking-wider text-zinc-800 py-1 cursor-pointer"
               >
@@ -661,6 +689,7 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
                   {AVAILABLE_NAMES.map((name) => (
                     <button
                       key={`mob-name-${name.id}`}
+                      type="button"
                       onClick={() => updateQueryParams("search", name.title)}
                       className={cn(
                         "w-full text-left py-2.5 px-3 rounded-lg text-xs font-medium transition-colors cursor-pointer",
@@ -679,6 +708,7 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
             {/* Mobile Price Accordion */}
             <div className="border-b border-zinc-100 pb-3">
               <button
+                type="button"
                 onClick={() => toggleAccordion("price")}
                 className="w-full flex items-center justify-between text-xs font-bold uppercase tracking-wider text-zinc-800 py-1 cursor-pointer"
               >
@@ -695,6 +725,7 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
                   {PRICE_PRESETS.map((preset) => (
                     <button
                       key={`mob-preset-${preset.label}`}
+                      type="button"
                       onClick={() => handlePricePreset(preset.min, preset.max)}
                       className={cn(
                         "w-full text-left py-2.5 px-3 rounded-lg text-xs font-medium transition-colors cursor-pointer",
@@ -713,6 +744,7 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
             {/* Mobile Size Accordion */}
             <div className="border-b border-zinc-100 pb-3">
               <button
+                type="button"
                 onClick={() => toggleAccordion("size")}
                 className="w-full flex items-center justify-between text-xs font-bold uppercase tracking-wider text-zinc-800 py-1 cursor-pointer"
               >
@@ -733,6 +765,7 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
                     return (
                       <button
                         key={`mob-size-${size}`}
+                        type="button"
                         onClick={() => updateQueryParams("size", size, true)}
                         className={cn(
                           "flex items-center justify-center h-11 border rounded-lg text-xs font-bold transition-all cursor-pointer",
@@ -752,6 +785,7 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
             {/* Mobile Color Accordion */}
             <div className="border-b border-zinc-100 pb-3">
               <button
+                type="button"
                 onClick={() => toggleAccordion("color")}
                 className="w-full flex items-center justify-between text-xs font-bold uppercase tracking-wider text-zinc-800 py-1 cursor-pointer"
               >
@@ -774,6 +808,7 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
                     return (
                       <button
                         key={`mob-color-${color.id}`}
+                        type="button"
                         onClick={() =>
                           updateQueryParams("color", color.id, true)
                         }
@@ -786,7 +821,7 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
                       >
                         <span
                           className={cn(
-                            "w-4 h-4 rounded-1 shrink-0 border border-black/5 shadow-xs",
+                            "w-4 h-4 rounded-sm shrink-0 border border-black/5 shadow-sm",
                             color.bgClass,
                           )}
                         />
@@ -801,6 +836,7 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
             {/* Mobile Fabric Accordion */}
             <div className="border-b border-zinc-100 pb-3">
               <button
+                type="button"
                 onClick={() => toggleAccordion("fabric")}
                 className="w-full flex items-center justify-between text-xs font-bold uppercase tracking-wider text-zinc-800 py-1 cursor-pointer"
               >
@@ -824,6 +860,7 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
                     return (
                       <button
                         key={`mob-fabric-${fabric.id}`}
+                        type="button"
                         onClick={() =>
                           updateQueryParams("fabric", fabric.id, true)
                         }
@@ -845,6 +882,7 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
             {/* Mobile Collection Accordion */}
             <div className="border-b border-zinc-100 pb-3">
               <button
+                type="button"
                 onClick={() => toggleAccordion("collection")}
                 className="w-full flex items-center justify-between text-xs font-bold uppercase tracking-wider text-zinc-800 py-1 cursor-pointer"
               >
@@ -870,6 +908,7 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
                     return (
                       <button
                         key={`mob-col-${col.id}`}
+                        type="button"
                         onClick={() =>
                           updateQueryParams("collection", col.id, true)
                         }
@@ -892,6 +931,7 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
           <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-zinc-200 bg-white flex items-center gap-3">
             {hasActiveFilters && (
               <button
+                type="button"
                 onClick={() => {
                   clearAll();
                   setIsMobileMenuOpen(false);
@@ -902,8 +942,9 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
               </button>
             )}
             <button
+              type="button"
               onClick={() => setIsMobileMenuOpen(false)}
-              className="flex-3 bg-[#C8205C] text-white font-bold rounded-lg py-3.5 text-xs uppercase tracking-wider hover:bg-[#a6174a] active:scale-[0.99] transition-all text-center cursor-pointer shadow-xs"
+              className="flex-3 bg-[#C8205C] text-white font-bold rounded-lg py-3.5 text-xs uppercase tracking-wider hover:bg-[#a6174a] active:scale-[0.99] transition-all text-center cursor-pointer shadow-sm"
             >
               Застосувати фільтри
             </button>
@@ -916,68 +957,83 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
         <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-4 flex flex-wrap gap-2.5 items-center animate-in fade-in duration-300 overflow-visible">
           {searchParams.get("search") && (
             <button
+              type="button"
               onClick={() => updateQueryParams("search", "")}
               className={activeBadgeClasses}
             >
-              Назва: {searchParams.get("search")}
+              <span>Назва: {searchParams.get("search")}</span>
+              <X className="w-3.5 h-3.5" />
             </button>
           )}
 
           {activeCollections.map((col) => (
             <button
               key={`badge-col-${col.id}`}
+              type="button"
               onClick={() => updateQueryParams("collection", col.id, true)}
               className={activeBadgeClasses}
             >
-              Колекція: {col.title.replace(/[“”]/g, "")}
+              <span>Колекція: {col.title.replace(/[“”]/g, "")}</span>
+              <X className="w-3.5 h-3.5" />
             </button>
           ))}
 
           {activeFabrics.map((fabric) => (
             <button
               key={`badge-fabric-${fabric.id}`}
+              type="button"
               onClick={() => updateQueryParams("fabric", fabric.id, true)}
               className={activeBadgeClasses}
             >
-              Тканина: {fabric.title}
+              <span>Тканина: {fabric.title}</span>
+              <X className="w-3.5 h-3.5" />
             </button>
           ))}
 
           {activeColors.map((color) => (
             <button
               key={`badge-color-${color.id}`}
+              type="button"
               onClick={() => updateQueryParams("color", color.id, true)}
               className={activeBadgeClasses}
             >
-              Колір: {color.title}
+              <span>Колір: {color.title}</span>
+              <X className="w-3.5 h-3.5" />
             </button>
           ))}
 
           {activeSizes.map((size) => (
             <button
               key={`badge-size-${size}`}
+              type="button"
               onClick={() => updateQueryParams("size", size, true)}
               className={activeBadgeClasses}
             >
-              Розмір: {size}
+              <span>Розмір: {size}</span>
+              <X className="w-3.5 h-3.5" />
             </button>
           ))}
 
           {(minPrice || maxPrice) && (
             <button
+              type="button"
               onClick={() => {
                 updateQueryParams("minPrice", "");
                 updateQueryParams("maxPrice", "");
               }}
               className={activeBadgeClasses}
             >
-              Ціна: {minPrice || "0"} - {maxPrice || "∞"} UAH
+              <span>
+                Ціна: {minPrice || "0"} - {maxPrice || "∞"} UAH
+              </span>
+              <X className="w-3.5 h-3.5" />
             </button>
           )}
 
           <button
+            type="button"
             onClick={clearAll}
-            className="inline-flex items-center justify-center border border-[#C8205C] text-zinc-900 font-bold rounded-lg px-5 py-2.5 text-xs bg-white cursor-pointer hover:bg-pink-50/60 active:scale-[0.98] transition-all shrink-0 select-none shadow-xs"
+            className="inline-flex items-center justify-center border border-[#C8205C] text-zinc-900 font-bold rounded-lg px-5 py-2 text-xs bg-white cursor-pointer hover:bg-pink-50/60 active:scale-[0.98] transition-all shrink-0 select-none shadow-sm"
           >
             Скинути все
           </button>
