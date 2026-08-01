@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, MoreHorizontal } from "lucide-react";
 import {
   PaginationRoot,
   PaginationContent,
@@ -21,11 +21,46 @@ export const Pagination: React.FC<PaginationProps> = ({
 }) => {
   if (totalPages <= 1) return null;
 
-  const pages = Array.from({ length: totalPages }, (_, i) => i + 1);
+  // Хелпер для генерації діапазону сторінок з трикрапками
+  const getPageNumbers = (): (number | "ellipsis")[] => {
+    // Якщо сторінок 7 або менше — показуємо всі без трикрапок
+    if (totalPages <= 7) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    }
+
+    const pages: (number | "ellipsis")[] = [];
+
+    // Завжди додаємо першу сторінку
+    pages.push(1);
+
+    if (currentPage > 3) {
+      pages.push("ellipsis");
+    }
+
+    // Визначаємо діапазон навколо поточної сторінки
+    const startPage = Math.max(2, currentPage - 1);
+    const endPage = Math.min(totalPages - 1, currentPage + 1);
+
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(i);
+    }
+
+    if (currentPage < totalPages - 2) {
+      pages.push("ellipsis");
+    }
+
+    // Завжди додаємо останню сторінку
+    pages.push(totalPages);
+
+    return pages;
+  };
+
+  const pages = getPageNumbers();
 
   return (
     <PaginationRoot className="my-8">
       <PaginationContent className="gap-2">
+        {/* Кнопка "Назад" */}
         <PaginationItem>
           <button
             type="button"
@@ -38,7 +73,18 @@ export const Pagination: React.FC<PaginationProps> = ({
           </button>
         </PaginationItem>
 
-        {pages.map((page) => {
+        {/* Номери сторінок та трикрапки */}
+        {pages.map((page, index) => {
+          if (page === "ellipsis") {
+            return (
+              <PaginationItem key={`ellipsis-${index}`}>
+                <span className="w-9 h-9 flex items-center justify-center text-muted-foreground">
+                  <MoreHorizontal className="w-4 h-4" />
+                </span>
+              </PaginationItem>
+            );
+          }
+
           const isActive = page === currentPage;
           return (
             <PaginationItem key={page}>
@@ -58,6 +104,7 @@ export const Pagination: React.FC<PaginationProps> = ({
           );
         })}
 
+        {/* Кнопка "Вперед" */}
         <PaginationItem>
           <button
             type="button"
