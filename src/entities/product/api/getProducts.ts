@@ -1,9 +1,13 @@
 import { createSupabaseServerClient } from "@/shared/api/supabase/serverClient";
 import { Product, ProductColor } from "../model/types";
 
-interface ProductFilters {
+export interface ProductFilters {
   color?: string | string[];
   size?: string | string[];
+  subcategory?: string | string[];
+  minPrice?: number;
+  maxPrice?: number;
+  sortBy?: "price_asc" | "price_desc" | "newest";
 }
 
 interface DBProductImage {
@@ -112,6 +116,7 @@ export async function getProducts(
 
   // 3. ФІЛЬТРАЦІЯ
   if (filters) {
+    // Фільтрація за кольором
     if (filters.color) {
       const colors = Array.isArray(filters.color)
         ? filters.color.map((c) => c.toLowerCase())
@@ -122,6 +127,7 @@ export async function getProducts(
       );
     }
 
+    // Фільтрація за розміром
     if (filters.size) {
       const sizes = Array.isArray(filters.size)
         ? filters.size.map((s) => s.toLowerCase())
@@ -131,9 +137,45 @@ export async function getProducts(
         product.variants?.some((v) => sizes.includes(v.size.toLowerCase()))
       );
     }
+
+    // Фільтрація за мін. ціною (перевіряємо хоча б один варіант товару)
+    if (typeof filters.minPrice === "number") {
+      products = products.filter((product) =>
+        product.variants?.some((v) => v.price >= (filters.minPrice as number))
+      );
+    }
+
+    // Фільтрація за макс. ціною
+    if (typeof filters.maxPrice === "number") {
+      products = products.filter((product) =>
+        product.variants?.some((v) => v.price <= (filters.maxPrice as number))
+      );
+    }
+
+    // Сортування
+    if (filters.sortBy) {
+      if (filters.sortBy === "price_asc") {
+        products.sort((a, b) => {
+          const minA = Math.min(...(a.variants?.map((v) => v.price) || [0]));
+          const minB = Math.min(...(b.variants?.map((v) => v.price) || [0]));
+          return minA - minB;
+        });
+      } else if (filters.sortBy === "price_desc") {
+        products.sort((a, b) => {
+          const minA = Math.min(...(a.variants?.map((v) => v.price) || [0]));
+          const minB = Math.min(...(b.variants?.map((v) => v.price) || [0]));
+          return minB - minA;
+        });
+      } else if (filters.sortBy === "newest") {
+        products.sort(
+          (a, b) =>
+            new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        );
+      }
+    }
   }
 
-  // 4. ПАГІНАЦІЯ В ПАМ'ЯТІ (зрізаємо відповідно до поточного page)
+  // 4. ПАГІНАЦІЯ В ПАМ'ЯТІ
   const totalCount = products.length;
   const totalPages = Math.ceil(totalCount / limit) || 1;
   const startIndex = (page - 1) * limit;
