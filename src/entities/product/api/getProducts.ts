@@ -5,9 +5,18 @@ export interface ProductFilters {
   color?: string | string[];
   size?: string | string[];
   subcategory?: string | string[];
-  minPrice?: number;
-  maxPrice?: number;
-  sortBy?: "price_asc" | "price_desc" | "newest";
+  minPrice?: number | string;
+  maxPrice?: number | string;
+  sortBy?:
+    | "price_asc"
+    | "price_desc"
+    | "price-asc"
+    | "price-desc"
+    | "newest"
+    | "popular";
+  search?: string | string[];
+  fabric?: string | string[];
+  collection?: string | string[];
 }
 
 interface DBProductImage {
@@ -54,7 +63,7 @@ export async function getProducts(
   slug: string[],
   filters?: ProductFilters,
   page: number = 1,
-  limit: number = 12
+  limit: number = 12,
 ): Promise<GetProductsResult> {
   const supabase = await createSupabaseServerClient();
 
@@ -66,7 +75,7 @@ export async function getProducts(
       *,
       product_variants (*),
       product_images (*)
-    `
+    `,
     )
     .eq("is_active", true)
     .order("id", { ascending: true });
@@ -82,7 +91,7 @@ export async function getProducts(
   let products: Product[] = rawProducts.map((prod) => {
     const rawImages = prod.product_images || [];
     const sortedImages = [...rawImages].sort(
-      (a, b) => a.sort_order - b.sort_order
+      (a, b) => a.sort_order - b.sort_order,
     );
 
     return {
@@ -116,60 +125,78 @@ export async function getProducts(
 
   // 3. ФІЛЬТРАЦІЯ
   if (filters) {
-    // Фільтрація за кольором
+    // 🔍 Фільтрація за назвою товару / пошуковим словом
+    if (filters.search) {
+      const searchTerms = Array.isArray(filters.search)
+        ? filters.search.map((s) => s.toLowerCase())
+        : [filters.search.toLowerCase()];
+
+      products = products.filter((product) =>
+        searchTerms.some((term) => product.title.toLowerCase().includes(term)),
+      );
+    }
+
+    // 🎨 Фільтрація за кольором
     if (filters.color) {
       const colors = Array.isArray(filters.color)
         ? filters.color.map((c) => c.toLowerCase())
         : [filters.color.toLowerCase()];
 
       products = products.filter((product) =>
-        product.variants?.some((v) => colors.includes(v.color.toLowerCase()))
+        product.variants?.some((v) => colors.includes(v.color.toLowerCase())),
       );
     }
 
-    // Фільтрація за розміром
+    // 📏 Фільтрація за розміром
     if (filters.size) {
       const sizes = Array.isArray(filters.size)
         ? filters.size.map((s) => s.toLowerCase())
         : [filters.size.toLowerCase()];
 
       products = products.filter((product) =>
-        product.variants?.some((v) => sizes.includes(v.size.toLowerCase()))
+        product.variants?.some((v) => sizes.includes(v.size.toLowerCase())),
       );
     }
 
-    // Фільтрація за мін. ціною (перевіряємо хоча б один варіант товару)
-    if (typeof filters.minPrice === "number") {
-      products = products.filter((product) =>
-        product.variants?.some((v) => v.price >= (filters.minPrice as number))
-      );
+    // 💰 Фільтрація за мін. ціною
+    if (filters.minPrice !== undefined && filters.minPrice !== "") {
+      const min = Number(filters.minPrice);
+      if (!isNaN(min)) {
+        products = products.filter((product) =>
+          product.variants?.some((v) => v.price >= min),
+        );
+      }
     }
 
-    // Фільтрація за макс. ціною
-    if (typeof filters.maxPrice === "number") {
-      products = products.filter((product) =>
-        product.variants?.some((v) => v.price <= (filters.maxPrice as number))
-      );
+    // 💰 Фільтрація за макс. ціною
+    if (filters.maxPrice !== undefined && filters.maxPrice !== "") {
+      const max = Number(filters.maxPrice);
+      if (!isNaN(max)) {
+        products = products.filter((product) =>
+          product.variants?.some((v) => v.price <= max),
+        );
+      }
     }
 
-    // Сортування
+    // 🔃 Сортування (підтримує як "price_asc", так і "price-asc")
     if (filters.sortBy) {
-      if (filters.sortBy === "price_asc") {
+      const sort = filters.sortBy;
+      if (sort === "price_asc" || sort === "price-asc") {
         products.sort((a, b) => {
           const minA = Math.min(...(a.variants?.map((v) => v.price) || [0]));
           const minB = Math.min(...(b.variants?.map((v) => v.price) || [0]));
           return minA - minB;
         });
-      } else if (filters.sortBy === "price_desc") {
+      } else if (sort === "price_desc" || sort === "price-desc") {
         products.sort((a, b) => {
           const minA = Math.min(...(a.variants?.map((v) => v.price) || [0]));
           const minB = Math.min(...(b.variants?.map((v) => v.price) || [0]));
           return minB - minA;
         });
-      } else if (filters.sortBy === "newest") {
+      } else if (sort === "newest") {
         products.sort(
           (a, b) =>
-            new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+            new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
         );
       }
     }
