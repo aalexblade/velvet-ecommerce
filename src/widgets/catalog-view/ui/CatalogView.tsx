@@ -39,7 +39,7 @@ export function CatalogView({
   const searchParams = useSearchParams();
 
   const [selectedQuickView, setSelectedQuickView] = useState<Product | null>(
-    null
+    null,
   );
   // State for controlling size calculator modal visibility
   const [isSizeGuideOpen, setIsSizeGuideOpen] = useState(false);
@@ -238,7 +238,8 @@ export function CatalogView({
                 Підбір ідеального розміру
               </h2>
               <p className="mt-1 text-xs md:text-sm text-muted-foreground leading-relaxed">
-                Введіть ваші точні анатомічні заміри в сантиметрах для розрахунку відповідної білизни за канонами нашого бренду.
+                Введіть ваші точні анатомічні заміри в сантиметрах для
+                розрахунку відповідної білизни за канонами нашого бренду.
               </p>
             </div>
 
