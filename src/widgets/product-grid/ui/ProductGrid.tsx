@@ -1,14 +1,14 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { ProductCard, Product } from "@/entities/product"
+import * as React from "react";
+import { ProductCard, ProductCardSkeleton, Product } from "@/entities/product";
 import {
   Carousel,
   CarouselContent,
   CarouselItem,
   type CarouselApi,
-} from "@/shared/ui/carousel"
-import { cn } from "@/shared/lib"
+} from "@/shared/ui/carousel";
+import { cn } from "@/shared/lib";
 
 export const BESTSELLERS_DATA: Product[] = [
   {
@@ -71,29 +71,33 @@ export const BESTSELLERS_DATA: Product[] = [
       { id: "v4", product_id: "4", sku: "BBB-004", color: "Black", size: "M", price: 1100, old_price: null, stock: 10 }
     ]
   },
-]
+];
 
 export interface ProductGridProps {
   products: Product[];
   title?: string;
   description?: string;
   showPromo?: boolean;
+  isLoading?: boolean;
+  skeletonCount?: number;
 }
 
 /**
  * ProductGrid Widget
  * 
  * Composite structural block that bridges domain data (Entities) 
- * with user interactivity (Features).
+ * with user interactivity (Features) and supports loading skeletons.
  */
 export const ProductGrid: React.FC<ProductGridProps> = ({ 
   products, 
   title, 
   description,
-  showPromo = false 
+  showPromo = false,
+  isLoading = false,
+  skeletonCount = 6,
 }) => {
-  const [api, setApi] = React.useState<CarouselApi>()
-  const [current, setCurrent] = React.useState(0)    
+  const [api, setApi] = React.useState<CarouselApi>();
+  const [current, setCurrent] = React.useState(0);
 
   React.useEffect(() => {
     if (!api) return;
@@ -110,7 +114,9 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
       api.off("select", onSelect);
       api.off("init", onSelect);
     };
-  }, [api])
+  }, [api]);
+
+  const skeletonItems = Array.from({ length: skeletonCount });
 
   return (
     <section className="w-full h-full">
@@ -150,46 +156,58 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
 
             {/* Desktop Product Composition Matrix */}
             <div className="hidden md:grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6 my-6 h-auto items-stretch">
-              {products.map((product) => (     
-                <ProductCard
-                  key={product.id}
-                  product={product}
-                />
-              ))}
+              {isLoading
+                ? skeletonItems.map((_, index) => (
+                    <ProductCardSkeleton key={`desktop-skeleton-${index}`} />
+                  ))
+                : products.map((product) => (     
+                    <ProductCard
+                      key={product.id}
+                      product={product}
+                    />
+                  ))}
             </div>
 
             {/* Mobile/Tablet Viewport Composition */}
             <div className="block md:hidden my-6">     
               <Carousel setApi={setApi} className="w-full" opts={{ align: "start", loop: true }}>
                 <CarouselContent className="-ml-4 items-stretch">
-                  {products.map((product) => ( 
-                    <CarouselItem key={product.id} className="pl-4 basis-3/4 sm:basis-1/2">
-                      <ProductCard
-                        product={product}
-                      />
-                    </CarouselItem>
-                  ))}
+                  {isLoading
+                    ? skeletonItems.map((_, index) => (
+                        <CarouselItem key={`mobile-skeleton-${index}`} className="pl-4 basis-3/4 sm:basis-1/2">
+                          <ProductCardSkeleton />
+                        </CarouselItem>
+                      ))
+                    : products.map((product) => ( 
+                        <CarouselItem key={product.id} className="pl-4 basis-3/4 sm:basis-1/2">
+                          <ProductCard
+                            product={product}
+                          />
+                        </CarouselItem>
+                      ))}
                 </CarouselContent>
 
                 {/* Compositional Navigation Indicators */}
-                <div className="flex justify-center gap-2 mt-8">
-                  {products.map((_, index) => (
-                    <button
-                      key={index}
-                      onClick={() => api?.scrollTo(index)}
-                      className={cn(
-                        "h-1 transition-all duration-300 cursor-pointer",
-                        current === index ? "w-8 bg-primary" : "w-4 bg-border"
-                      )}
-                      aria-label={`Go to slide ${index + 1}`}
-                    />
-                  ))}
-                </div>
+                {!isLoading && products.length > 0 && (
+                  <div className="flex justify-center gap-2 mt-8">
+                    {products.map((_, index) => (
+                      <button
+                        key={index}
+                        onClick={() => api?.scrollTo(index)}
+                        className={cn(
+                          "h-1 transition-all duration-300 cursor-pointer",
+                          current === index ? "w-8 bg-primary" : "w-4 bg-border"
+                        )}
+                        aria-label={`Go to slide ${index + 1}`}
+                      />
+                    ))}
+                  </div>
+                )}
               </Carousel>
             </div>
           </div>
         </div>
       </div>
     </section>
-  )
-}
+  );
+};
