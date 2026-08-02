@@ -21,7 +21,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const [isWishlist, setIsWishlist] = useState(false);
 
   const imagesToRender = useMemo(() => {
-    return product.images?.length > 0
+    return product.images && product.images.length > 0
       ? product.images
       : [{ url: "/placeholder-product.webp", id: 0 }];
   }, [product.images]);
@@ -71,7 +71,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       title: product.title,
       price: baseVariant.price,
       quantity: 1,
-      image: imagesToRender[0].url,
+      image: imagesToRender[0]?.url || "/placeholder-product.webp",
       color: baseVariant.color,
       size: baseVariant.size,
     });
@@ -103,7 +103,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             </div>
           </div>
 
-          {/*Clickable link to detailed page across the entire area */}
+          {/* Clickable link to detailed page across the entire area */}
           <Link
             href={`/product/${product.id}`}
             className="absolute inset-0 z-10"
@@ -114,14 +114,14 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             <div className="absolute inset-x-2 top-1/2 -translate-y-1/2 z-20 flex justify-between pointer-events-none opacity-0 group-hover/card:opacity-100 transition-opacity duration-300">
               <button
                 onClick={scrollPrev}
-                className="w-7 h-7 rounded-full bg-[#C8205C] text-white flex items-center justify-center shadow-xs cursor-pointer hover:bg-[#A61548] active:scale-90 transition-all pointer-events-auto"
+                className="w-7 h-7 rounded-full bg-[#C8205C] text-white flex items-center justify-center shadow-sm cursor-pointer hover:bg-[#A61548] active:scale-90 transition-all pointer-events-auto"
                 aria-label="Попередня картинка"
               >
                 <ChevronLeft className="w-4 h-4 stroke-[2.5px]" />
               </button>
               <button
                 onClick={scrollNext}
-                className="w-7 h-7 rounded-full bg-[#C8205C] text-white flex items-center justify-center shadow-xs cursor-pointer hover:bg-[#A61548] active:scale-90 transition-all pointer-events-auto"
+                className="w-7 h-7 rounded-full bg-[#C8205C] text-white flex items-center justify-center shadow-sm cursor-pointer hover:bg-[#A61548] active:scale-90 transition-all pointer-events-auto"
                 aria-label="Наступна картинка"
               >
                 <ChevronRight className="w-4 h-4 stroke-[2.5px]" />
@@ -129,7 +129,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             </div>
           )}
 
-          {/* Quick View Button — Semi-transparent, blurred, and elegant in layout*/}
+          {/* Quick View Button — Semi-transparent, blurred, and elegant in layout */}
           <div className="absolute bottom-4 left-0 right-0 z-20 flex justify-center px-4 opacity-0 group-hover/card:opacity-100 transition-opacity duration-300">
             <button
               onClick={(e) => {
@@ -137,16 +137,16 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                 e.stopPropagation();
                 setIsQuickViewOpen(true);
               }}
-              className="w-full max-w-48 bg-white/40 backdrop-blur-md text-zinc-900 font-semibold text-xs py-2.5 rounded-lg shadow-xs hover:bg-white/90 hover:text-[#C8205C] transition-all transform translate-y-1 group-hover/card:translate-y-0 cursor-pointer border border-white/30 text-center"
+              className="w-full max-w-48 bg-white/40 backdrop-blur-md text-zinc-900 font-semibold text-xs py-2.5 rounded-lg shadow-sm hover:bg-white/90 hover:text-[#C8205C] transition-all transform translate-y-1 group-hover/card:translate-y-0 cursor-pointer border border-white/30 text-center"
             >
               Швидкий перегляд
             </button>
           </div>
         </div>
 
-        {/* 2. INFO BLOCK (The order of elements is clearly according to the Figma layout) */}
+        {/* 2. INFO BLOCK */}
         <div className="flex flex-col gap-1.5 px-1 grow">
-          {/*A row of colors and actions */}
+          {/* A row of colors and actions */}
           <div className="flex items-center justify-between w-full min-h-6">
             <div className="flex items-center gap-1.5">
               {uniqueColors.map((color, cIdx) => (
@@ -154,7 +154,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                   key={cIdx}
                   title={color}
                   className={cn(
-                    "w-4 h-4 rounded-xs border border-zinc-300 shadow-inner cursor-pointer transition-transform hover:scale-110",
+                    "w-4 h-4 rounded-sm border border-zinc-300 shadow-inner cursor-pointer transition-transform hover:scale-110",
                     getProductColorClass(color),
                   )}
                 />
@@ -188,21 +188,21 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             </div>
           </div>
 
-          {/* name products */}
+          {/* Product Title */}
           <Link href={`/product/${product.id}`} className="block">
             <h2 className="text-sm font-normal text-zinc-800 line-clamp-1 group-hover/card:text-[#C8205C] transition-colors tracking-tight">
               {product.title}
             </h2>
           </Link>
 
-          {/* Ptice */}
+          {/* Price */}
           <div className="text-sm font-bold text-zinc-900">
             {price.toLocaleString("uk-UA")} UAH
           </div>
         </div>
       </div>
 
-      {/* --- QUICK VIEW MODULE--- */}
+      {/* --- QUICK VIEW MODULE --- */}
       {isQuickViewOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-6 animate-in fade-in duration-200">
           <div
