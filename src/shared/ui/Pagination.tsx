@@ -21,7 +21,7 @@ export interface PaginationProps {
 function generatePaginationRange(
   currentPage: number,
   totalPages: number,
-  siblingCount: number = 1
+  siblingCount: number = 1,
 ): (number | "ellipsis")[] {
   // Total elements to display without collapsing:
   // 1 (first) + 1 (last) + 1 (current) + 2 * siblingCount + 2 (two ellipsis markers)
@@ -53,7 +53,7 @@ function generatePaginationRange(
     const rightItemCount = 3 + 2 * siblingCount;
     const rightRange = Array.from(
       { length: rightItemCount },
-      (_, i) => totalPages - rightItemCount + i + 1
+      (_, i) => totalPages - rightItemCount + i + 1,
     );
     return [firstPageIndex, "ellipsis", ...rightRange];
   }
@@ -62,9 +62,15 @@ function generatePaginationRange(
   if (shouldShowLeftEllipsis && shouldShowRightEllipsis) {
     const middleRange = Array.from(
       { length: rightSiblingIndex - leftSiblingIndex + 1 },
-      (_, i) => leftSiblingIndex + i
+      (_, i) => leftSiblingIndex + i,
     );
-    return [firstPageIndex, "ellipsis", ...middleRange, "ellipsis", lastPageIndex];
+    return [
+      firstPageIndex,
+      "ellipsis",
+      ...middleRange,
+      "ellipsis",
+      lastPageIndex,
+    ];
   }
 
   return [];
@@ -81,7 +87,7 @@ export const Pagination: React.FC<PaginationProps> = ({
   const paginationRange = generatePaginationRange(
     currentPage,
     totalPages,
-    siblingCount
+    siblingCount,
   );
 
   return (
@@ -93,7 +99,7 @@ export const Pagination: React.FC<PaginationProps> = ({
             type="button"
             onClick={() => currentPage > 1 && onPageChange(currentPage - 1)}
             disabled={currentPage === 1}
-            className="w-9 h-9 flex items-center justify-center rounded-lg transition-colors cursor-pointer text-muted-foreground hover:bg-accent hover:text-accent-foreground disabled:pointer-events-none disabled:opacity-30"
+            className="w-9 h-9 flex items-center justify-center rounded-lg transition-colors cursor-pointer text-zinc-500 hover:bg-zinc-100 hover:text-zinc-800 disabled:pointer-events-none disabled:opacity-30"
             aria-label="Previous page"
           >
             <ChevronLeft className="w-4 h-4" />
@@ -105,7 +111,7 @@ export const Pagination: React.FC<PaginationProps> = ({
           if (page === "ellipsis") {
             return (
               <PaginationItem key={`ellipsis-${index}`}>
-                <span className="w-9 h-9 flex items-center justify-center text-muted-foreground select-none">
+                <span className="w-9 h-9 flex items-center justify-center text-zinc-400 select-none">
                   <MoreHorizontal className="w-4 h-4" />
                 </span>
               </PaginationItem>
@@ -121,8 +127,8 @@ export const Pagination: React.FC<PaginationProps> = ({
                 disabled={isActive}
                 className={`w-9 h-9 flex items-center justify-center rounded-lg text-sm font-medium transition-all cursor-pointer ${
                   isActive
-                    ? "border border-primary text-primary bg-background cursor-default"
-                    : "text-foreground hover:text-primary hover:bg-primary/10"
+                    ? "border border-[#C8102E] text-[#C8102E] bg-white cursor-default font-semibold shadow-xs"
+                    : "text-zinc-700 hover:text-[#C8102E] hover:bg-rose-50/50"
                 }`}
               >
                 {page}
@@ -139,7 +145,7 @@ export const Pagination: React.FC<PaginationProps> = ({
               currentPage < totalPages && onPageChange(currentPage + 1)
             }
             disabled={currentPage === totalPages}
-            className="w-9 h-9 flex items-center justify-center rounded-lg transition-colors cursor-pointer text-muted-foreground hover:bg-accent hover:text-accent-foreground disabled:pointer-events-none disabled:opacity-30"
+            className="w-9 h-9 flex items-center justify-center rounded-lg transition-colors cursor-pointer text-zinc-500 hover:bg-zinc-100 hover:text-zinc-800 disabled:pointer-events-none disabled:opacity-30"
             aria-label="Next page"
           >
             <ChevronRight className="w-4 h-4" />
