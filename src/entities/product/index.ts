@@ -1,5 +1,6 @@
-// Export only UI presentation layers and standalone client components
+// Export presentation components and skeletons from their respective files
 export { ProductCard } from './ui/ProductCard';
+export { ProductCardSkeleton, ProductGridSkeleton } from './ui/ProductCardSkeleton';
 
-// Export type registries and structural models (Safe for both Client and Server environments)
+// Export types
 export type { Product, ProductColor, ProductVariant, ProductImage } from './model/types';
