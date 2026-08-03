@@ -1,4 +1,6 @@
-// Export presentation components and skeletons from their respective files
+// src/entities/product/index.ts
+
+// Export presentation components and skeletons
 export { ProductCard } from './ui/ProductCard';
 export { ProductCardSkeleton, ProductGridSkeleton } from './ui/ProductCardSkeleton';
 
