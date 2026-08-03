@@ -73,7 +73,7 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
         >
           {/* 1. LEFT PROMO BANNER (Desktop Only: >= 1024px) */}
           {showPromo && (
-            <div className="relative w-full h-full min-h-125 rounded-2xl overflow-hidden hidden lg:block border border-zinc-100">
+            <div className="relative w-full h-full min-h-125 rounded-2xl overflow-hidden hidden lg:block border border-border">
               <Image
                 src={promoImageUrl}
                 alt="Bestsellers Promo"
@@ -92,12 +92,14 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
               {(title || description) && (
                 <div className="mb-4 lg:mb-6 text-left">
                   {title && (
-                    <h2 className="text-2xl md:text-3xl font-bold text-zinc-900 mb-1">
+                    <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-1">
                       {title}
                     </h2>
                   )}
                   {description && (
-                    <p className="text-zinc-500 text-sm">{description}</p>
+                    <p className="text-muted-foreground text-sm">
+                      {description}
+                    </p>
                   )}
                 </div>
               )}
@@ -160,8 +162,8 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
                           className={cn(
                             "h-1 rounded-full transition-all duration-300 cursor-pointer",
                             current === index
-                              ? "w-6 bg-[#C8205C]"
-                              : "w-3 bg-zinc-200",
+                              ? "w-6 bg-accent"
+                              : "w-3 bg-muted-foreground/30 hover:bg-muted-foreground/50",
                           )}
                           aria-label={`Go to slide ${index + 1}`}
                         />
@@ -176,7 +178,7 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
             <div className="mt-2 flex justify-center lg:justify-start">
               <Link
                 href="/catalog"
-                className="inline-flex items-center justify-center px-6 py-2 border border-[#C8205C] text-[#C8205C] hover:bg-[#C8205C] hover:text-white transition-all text-xs font-medium rounded-lg"
+                className="inline-flex items-center justify-center px-6 py-2 border border-accent text-accent hover:bg-accent hover:text-accent-foreground transition-all duration-300 text-xs font-medium rounded-lg"
               >
                 Подивитись все
               </Link>
