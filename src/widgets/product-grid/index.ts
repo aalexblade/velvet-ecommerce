@@ -1,1 +1,2 @@
-export { ProductGrid, BESTSELLERS_DATA } from './ui/ProductGrid';
+export { ProductGrid } from './ui/ProductGrid';
+export type { ProductGridProps } from './ui/ProductGrid';
