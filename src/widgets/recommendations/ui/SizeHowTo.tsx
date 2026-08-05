@@ -35,7 +35,7 @@ export const SizeHowTo = () => {
           </h2>
 
           <div className="flex flex-col gap-10 w-full">
-            {/* Step 1: Зніміть мірки */}
+            {/* Step 1:check your size */}
             <StepItem number="1." title="Зніміть мірки" icon={<Ruler className="w-6 h-6" />}>
               <div className="flex flex-col gap-3">
                 {[
@@ -51,7 +51,7 @@ export const SizeHowTo = () => {
               </div>
             </StepItem>
 
-            {/* Step 2: Введіть дані в калькулятор */}
+            {/* Step 2: answer calc*/}
             <StepItem number="2." title="Введіть дані в калькулятор" icon={<Calculator className="w-6 h-6" />}>
               <div className="flex flex-col gap-3">
                 {[
@@ -67,7 +67,7 @@ export const SizeHowTo = () => {
               </div>
             </StepItem>
 
-            {/* Step 3: Отримайте свій розмір */}
+            {/* Step 3: get your size*/}
             <StepItem number="3." title="Отримайте свій розмір" icon={<Sparkles className="w-6 h-6" />}>
               <div className="flex flex-col gap-4">
                 <p className="text-foreground/90 font-medium">
