@@ -2,105 +2,140 @@
 
 import * as React from "react";
 import Image from "next/image";
+import Link from "next/link";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import {
   Carousel,
   CarouselContent,
   CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
+  type CarouselApi,
 } from "@/shared/ui/carousel";
-import { Button } from "@/shared/ui";
 
-export const PromoLook = () => {
+const SUPABASE_STORAGE_URL =
+  "https://mylhoikievakodeutzsi.supabase.co/storage/v1/object/public/assets/promo-look";
+
+const PROMO_ITEMS = [
+  {
+    id: "nude",
+    title: "Трусики стрінги бежеві (Nude)",
+    imageUrl: `${SUPABASE_STORAGE_URL}/promo-look-item-1-nude.jpg`,
+  },
+  {
+    id: "black",
+    title: "Трусики стрінги чорні (Black)",
+    imageUrl: `${SUPABASE_STORAGE_URL}/promo-look-item-2-black.jpg`,
+  },
+  {
+    id: "pink",
+    title: "Трусики стрінги рожеві (Pink)",
+    imageUrl: `${SUPABASE_STORAGE_URL}/promo-look-item-3-pink.jpg`,
+  },
+];
+
+const MODEL_IMAGE_URL = `${SUPABASE_STORAGE_URL}/promo-look-model.jpg`;
+
+export const PromoLook: React.FC = () => {
+  const [api, setApi] = React.useState<CarouselApi>();
+
+  const handlePrev = React.useCallback(() => {
+    api?.scrollPrev();
+  }, [api]);
+
+  const handleNext = React.useCallback(() => {
+    api?.scrollNext();
+  }, [api]);
+
   return (
-    <section className="w-full bg-background overflow-hidden selection:bg-primary/10">
-      <div className="container mx-auto px-4 py-16 md:py-24 lg:py-32 grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24 items-center">
-        
-        {/* Left Column: Editorial Content & Interactive Carousel Section */}
-        <div className="flex flex-col gap-10 md:gap-14 w-full max-w-2xl mx-auto lg:mx-0 order-2 lg:order-1">
-          
-          {/* Header Typography Group */}
-          <div className="flex flex-col gap-6 text-center lg:text-left animate-in fade-in slide-in-from-left-8 duration-1000 ease-out">
-            <h2 className="font-sans font-bold text-4xl md:text-5xl lg:text-6xl text-foreground tracking-tight leading-[1.1]">
-              Одягайся з любов’ю <br className="hidden md:block" /> до себе
-            </h2>
-            <p className="font-sans text-muted-foreground text-base md:text-lg lg:text-xl leading-relaxed max-w-lg mx-auto lg:mx-0 opacity-80">
-              М’яка білизна, затишний одяг і натхнення для твого щоденного комфорту. Кожна деталь створена з турботою про тебе.
-            </p>
-          </div>
-
-          {/* Interactive Transparent Carousel Display */}
-          <div className="relative group w-full px-4 md:px-0 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-200">
-            <Carousel 
-              className="w-full" 
-              opts={{ 
-                loop: true,
-                align: "start"
-              }}
-            >
-              <CarouselContent className="-ml-4">
-                {[1, 2, 3].map((item) => (
-                  <CarouselItem key={item} className="pl-4 basis-full sm:basis-1/2 lg:basis-full">
-                    <div className="relative w-full aspect-square flex items-center justify-center bg-muted rounded-3xl transition-all duration-500 hover:bg-muted/80 group/item overflow-hidden border border-border">
-                      {/* Product Placeholder Image */}
-                      <Image
-                        src="/next.svg"
-                        alt={`Lingerie Set ${item}`}
-                        fill
-                        priority
-                        className="object-contain opacity-20 p-16 transition-transform duration-700 group-hover/item:scale-110"
-                      />
-                      
-                      {/* Variant Info Label */}
-                      <div className="absolute inset-0 flex items-end justify-center pb-10 opacity-0 group-hover/item:opacity-100 transition-opacity duration-300">
-                        <span className="text-foreground/40 font-bold uppercase tracking-widest text-[10px] md:text-xs bg-background/40 backdrop-blur-sm px-4 py-1 rounded-full border border-border">
-                          Lingerie Set {item}
-                        </span>
-                      </div>
-                    </div>
-                  </CarouselItem>
-                ))}
-              </CarouselContent>
-              
-              {/* Navigation Arrows */}
-              <div className="hidden md:flex">
-                <CarouselPrevious 
-                  className="-left-6 lg:-left-12 border-border bg-background/80 backdrop-blur-md text-primary shadow-xl hover:bg-primary hover:text-primary-foreground transition-all scale-125 opacity-0 group-hover:opacity-100 disabled:opacity-0" 
-                />
-                <CarouselNext 
-                  className="-right-6 lg:-right-12 border-border bg-background/80 backdrop-blur-md text-primary shadow-xl hover:bg-primary hover:text-primary-foreground transition-all scale-125 opacity-0 group-hover:opacity-100 disabled:opacity-0" 
-                />
-              </div>
-            </Carousel>
-          </div>
-
-          {/* CTA Primary Action */}
-          <div className="flex justify-center lg:justify-start animate-in fade-in zoom-in-95 duration-1000 delay-500">
-            <Button 
-              className="bg-primary text-primary-foreground font-bold rounded-2xl px-14 py-8 w-full sm:w-fit tracking-widest transition-all active:scale-[0.98] hover:shadow-2xl h-auto text-lg hover:-translate-y-1"
-            >
-              Обрати комфорт
-            </Button>
-          </div>
-        </div>
-
-        {/* Right Column: Hero Lookbook Visual */}
-        <div className="relative w-full aspect-4/5 rounded-[2.5rem] overflow-hidden shadow-2xl group order-1 lg:order-2 animate-in fade-in slide-in-from-right-8 duration-1000 ease-out">
-          {/* Editorial Asset Placeholder Container */}
-          <div className="absolute inset-0 bg-muted flex flex-col items-center justify-center gap-6 text-muted-foreground transition-transform duration-1000 group-hover:scale-105">
-            <div className="w-16 h-px bg-border" />
-            <div className="flex flex-col items-center gap-2">
-              <span className="text-3xl font-bold uppercase tracking-widest pl-4 text-foreground">Editorial</span>
-              <span className="text-xs tracking-widest uppercase opacity-60">Model Lookbook 2026</span>
+    <section className="w-full bg-background overflow-hidden">
+      <div className="container mx-auto px-4 max-w-7xl">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-stretch lg:min-h-150">
+          {/* LEFT COLUMN: Flexbox для ідеального розподілу простору (Текст - Карусель - Кнопка) */}
+          <div className="flex flex-col justify-between py-10 lg:py-16 order-2 lg:order-1">
+            {/* 1. Текст (зменшено розмір заголовка як на макеті) */}
+            <div>
+              <h2 className="font-sans font-bold text-3xl lg:text-4xl text-foreground tracking-tight leading-tight mb-4">
+                Одягайся з любов’ю до себе
+              </h2>
+              <p className="font-sans text-muted-foreground text-sm lg:text-base leading-relaxed max-w-md">
+                М’яка білизна, затишний одяг і натхнення для твого щоденного
+                комфорту.
+              </p>
             </div>
-            <div className="w-16 h-px bg-border" />
-          </div>
-          
-          {/* Gradient Gloss Overlay */}
-          <div className="absolute inset-0 bg-linear-to-tr from-foreground/5 via-transparent to-background/10 pointer-events-none group-hover:opacity-0 transition-opacity duration-700" />
-          <div className="absolute inset-0 ring-1 ring-inset ring-border/5 rounded-[2.5rem] pointer-events-none" />
-        </div>
 
+            {/* 2. Карусель (Центрується у вільному просторі, значно більша) */}
+            <div className="flex-1 flex flex-col items-center justify-center w-full my-10">
+              <div className="relative w-full max-w-xs sm:max-w-sm flex items-center justify-center">
+                <Carousel
+                  setApi={setApi}
+                  className="w-full"
+                  opts={{ loop: true, align: "center" }}
+                >
+                  <CarouselContent className="ml-0">
+                    {PROMO_ITEMS.map((item) => (
+                      <CarouselItem
+                        key={item.id}
+                        className="pl-0 basis-full flex justify-center items-center"
+                      >
+                        {/* Розмір картинки збільшено (w-64 h-64 -> w-80 h-80), додано mix-blend-multiply для прибирання білого фону JPG */}
+                        <div className="relative w-64 h-64 sm:w-72 sm:h-72 lg:w-80 lg:h-80 flex justify-center items-center">
+                          <Image
+                            src={item.imageUrl}
+                            alt={item.title}
+                            fill
+                            priority
+                            className="object-contain mix-blend-multiply"
+                            unoptimized
+                          />
+                        </div>
+                      </CarouselItem>
+                    ))}
+                  </CarouselContent>
+                </Carousel>
+
+                {/* Стрілки тепер "обіймають" зображення */}
+                <button
+                  type="button"
+                  onClick={handlePrev}
+                  className="absolute -left-2 sm:-left-6 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-accent/20 text-accent hover:bg-accent hover:text-white flex items-center justify-center transition-all cursor-pointer z-10"
+                  aria-label="Previous image"
+                >
+                  <ChevronLeft className="w-5 h-5" />
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleNext}
+                  className="absolute -right-2 sm:-right-6 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-accent text-white hover:bg-accent/90 flex items-center justify-center transition-all cursor-pointer shadow-sm z-10"
+                  aria-label="Next image"
+                >
+                  <ChevronRight className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+
+            {/* 3. Кнопка (Притискається до низу) */}
+            <div className="flex justify-start">
+              <Link
+                href="/catalog"
+                className="inline-flex items-center justify-center px-8 py-3 bg-accent text-accent-foreground hover:bg-accent/90 transition-all duration-300 font-medium rounded-xl text-base shadow-sm"
+              >
+                Обрати комфорт
+              </Link>
+            </div>
+          </div>
+
+          {/* RIGHT COLUMN: Модель (Займає всю висоту без відступів) */}
+          <div className="relative w-full h-full min-h-100 lg:min-h-full hidden lg:block order-1 lg:order-2 rounded-2xl lg:rounded-none lg:rounded-r-2xl overflow-hidden">
+            <Image
+              src={MODEL_IMAGE_URL}
+              alt="Одягайся з любов’ю до себе"
+              fill
+              priority
+              className="object-cover object-center"
+              unoptimized
+            />
+          </div>
+        </div>
       </div>
     </section>
   );
