@@ -62,7 +62,6 @@ export const PromoLook: React.FC = () => {
               </p>
             </div>
 
-            {/* 2. Карусель (Центрується у вільному просторі, значно більша) */}
             <div className="flex-1 flex flex-col items-center justify-center w-full my-10">
               <div className="relative w-full max-w-xs sm:max-w-sm flex items-center justify-center">
                 <Carousel
@@ -76,7 +75,6 @@ export const PromoLook: React.FC = () => {
                         key={item.id}
                         className="pl-0 basis-full flex justify-center items-center"
                       >
-                        {/* Розмір картинки збільшено (w-64 h-64 -> w-80 h-80), додано mix-blend-multiply для прибирання білого фону JPG */}
                         <div className="relative w-64 h-64 sm:w-72 sm:h-72 lg:w-80 lg:h-80 flex justify-center items-center">
                           <Image
                             src={item.imageUrl}
@@ -92,7 +90,6 @@ export const PromoLook: React.FC = () => {
                   </CarouselContent>
                 </Carousel>
 
-                {/* Стрілки тепер "обіймають" зображення */}
                 <button
                   type="button"
                   onClick={handlePrev}
@@ -113,7 +110,6 @@ export const PromoLook: React.FC = () => {
               </div>
             </div>
 
-            {/* 3. Кнопка (Притискається до низу) */}
             <div className="flex justify-start">
               <Link
                 href="/catalog"
@@ -124,7 +120,6 @@ export const PromoLook: React.FC = () => {
             </div>
           </div>
 
-          {/* RIGHT COLUMN: Модель (Займає всю висоту без відступів) */}
           <div className="relative w-full h-full min-h-100 lg:min-h-full hidden lg:block order-1 lg:order-2 rounded-2xl lg:rounded-none lg:rounded-r-2xl overflow-hidden">
             <Image
               src={MODEL_IMAGE_URL}
