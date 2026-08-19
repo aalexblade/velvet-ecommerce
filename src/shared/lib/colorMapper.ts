@@ -1,42 +1,38 @@
-import { ProductColor } from "@/entities/product/model/types";
-
-/**
- * Maps ProductColor labels to their corresponding Tailwind CSS theme tokens.
- * These tokens are defined in src/app/globals.css under the @theme block.
- *
- * @param color - The color label from the product data.
- * @returns The CSS class string for the background color.
- */
 export const getProductColorClass = (color: string): string => {
-  const colorMap: Record<ProductColor | string, string> = {
-    "White": "bg-product-white",
-    "Smoky White": "bg-product-smoky-white",
-    "Lavender": "bg-product-lavender",
-    "Creamy Yellow": "bg-product-creamy-yellow",
-    "Cream": "bg-product-creamy",
-    "Creamy Velvet": "bg-product-milky-creamy",
-    "Peach": "bg-product-peach",
-    "Cotton Candy": "bg-product-cotton-candy",
-    "Pale Purple": "bg-product-pale-purple",
-    "Eggplant": "bg-product-eggplant",
-    "Cherry": "bg-product-cherry",
-    "Dark Violet": "bg-product-dark-purple",
-    "Plum": "bg-product-plum",
-    "Ruby": "bg-product-ruby",
-    "Wine Red": "bg-product-wine-red",
-    "Magenta": "bg-product-red-purple",
-    "Red": "bg-product-red",
-    "Mahogany Brown": "bg-product-mahogany",
-    "Magic Mint": "bg-product-magic-mint",
-    "Emerald": "bg-product-emerald",
-    "Pearl Green": "bg-product-pearly-green",
-    "Azure Blue": "bg-product-azure-blue",
-    "Denim Blue": "bg-product-denim-blue",
-    "Midnight Blue": "bg-product-night-blue",
-    "Raw Umber": "bg-product-grey-umbra",
-    "Dark": "bg-product-dark",
-    "Black": "bg-product-black",
+  const colorMap: Record<string, string> = {
+    // Основні базові кольори
+    "White": "bg-white border border-zinc-300",
+    "Beige": "bg-[#E4C5A8]",
+    "Black": "bg-black",
+    "Red": "bg-[#D32F2F]",
+    
+    // Додаткові палітри
+    "Smoky White": "bg-[#F5F5F0] border border-zinc-200",
+    "Lavender": "bg-[#E6E6FA]",
+    "Creamy Yellow": "bg-[#FFFDD0] border border-zinc-200",
+    "Cream": "bg-[#FFF8DC] border border-zinc-200",
+    "Creamy Velvet": "bg-[#F3E5D8]",
+    "Peach": "bg-[#FFDAB9]",
+    "Cotton Candy": "bg-[#FFBCD9]",
+    "Pale Purple": "bg-[#DCD0FF]",
+    "Eggplant": "bg-[#381A35]",
+    "Cherry": "bg-[#630327]",
+    "Dark Violet": "bg-[#421C52]",
+    "Plum": "bg-[#4A0E2E]",
+    "Ruby": "bg-[#9B111E]",
+    "Wine Red": "bg-[#722F37]",
+    "Magenta": "bg-[#FF007F]",
+    "Mahogany Brown": "bg-[#4A2C11]",
+    "Magic Mint": "bg-[#AAF0D1]",
+    "Emerald": "bg-[#046307]",
+    "Pearl Green": "bg-[#E8F5E9] border border-zinc-200",
+    "Azure Blue": "bg-[#007FFF]",
+    "Denim Blue": "bg-[#1560BD]",
+    "Midnight Blue": "bg-[#191970]",
+    "Raw Umber": "bg-[#826644]",
+    "Dark": "bg-[#212121]",
+    "Nude": "bg-[#E8C0A0]",
   };
 
-  return colorMap[color as ProductColor] || "bg-product-white";
+  return colorMap[color] || "bg-zinc-200 border border-zinc-300";
 };
