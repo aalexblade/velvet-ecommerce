@@ -1,0 +1,115 @@
+"use client";
+
+import React, { useMemo } from "react";
+import { cn, getProductColorClass } from "@/shared/lib";
+import { ProductVariant } from "../model/types";
+
+const BASE_COLOR_PALETTE: string[] = [
+  "White",
+  "Beige",
+  "Black",
+  "Red",
+];
+
+interface ProductColorSwatchesProps {
+  variants?: ProductVariant[];
+  selectedColor?: string;
+  defaultColor?: string; // Поточний колір товару (наприклад, з головного зображення)
+  onSelectColor: (color: string) => void;
+  maxDisplay?: number;
+  showAllBaseColors?: boolean;
+}
+
+export const ProductColorSwatches: React.FC<ProductColorSwatchesProps> = ({
+  variants = [],
+  selectedColor,
+  defaultColor,
+  onSelectColor,
+  maxDisplay = 4,
+  showAllBaseColors = true,
+}) => {
+  const activeColor = selectedColor || defaultColor;
+
+  const colorItems = useMemo(() => {
+    const availableColorsMap = new Map<string, boolean>();
+    
+    variants.forEach((v) => {
+      if (!v.color) return;
+      const isAvailable = v.stock === undefined || v.stock === null ? true : v.stock > 0;
+      if (availableColorsMap.has(v.color)) {
+        availableColorsMap.set(v.color, availableColorsMap.get(v.color) || isAvailable);
+      } else {
+        availableColorsMap.set(v.color, isAvailable);
+      }
+    });
+
+    let colorsList: string[];
+
+    if (!showAllBaseColors) {
+      colorsList = Array.from(availableColorsMap.keys());
+    } else {
+      colorsList = Array.from(
+        new Set([...BASE_COLOR_PALETTE, ...Array.from(availableColorsMap.keys())])
+      );
+    }
+
+    // Сортуємо: активний/першочерговий колір ставить на першу позицію [0]
+    if (activeColor) {
+      colorsList.sort((a, b) => {
+        if (a.toLowerCase() === activeColor.toLowerCase()) return -1;
+        if (b.toLowerCase() === activeColor.toLowerCase()) return 1;
+        return 0;
+      });
+    }
+
+    return colorsList.map((color) => ({
+      color,
+      isAvailable: availableColorsMap.get(color) ?? false,
+    }));
+  }, [variants, showAllBaseColors, activeColor]);
+
+  if (colorItems.length === 0) return null;
+
+  const visibleColors = colorItems.slice(0, maxDisplay);
+  const hiddenCount = colorItems.length - maxDisplay;
+
+  return (
+    <div className="flex items-center gap-1.5 my-1.5">
+      {visibleColors.map(({ color, isAvailable }) => {
+        const isSelected = activeColor?.toLowerCase() === color.toLowerCase();
+
+        return (
+          <button
+            key={color}
+            type="button"
+            disabled={!isAvailable}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              if (isAvailable) onSelectColor(color);
+            }}
+            title={isAvailable ? color : `${color} (Немає в наявності)`}
+            className={cn(
+              "relative w-4 h-4 rounded-xs border flex items-center justify-center shrink-0 transition-all p-px",
+              isSelected ? "border-zinc-900 ring-1 ring-zinc-900" : "border-zinc-200",
+              isAvailable ? "cursor-pointer hover:border-zinc-400" : "opacity-40 cursor-not-allowed"
+            )}
+          >
+            <span
+              className={cn(
+                "w-full h-full rounded-[1px] block border border-black/10 shadow-2xs",
+                getProductColorClass(color)
+              )}
+            />
+          </button>
+        );
+      })}
+
+      {hiddenCount > 0 && (
+        <span className="text-[10px] font-medium text-zinc-400 ml-0.5">
+          +{hiddenCount}
+        </span>
+      )}
+    </div>
+  );
+};
