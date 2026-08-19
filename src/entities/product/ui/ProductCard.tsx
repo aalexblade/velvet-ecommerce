@@ -1,15 +1,16 @@
 "use client";
 
 import * as React from "react";
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import useEmblaCarousel from "embla-carousel-react";
 import { Heart, ShoppingBag, ChevronLeft, ChevronRight, X } from "lucide-react";
-import { cn, getProductColorClass } from "@/shared/lib";
+import { cn } from "@/shared/lib";
 import { Product, ProductColor } from "../model/types";
 import { useCartStore } from "@/features/cart/model/cartStore";
 import { ProductDetailsBlock } from "@/widgets/product-details-block";
+import { ProductColorSwatches } from "./ProductColorSwatches";
 
 interface ProductCardProps {
   product: Product;
@@ -20,11 +21,36 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
   const [isWishlist, setIsWishlist] = useState(false);
 
+  // 1. Початковий активний колір (беремо перший доступний з stock > 0 або просто перший)
+  const [selectedColor, setSelectedColor] = useState<ProductColor | string>(() => {
+    const availableVariant = product.variants?.find((v) => v.stock > 0);
+    return availableVariant?.color || product.variants?.[0]?.color || "";
+  });
+
+  // Знаходимо варіант, що відповідає обраному кольору
+  const activeVariant = useMemo(() => {
+    return (
+      product.variants?.find((v) => v.color === selectedColor && v.stock > 0) ||
+      product.variants?.find((v) => v.color === selectedColor) ||
+      product.variants?.[0]
+    );
+  }, [product.variants, selectedColor]);
+
+  // 2. Фільтрація зображень під обраний колір/варіант
   const imagesToRender = useMemo(() => {
-    return product.images && product.images.length > 0
-      ? product.images
-      : [{ url: "/placeholder-product.webp", id: 0 }];
-  }, [product.images]);
+    if (!product.images || product.images.length === 0) {
+      return [{ url: "/placeholder-product.webp", id: 0 }];
+    }
+
+    if (activeVariant) {
+      const variantImages = product.images.filter(
+        (img) => img.variant_id === activeVariant.id
+      );
+      if (variantImages.length > 0) return variantImages;
+    }
+
+    return product.images;
+  }, [product.images, activeVariant]);
 
   const [emblaRef, emblaApi] = useEmblaCarousel({
     loop: true,
@@ -33,13 +59,20 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     active: true,
   });
 
+  // При зміні кольору скидаємо карусель на перший слайд
+  useEffect(() => {
+    if (emblaApi) {
+      emblaApi.scrollTo(0);
+    }
+  }, [selectedColor, emblaApi]);
+
   const scrollPrev = useCallback(
     (e: React.MouseEvent) => {
       e.preventDefault();
       e.stopPropagation();
       if (emblaApi) emblaApi.scrollPrev();
     },
-    [emblaApi],
+    [emblaApi]
   );
 
   const scrollNext = useCallback(
@@ -48,39 +81,32 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       e.stopPropagation();
       if (emblaApi) emblaApi.scrollNext();
     },
-    [emblaApi],
+    [emblaApi]
   );
 
-  const baseVariant = product.variants?.[0];
-  const price = baseVariant?.price || 0;
-
-  const uniqueColors = useMemo(() => {
-    return Array.from(
-      new Set(product.variants?.map((v) => v.color) || []),
-    ) as ProductColor[];
-  }, [product.variants]);
+  const price = activeVariant?.price || 0;
 
   const handleQuickAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (!baseVariant) return;
+    if (!activeVariant) return;
 
     addToCart({
-      variantId: baseVariant.id,
+      variantId: activeVariant.id,
       productId: product.id,
       title: product.title,
-      price: baseVariant.price,
+      price: activeVariant.price,
       quantity: 1,
       image: imagesToRender[0]?.url || "/placeholder-product.webp",
-      color: baseVariant.color,
-      size: baseVariant.size,
+      color: activeVariant.color,
+      size: activeVariant.size,
     });
   };
 
   return (
     <>
       <div className="group/card relative flex flex-col h-full bg-white transition-all duration-300 font-sans text-zinc-900">
-        {/* 1. PHOTO ZONE (Carousel with arrows when hovering) */}
+        {/* 1. PHOTO ZONE */}
         <div className="relative aspect-3/4 w-full overflow-hidden bg-neutral-50 rounded-xl border border-zinc-100 mb-3">
           <div className="w-full h-full overflow-hidden" ref={emblaRef}>
             <div className="flex h-full touch-pan-y">
@@ -103,13 +129,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             </div>
           </div>
 
-          {/* Clickable link to detailed page across the entire area */}
           <Link
             href={`/product/${product.id}`}
             className="absolute inset-0 z-10"
           />
 
-          {/* Elegant branded pink navigation arrows that appear on hover */}
           {imagesToRender.length > 1 && (
             <div className="absolute inset-x-2 top-1/2 -translate-y-1/2 z-20 flex justify-between pointer-events-none opacity-0 group-hover/card:opacity-100 transition-opacity duration-300">
               <button
@@ -129,7 +153,6 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             </div>
           )}
 
-          {/* Quick View Button — Semi-transparent, blurred, and elegant in layout */}
           <div className="absolute bottom-4 left-0 right-0 z-20 flex justify-center px-4 opacity-0 group-hover/card:opacity-100 transition-opacity duration-300">
             <button
               onClick={(e) => {
@@ -146,22 +169,16 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
         {/* 2. INFO BLOCK */}
         <div className="flex flex-col gap-1.5 px-1 grow">
-          {/* A row of colors and actions */}
           <div className="flex items-center justify-between w-full min-h-6">
-            <div className="flex items-center gap-1.5">
-              {uniqueColors.map((color, cIdx) => (
-                <span
-                  key={cIdx}
-                  title={color}
-                  className={cn(
-                    "w-4 h-4 rounded-sm border border-zinc-300 shadow-inner cursor-pointer transition-transform hover:scale-110",
-                    getProductColorClass(color),
-                  )}
-                />
-              ))}
-            </div>
+            {/* Оновлені свочі кольорів з перекресленням та активним станом */}
+            <ProductColorSwatches
+              variants={product.variants}
+              selectedColor={selectedColor}
+              onSelectColor={setSelectedColor}
+              maxDisplay={4}
+            />
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 ml-auto">
               <button
                 onClick={handleQuickAddToCart}
                 className="text-zinc-400 hover:text-[#C8205C] transition-colors p-1 cursor-pointer"
@@ -181,28 +198,25 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                 <Heart
                   className={cn(
                     "w-4 h-4 transition-all",
-                    isWishlist && "fill-[#C8205C] text-[#C8205C]",
+                    isWishlist && "fill-[#C8205C] text-[#C8205C]"
                   )}
                 />
               </button>
             </div>
           </div>
 
-          {/* Product Title */}
           <Link href={`/product/${product.id}`} className="block">
             <h2 className="text-sm font-normal text-zinc-800 line-clamp-1 group-hover/card:text-[#C8205C] transition-colors tracking-tight">
               {product.title}
             </h2>
           </Link>
 
-          {/* Price */}
           <div className="text-sm font-bold text-zinc-900">
             {price.toLocaleString("uk-UA")} UAH
           </div>
         </div>
       </div>
 
-      {/* --- QUICK VIEW MODULE --- */}
       {isQuickViewOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-6 animate-in fade-in duration-200">
           <div
