@@ -25,36 +25,40 @@ export type ProductColor =
   | "Midnight Blue"
   | "Raw Umber"
   | "Dark"
-  | "Black";
+  | "Black"
+  | "Beige"
+  | "Nude";
 
 export interface ProductVariant {
-  id: string;
-  product_id: string;
+  id: number;
+  product_id: number;
   sku: string;
-  color: ProductColor;
+  color: ProductColor | string;
   size: string;
   price: number;
   old_price: number | null;
   stock: number;
+  created_at?: string;
 }
 
 export interface ProductImage {
   id: number;
-  product_id: string;
-  variant_id: string | null;
+  product_id: number;
+  variant_id?: number | null;
   url: string;
   is_main: boolean;
   sort_order: number;
+  created_at?: string;
 }
 
 export interface Product {
-  id: string;
+  id: number;
   title: string;
-  slug: string;
-  description: string;
-  category_id: number;
-  is_active: boolean;
-  created_at: string;
+  slug: string | null;
+  description?: string;
+  category_id?: number;
+  is_active?: boolean;
+  created_at?: string;
   variants: ProductVariant[];
   images: ProductImage[];
 }
