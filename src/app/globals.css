@@ -37,6 +37,8 @@
   /* --- Multi-Tenant Extended Product Colors (E-commerce Swatches) --- */
   /* Base & Pastels */
   --color-product-white: #ffffff;
+  --color-product-beige: #e4c5a8;
+  --color-product-nude: #e8c0a0;
   --color-product-smoky-white: #f5f5f7;
   --color-product-lavender: #e0e0ff;
   --color-product-creamy-yellow: #fffdd0;
