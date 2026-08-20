@@ -47,7 +47,7 @@ export interface ProductImage {
   id: number;
   product_id: number;
   variant_id?: number | null;
-  color?: ProductColor | string | null; // Прив'язка зображення напряму до назви кольору
+  color?: ProductColor | string | null;
   url: string;
   is_main: boolean;
   sort_order: number;
