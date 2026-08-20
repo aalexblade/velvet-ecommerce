@@ -1,3 +1,5 @@
+// src/entities/product/model/types.ts
+
 export type ProductColor =
   | "White"
   | "Smoky White"
@@ -45,6 +47,7 @@ export interface ProductImage {
   id: number;
   product_id: number;
   variant_id?: number | null;
+  color?: ProductColor | string | null; // Прив'язка зображення напряму до назви кольору
   url: string;
   is_main: boolean;
   sort_order: number;
