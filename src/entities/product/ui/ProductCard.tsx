@@ -21,13 +21,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
   const [isWishlist, setIsWishlist] = useState(false);
 
-  // 1. Початковий активний колір (беремо перший доступний з stock > 0 або просто перший)
   const [selectedColor, setSelectedColor] = useState<ProductColor | string>(() => {
     const availableVariant = product.variants?.find((v) => v.stock > 0);
     return availableVariant?.color || product.variants?.[0]?.color || "";
   });
 
-  // Знаходимо варіант, що відповідає обраному кольору
   const activeVariant = useMemo(() => {
     return (
       product.variants?.find((v) => v.color === selectedColor && v.stock > 0) ||
@@ -36,12 +34,21 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     );
   }, [product.variants, selectedColor]);
 
-  // 2. Фільтрація зображень під обраний колір/варіант
+  // Змінена логіка фільтрації зображень під обраний колір
   const imagesToRender = useMemo(() => {
     if (!product.images || product.images.length === 0) {
       return [{ url: "/placeholder-product.webp", id: 0 }];
     }
 
+    // Спочатку шукаємо зображення, явно прив'язані до обраного кольору
+    if (selectedColor) {
+      const colorImages = product.images.filter(
+        (img) => img.color?.toLowerCase() === selectedColor.toLowerCase()
+      );
+      if (colorImages.length > 0) return colorImages;
+    }
+
+    // Якщо немає зображень для кольору, перевіряємо по variant_id
     if (activeVariant) {
       const variantImages = product.images.filter(
         (img) => img.variant_id === activeVariant.id
@@ -49,8 +56,9 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       if (variantImages.length > 0) return variantImages;
     }
 
+    // Якщо нічого не знайдено, повертаємо всі зображення
     return product.images;
-  }, [product.images, activeVariant]);
+  }, [product.images, activeVariant, selectedColor]);
 
   const [emblaRef, emblaApi] = useEmblaCarousel({
     loop: true,
@@ -59,7 +67,6 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     active: true,
   });
 
-  // При зміні кольору скидаємо карусель на перший слайд
   useEffect(() => {
     if (emblaApi) {
       emblaApi.scrollTo(0);
@@ -106,7 +113,6 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   return (
     <>
       <div className="group/card relative flex flex-col h-full bg-white transition-all duration-300 font-sans text-zinc-900">
-        {/* 1. PHOTO ZONE */}
         <div className="relative aspect-3/4 w-full overflow-hidden bg-neutral-50 rounded-xl border border-zinc-100 mb-3">
           <div className="w-full h-full overflow-hidden" ref={emblaRef}>
             <div className="flex h-full touch-pan-y">
@@ -167,10 +173,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           </div>
         </div>
 
-        {/* 2. INFO BLOCK */}
         <div className="flex flex-col gap-1.5 px-1 grow">
           <div className="flex items-center justify-between w-full min-h-6">
-            {/* Оновлені свочі кольорів з перекресленням та активним станом */}
             <ProductColorSwatches
               variants={product.variants}
               selectedColor={selectedColor}
