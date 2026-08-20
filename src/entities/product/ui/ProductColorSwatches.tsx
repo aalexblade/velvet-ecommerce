@@ -26,7 +26,7 @@ export const ProductColorSwatches: React.FC<ProductColorSwatchesProps> = ({
   defaultColor,
   onSelectColor,
   maxDisplay = 4,
-  showAllBaseColors = true,
+  showAllBaseColors = false, // <-- Змінено на false, щоб картка рендерила ТІЛЬКИ наявні кольори
 }) => {
   const activeColor = selectedColor || defaultColor;
 
@@ -43,23 +43,26 @@ export const ProductColorSwatches: React.FC<ProductColorSwatchesProps> = ({
       }
     });
 
-    let colorsList: string[];
+    let rawColors: string[];
 
     if (!showAllBaseColors) {
-      colorsList = Array.from(availableColorsMap.keys());
+      rawColors = Array.from(availableColorsMap.keys());
     } else {
-      colorsList = Array.from(
+      rawColors = Array.from(
         new Set([...BASE_COLOR_PALETTE, ...Array.from(availableColorsMap.keys())])
       );
     }
 
-    // Сортуємо: активний/першочерговий колір ставить на першу позицію [0]
+    // Виносимо активний колір на першу позицію [0] без злому порядку інших
+    const colorsList = [...rawColors];
     if (activeColor) {
-      colorsList.sort((a, b) => {
-        if (a.toLowerCase() === activeColor.toLowerCase()) return -1;
-        if (b.toLowerCase() === activeColor.toLowerCase()) return 1;
-        return 0;
-      });
+      const activeIndex = colorsList.findIndex(
+        (c) => c.toLowerCase() === activeColor.toLowerCase()
+      );
+      if (activeIndex > -1) {
+        const [removed] = colorsList.splice(activeIndex, 1);
+        colorsList.unshift(removed);
+      }
     }
 
     return colorsList.map((color) => ({
