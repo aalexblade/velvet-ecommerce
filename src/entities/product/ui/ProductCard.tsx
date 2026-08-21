@@ -21,67 +21,84 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
   const [isWishlist, setIsWishlist] = useState(false);
 
-  // Гнучкий парсер кольору з URL або назви
   const parseColorFromUrl = (url?: string): string | null => {
     if (!url) return null;
     const lower = url.toLowerCase();
     if (lower.includes("-white") || lower.includes("white")) return "White";
     if (lower.includes("-black") || lower.includes("black")) return "Black";
-    if (lower.includes("-beige") || lower.includes("beige") || lower.includes("nude")) return "Beige";
+    if (
+      lower.includes("-beige") ||
+      lower.includes("beige") ||
+      lower.includes("nude")
+    )
+      return "Beige";
     if (lower.includes("-blue") || lower.includes("blue")) return "Blue";
     if (lower.includes("-navy") || lower.includes("navy")) return "Navy";
-    if (lower.includes("-red") || lower.includes("burgundy") || lower.includes("darkred")) return "Red";
-    if (lower.includes("-fuchsia") || lower.includes("magenta")) return "Fuchsia";
-    if (lower.includes("-green") || lower.includes("sage") || lower.includes("emerald")) return "Green";
-    if (lower.includes("-purple") || lower.includes("lavender")) return "Purple";
+    if (
+      lower.includes("-red") ||
+      lower.includes("burgundy") ||
+      lower.includes("darkred")
+    )
+      return "Red";
+    if (lower.includes("-fuchsia") || lower.includes("magenta"))
+      return "Fuchsia";
+    if (
+      lower.includes("-green") ||
+      lower.includes("sage") ||
+      lower.includes("emerald")
+    )
+      return "Green";
+    if (lower.includes("-purple") || lower.includes("lavender"))
+      return "Purple";
     if (lower.includes("-pink") || lower.includes("pink")) return "Pink";
-    if (lower.includes("-orange") || lower.includes("terracotta")) return "Orange";
+    if (lower.includes("-orange") || lower.includes("terracotta"))
+      return "Orange";
     if (lower.includes("-mint")) return "Mint";
     return null;
   };
 
-  // 1. Головне зображення
   const mainImage = useMemo(() => {
     return product.images?.find((img) => img.is_main) || product.images?.[0];
   }, [product.images]);
 
-  // 2. Визначення дефолтного кольору
   const defaultColor = useMemo(() => {
     const mainImgColor = mainImage?.color || parseColorFromUrl(mainImage?.url);
     if (mainImgColor) return mainImgColor;
 
     if (mainImage?.variant_id) {
-      const match = product.variants?.find((v) => v.id === mainImage.variant_id);
+      const match = product.variants?.find(
+        (v) => v.id === mainImage.variant_id,
+      );
       if (match?.color) return match.color;
     }
 
     return product.variants?.[0]?.color || "";
   }, [mainImage, product.variants]);
 
-  // Скидання стану при зміні товару під час рендеру (без викликання каскадних рендерів)
   const [prevProductId, setPrevProductId] = useState(product.id);
-  const [selectedColor, setSelectedColor] = useState<ProductColor | string>(defaultColor);
+  const [selectedColor, setSelectedColor] = useState<ProductColor | string>(
+    defaultColor,
+  );
 
   if (prevProductId !== product.id) {
     setPrevProductId(product.id);
     setSelectedColor(defaultColor);
   }
 
-  // 3. Активний варіант
   const activeVariant = useMemo(() => {
     return (
       product.variants?.find(
         (v) =>
-          v.color?.toLowerCase() === selectedColor.toLowerCase() && (v.stock ?? 1) > 0
+          v.color?.toLowerCase() === selectedColor.toLowerCase() &&
+          (v.stock ?? 1) > 0,
       ) ||
       product.variants?.find(
-        (v) => v.color?.toLowerCase() === selectedColor.toLowerCase()
+        (v) => v.color?.toLowerCase() === selectedColor.toLowerCase(),
       ) ||
       product.variants?.[0]
     );
   }, [product.variants, selectedColor]);
 
-  // 4. Формування масиву фото для каруселі
   const imagesToRender = useMemo(() => {
     if (!product.images || product.images.length === 0) {
       return [{ url: "/placeholder-product.webp", id: 0 }];
@@ -90,22 +107,27 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     if (selectedColor) {
       const filtered = product.images.filter((img) => {
         const imgColor = img.color || parseColorFromUrl(img.url);
-        if (imgColor && imgColor.toLowerCase() === selectedColor.toLowerCase()) {
+        if (
+          imgColor &&
+          imgColor.toLowerCase() === selectedColor.toLowerCase()
+        ) {
           return true;
         }
         if (img.variant_id) {
-          const variant = product.variants?.find((v) => v.id === img.variant_id);
+          const variant = product.variants?.find(
+            (v) => v.id === img.variant_id,
+          );
           return variant?.color?.toLowerCase() === selectedColor.toLowerCase();
         }
         return false;
       });
 
-      // Якщо є кілька фото обраного кольору — виводимо їх
       if (filtered.length > 1) return filtered;
-      
-      // Якщо фото тільки 1 — ставить його першим і додаємо інші фото товару, щоб карусель НЕ зникала
+
       if (filtered.length === 1) {
-        const others = product.images.filter((img) => img.url !== filtered[0].url);
+        const others = product.images.filter(
+          (img) => img.url !== filtered[0].url,
+        );
         return [filtered[0], ...others];
       }
     }
@@ -132,7 +154,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       e.stopPropagation();
       if (emblaApi) emblaApi.scrollPrev();
     },
-    [emblaApi]
+    [emblaApi],
   );
 
   const scrollNext = useCallback(
@@ -141,7 +163,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       e.stopPropagation();
       if (emblaApi) emblaApi.scrollNext();
     },
-    [emblaApi]
+    [emblaApi],
   );
 
   const price = activeVariant?.price || product.variants?.[0]?.price || 0;
@@ -188,13 +210,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             </div>
           </div>
 
-          {/* Основне посилання на картку */}
           <Link
             href={`/product/${product.id}`}
             className="absolute inset-0 z-10"
           />
 
-          {/* Стрелочки каруселі з високим z-index */}
           {imagesToRender.length > 1 && (
             <div className="absolute inset-x-2 top-1/2 -translate-y-1/2 z-20 flex justify-between pointer-events-none opacity-0 group-hover/card:opacity-100 transition-opacity duration-300">
               <button
@@ -216,7 +236,6 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             </div>
           )}
 
-          {/* Кнопка швидкого перегляду */}
           <div className="absolute bottom-4 left-0 right-0 z-20 flex justify-center px-4 opacity-0 group-hover/card:opacity-100 transition-opacity duration-300 pointer-events-none">
             <button
               type="button"
@@ -264,7 +283,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                 <Heart
                   className={cn(
                     "w-4 h-4 transition-all text-zinc-400 hover:text-[#C8205C]",
-                    isWishlist && "fill-[#C8205C] text-[#C8205C]"
+                    isWishlist && "fill-[#C8205C] text-[#C8205C]",
                   )}
                 />
               </button>
