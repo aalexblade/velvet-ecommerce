@@ -24,9 +24,7 @@ export const ProductCardSkeleton: React.FC = () => {
   );
 };
 
-/**
- * Grid layout skeleton for a collection of product cards
- */
+
 export const ProductGridSkeleton: React.FC<{ count?: number }> = ({
   count = 12,
 }) => {
