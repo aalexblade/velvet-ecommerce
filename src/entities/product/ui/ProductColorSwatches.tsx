@@ -14,7 +14,7 @@ const BASE_COLOR_PALETTE: string[] = [
 interface ProductColorSwatchesProps {
   variants?: ProductVariant[];
   selectedColor?: string;
-  defaultColor?: string; // Поточний колір товару (наприклад, з головного зображення)
+  defaultColor?: string; 
   onSelectColor: (color: string) => void;
   maxDisplay?: number;
   showAllBaseColors?: boolean;
@@ -53,7 +53,6 @@ export const ProductColorSwatches: React.FC<ProductColorSwatchesProps> = ({
       );
     }
 
-    // Виносимо активний колір на першу позицію [0] без злому порядку інших
     const colorsList = [...rawColors];
     if (activeColor) {
       const activeIndex = colorsList.findIndex(
