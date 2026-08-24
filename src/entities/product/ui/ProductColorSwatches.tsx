@@ -4,30 +4,79 @@ import React, { useMemo } from "react";
 import { cn } from "@/shared/lib";
 import { ProductVariant } from "../model/types";
 
-// 1. Словник для точного збігу кольорів із БД та Tailwind v4 (@theme)
-const COLOR_CLASS_MAP: Record<string, string> = {
+// 1. Базова палітра Tailwind-класів
+const BASE_COLOR_CLASSES: Record<string, string> = {
   black: "bg-product-black",
   white: "bg-product-white border-black/20",
   beige: "bg-product-beige",
-  nude: "bg-product-nude",
-  pink: "bg-product-pink",
-  purple: "bg-product-purple",
-  lavender: "bg-product-lavender",
-  green: "bg-product-green",
-  emerald: "bg-product-emerald",
-  mint: "bg-product-mint",
-  sage: "bg-product-sage",
-  orange: "bg-product-orange",
-  terracotta: "bg-product-terracotta",
   red: "bg-product-red",
-  ruby: "bg-product-ruby",
+  blue: "bg-product-azure-blue",
+  green: "bg-product-green",
+  purple: "bg-product-purple",
+  orange: "bg-product-orange",
+  pink: "bg-product-pink",
 };
 
-// 2. Локальна функція визначення класу кольору
+// Нормалізація назви кольору до канонічного ключа
+const getCanonicalColorKey = (colorName?: string | null): string => {
+  if (!colorName) return "";
+  const val = colorName.trim().toLowerCase();
+
+  if (val.includes("black") || val.includes("чорн")) return "black";
+  if (val.includes("white") || val.includes("біл") || val.includes("молоч")) return "white";
+  if (
+    val.includes("beige") ||
+    val.includes("nude") ||
+    val.includes("беж") ||
+    val.includes("нюд") ||
+    val.includes("тілес")
+  ) return "beige";
+  if (
+    val.includes("red") ||
+    val.includes("ruby") ||
+    val.includes("червон") ||
+    val.includes("бордо") ||
+    val.includes("марсал")
+  ) return "red";
+  if (
+    val.includes("blue") ||
+    val.includes("син") ||
+    val.includes("блакит") ||
+    val.includes("волошк")
+  ) return "blue";
+  if (
+    val.includes("green") ||
+    val.includes("emerald") ||
+    val.includes("mint") ||
+    val.includes("sage") ||
+    val.includes("зелен") ||
+    val.includes("смарагд") ||
+    val.includes("м'ят") ||
+    val.includes("фісташ") ||
+    val.includes("шавл")
+  ) return "green";
+  if (
+    val.includes("purple") ||
+    val.includes("lavender") ||
+    val.includes("фіолет") ||
+    val.includes("лаванд") ||
+    val.includes("бузк")
+  ) return "purple";
+  if (
+    val.includes("orange") ||
+    val.includes("terracotta") ||
+    val.includes("помаранч") ||
+    val.includes("теракот")
+  ) return "orange";
+  if (val.includes("pink") || val.includes("рожев")) return "pink";
+
+  return val;
+};
+
+// 2. Функція зведення назв до Tailwind-класу
 const getSwatchColorClass = (colorName?: string | null): string => {
-  if (!colorName) return "bg-gray-200";
-  const normalized = colorName.trim().toLowerCase();
-  return COLOR_CLASS_MAP[normalized] || "bg-gray-200";
+  const key = getCanonicalColorKey(colorName);
+  return BASE_COLOR_CLASSES[key] || "bg-zinc-200 border-zinc-300";
 };
 
 const BASE_COLOR_PALETTE: string[] = ["White", "Beige", "Black", "Red"];
@@ -50,6 +99,7 @@ export const ProductColorSwatches: React.FC<ProductColorSwatchesProps> = ({
   showAllBaseColors = false,
 }) => {
   const activeColor = selectedColor || defaultColor;
+  const activeCanonicalGroup = getCanonicalColorKey(activeColor);
 
   const colorItems = useMemo(() => {
     const availableColorsMap = new Map<string, boolean>();
@@ -58,10 +108,11 @@ export const ProductColorSwatches: React.FC<ProductColorSwatchesProps> = ({
       if (!v.color) return;
       const isAvailable =
         v.stock === undefined || v.stock === null ? true : v.stock > 0;
+
       if (availableColorsMap.has(v.color)) {
         availableColorsMap.set(
           v.color,
-          availableColorsMap.get(v.color) || isAvailable,
+          availableColorsMap.get(v.color) || isAvailable
         );
       } else {
         availableColorsMap.set(v.color, isAvailable);
@@ -77,14 +128,16 @@ export const ProductColorSwatches: React.FC<ProductColorSwatchesProps> = ({
         new Set([
           ...BASE_COLOR_PALETTE,
           ...Array.from(availableColorsMap.keys()),
-        ]),
+        ])
       );
     }
 
     const colorsList = [...rawColors];
-    if (activeColor) {
+
+    // Підтягуємо активний колір на перше місце за канонічною групою
+    if (activeCanonicalGroup) {
       const activeIndex = colorsList.findIndex(
-        (c) => c.toLowerCase() === activeColor.toLowerCase(),
+        (c) => getCanonicalColorKey(c) === activeCanonicalGroup
       );
       if (activeIndex > -1) {
         const [removed] = colorsList.splice(activeIndex, 1);
@@ -96,7 +149,7 @@ export const ProductColorSwatches: React.FC<ProductColorSwatchesProps> = ({
       color,
       isAvailable: availableColorsMap.get(color) ?? false,
     }));
-  }, [variants, showAllBaseColors, activeColor]);
+  }, [variants, showAllBaseColors, activeCanonicalGroup]);
 
   if (colorItems.length === 0) return null;
 
@@ -106,7 +159,8 @@ export const ProductColorSwatches: React.FC<ProductColorSwatchesProps> = ({
   return (
     <div className="flex items-center gap-1.5 my-1.5">
       {visibleColors.map(({ color, isAvailable }) => {
-        const isSelected = activeColor?.toLowerCase() === color.toLowerCase();
+        const isSelected =
+          getCanonicalColorKey(activeColor) === getCanonicalColorKey(color);
 
         return (
           <button
@@ -126,13 +180,13 @@ export const ProductColorSwatches: React.FC<ProductColorSwatchesProps> = ({
                 : "border-zinc-200",
               isAvailable
                 ? "cursor-pointer hover:border-zinc-400"
-                : "opacity-40 cursor-not-allowed",
+                : "opacity-40 cursor-not-allowed"
             )}
           >
             <span
               className={cn(
                 "w-full h-full rounded-[1px] block border border-black/10 shadow-2xs",
-                getSwatchColorClass(color),
+                getSwatchColorClass(color)
               )}
             />
           </button>
