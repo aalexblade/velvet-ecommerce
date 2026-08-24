@@ -35,7 +35,7 @@
   --color-accent-foreground: var(--accent-foreground);
 
   /* --- Multi-Tenant Extended Product Colors (E-commerce Swatches) --- */
-  /* Base & Pastels */
+  /* Direct DB Keys & Base Pastels */
   --color-product-white: #ffffff;
   --color-product-beige: #e4c5a8;
   --color-product-nude: #e8c0a0;
@@ -47,7 +47,8 @@
   --color-product-peach: #ffcba4;
 
   /* Pinks & Purples */
-  --color-product-cotton-candy: #ffbcd9;
+  --color-product-pink: #ffbcd9;
+  --color-product-purple: #e0e0ff;
   --color-product-pale-purple: #fae6fa;
   --color-product-eggplant: #614051;
   --color-product-cherry: #990033;
@@ -55,16 +56,20 @@
   --color-product-plum: #dda0dd;
 
   /* Reds & Darks */
+  --color-product-red: #ff0000;
   --color-product-ruby: #cc0000;
   --color-product-wine-red: #722f37;
   --color-product-magenta: #ff00ff;
-  --color-product-red: #ff0000;
   --color-product-mahogany-brown: #c04000;
 
-  /* Greens & Blues */
-  --color-product-magic-mint: #aaf0d1;
+  /* Greens, Oranges & Blues */
+  --color-product-green: #50c878;
   --color-product-emerald: #50c878;
+  --color-product-mint: #aaf0d1;
+  --color-product-sage: #9caf88;
   --color-product-pearl-green: #e2f4c5;
+  --color-product-orange: #c04000;
+  --color-product-terracotta: #c04000;
   --color-product-azure-blue: #007fff;
   --color-product-denim-blue: #1560bd;
   --color-product-midnight-blue: #191970;
