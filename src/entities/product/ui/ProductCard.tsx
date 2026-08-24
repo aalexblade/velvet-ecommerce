@@ -21,6 +21,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
   const [isWishlist, setIsWishlist] = useState(false);
 
+  // Хелпер для нормалізації кольору
+  const normalizeColor = (color?: string | null) =>
+    color?.trim().toLowerCase() || "";
+
+  // Хелпер для визначення кольору з URL
   const parseColorFromUrl = (url?: string): string | null => {
     if (!url) return null;
     const lower = url.toLowerCase();
@@ -75,65 +80,59 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     return product.variants?.[0]?.color || "";
   }, [mainImage, product.variants]);
 
+  // Стан для відстеження зміни товару та обраного кольору
   const [prevProductId, setPrevProductId] = useState(product.id);
   const [selectedColor, setSelectedColor] = useState<ProductColor | string>(
     defaultColor,
   );
 
+  // Синхронізація стану ПІД ЧАС РЕНДЕРУ (замість useEffect)
   if (prevProductId !== product.id) {
     setPrevProductId(product.id);
     setSelectedColor(defaultColor);
   }
 
   const activeVariant = useMemo(() => {
+    const target = normalizeColor(selectedColor);
     return (
       product.variants?.find(
-        (v) =>
-          v.color?.toLowerCase() === selectedColor.toLowerCase() &&
-          (v.stock ?? 1) > 0,
+        (v) => normalizeColor(v.color) === target && (v.stock ?? 1) > 0,
       ) ||
-      product.variants?.find(
-        (v) => v.color?.toLowerCase() === selectedColor.toLowerCase(),
-      ) ||
+      product.variants?.find((v) => normalizeColor(v.color) === target) ||
       product.variants?.[0]
     );
   }, [product.variants, selectedColor]);
 
+  // Фільтрація картинок strictly під обраний колір
   const imagesToRender = useMemo(() => {
     if (!product.images || product.images.length === 0) {
       return [{ url: "/placeholder-product.webp", id: 0 }];
     }
 
-    if (selectedColor) {
+    const targetColor = normalizeColor(selectedColor);
+
+    if (targetColor) {
       const filtered = product.images.filter((img) => {
-        const imgColor = img.color || parseColorFromUrl(img.url);
-        if (
-          imgColor &&
-          imgColor.toLowerCase() === selectedColor.toLowerCase()
-        ) {
+        const imgColor = normalizeColor(
+          img.color || parseColorFromUrl(img.url),
+        );
+        if (imgColor && imgColor === targetColor) {
           return true;
         }
         if (img.variant_id) {
           const variant = product.variants?.find(
             (v) => v.id === img.variant_id,
           );
-          return variant?.color?.toLowerCase() === selectedColor.toLowerCase();
+          return normalizeColor(variant?.color) === targetColor;
         }
         return false;
       });
 
-      if (filtered.length > 1) return filtered;
-
-      if (filtered.length === 1) {
-        const others = product.images.filter(
-          (img) => img.url !== filtered[0].url,
-        );
-        return [filtered[0], ...others];
-      }
+      if (filtered.length > 0) return filtered;
     }
 
-    return product.images;
-  }, [product.images, product.variants, selectedColor]);
+    return [mainImage || product.images[0]];
+  }, [product.images, product.variants, selectedColor, mainImage]);
 
   const [emblaRef, emblaApi] = useEmblaCarousel({
     loop: true,
