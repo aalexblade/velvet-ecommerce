@@ -16,60 +16,126 @@ interface ProductCardProps {
   product: Product;
 }
 
+// Канонічна нормалізація кольорів для збігу з ProductColorSwatches
+const getCanonicalColorGroup = (color?: string | null): string => {
+  if (!color) return "";
+  const val = color.trim().toLowerCase();
+
+  if (val.includes("black") || val.includes("чорн")) return "black";
+  if (val.includes("white") || val.includes("біл") || val.includes("молоч"))
+    return "white";
+  if (
+    val.includes("beige") ||
+    val.includes("nude") ||
+    val.includes("беж") ||
+    val.includes("нюд") ||
+    val.includes("тілес")
+  )
+    return "beige";
+  if (
+    val.includes("red") ||
+    val.includes("ruby") ||
+    val.includes("червон") ||
+    val.includes("бордо") ||
+    val.includes("марсал")
+  )
+    return "red";
+  if (
+    val.includes("blue") ||
+    val.includes("син") ||
+    val.includes("блакит") ||
+    val.includes("волошк")
+  )
+    return "blue";
+  if (
+    val.includes("green") ||
+    val.includes("emerald") ||
+    val.includes("mint") ||
+    val.includes("sage") ||
+    val.includes("зелен") ||
+    val.includes("смарагд") ||
+    val.includes("м'ят") ||
+    val.includes("фісташ") ||
+    val.includes("шавл")
+  )
+    return "green";
+  if (
+    val.includes("purple") ||
+    val.includes("lavender") ||
+    val.includes("фіолет") ||
+    val.includes("лаванд") ||
+    val.includes("бузк")
+  )
+    return "purple";
+  if (
+    val.includes("orange") ||
+    val.includes("terracotta") ||
+    val.includes("помаранч") ||
+    val.includes("теракот")
+  )
+    return "orange";
+  if (val.includes("pink") || val.includes("рожев")) return "pink";
+
+  return val;
+};
+
+// Зчитування кольору з назви файлу зображення
+const parseColorFromUrl = (url?: string): string | null => {
+  if (!url) return null;
+  const lower = url.toLowerCase();
+
+  if (lower.includes("-white") || lower.includes("-milk")) return "white";
+  if (lower.includes("-black") || lower.includes("-dark")) return "black";
+  if (lower.includes("-beige") || lower.includes("-nude")) return "beige";
+  if (
+    lower.includes("-blue") ||
+    lower.includes("-navy") ||
+    lower.includes("-electric")
+  )
+    return "blue";
+  if (
+    lower.includes("-red") ||
+    lower.includes("-burgundy") ||
+    lower.includes("-marsala")
+  )
+    return "red";
+  if (
+    lower.includes("-green") ||
+    lower.includes("-emerald") ||
+    lower.includes("-sage") ||
+    lower.includes("-mint")
+  )
+    return "green";
+  if (lower.includes("-purple") || lower.includes("-lavender")) return "purple";
+  if (lower.includes("-pink")) return "pink";
+  if (lower.includes("-terracotta") || lower.includes("-orange"))
+    return "orange";
+
+  return null;
+};
+
 export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const addToCart = useCartStore((state) => state.addToCart);
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
   const [isWishlist, setIsWishlist] = useState(false);
-
-  // Хелпер для нормалізації кольору
-  const normalizeColor = (color?: string | null) =>
-    color?.trim().toLowerCase() || "";
-
-  // Хелпер для визначення кольору з URL
-  const parseColorFromUrl = (url?: string): string | null => {
-    if (!url) return null;
-    const lower = url.toLowerCase();
-    if (lower.includes("-white") || lower.includes("white")) return "White";
-    if (lower.includes("-black") || lower.includes("black")) return "Black";
-    if (
-      lower.includes("-beige") ||
-      lower.includes("beige") ||
-      lower.includes("nude")
-    )
-      return "Beige";
-    if (lower.includes("-blue") || lower.includes("blue")) return "Blue";
-    if (lower.includes("-navy") || lower.includes("navy")) return "Navy";
-    if (
-      lower.includes("-red") ||
-      lower.includes("burgundy") ||
-      lower.includes("darkred")
-    )
-      return "Red";
-    if (lower.includes("-fuchsia") || lower.includes("magenta"))
-      return "Fuchsia";
-    if (
-      lower.includes("-green") ||
-      lower.includes("sage") ||
-      lower.includes("emerald")
-    )
-      return "Green";
-    if (lower.includes("-purple") || lower.includes("lavender"))
-      return "Purple";
-    if (lower.includes("-pink") || lower.includes("pink")) return "Pink";
-    if (lower.includes("-orange") || lower.includes("terracotta"))
-      return "Orange";
-    if (lower.includes("-mint")) return "Mint";
-    return null;
-  };
 
   const mainImage = useMemo(() => {
     return product.images?.find((img) => img.is_main) || product.images?.[0];
   }, [product.images]);
 
   const defaultColor = useMemo(() => {
-    const mainImgColor = mainImage?.color || parseColorFromUrl(mainImage?.url);
-    if (mainImgColor) return mainImgColor;
+    // 1. Колір з поля чи URL головного зображення
+    const mainImgColorGroup = getCanonicalColorGroup(
+      mainImage?.color || parseColorFromUrl(mainImage?.url),
+    );
+    if (mainImgColorGroup) {
+      const match = product.variants?.find(
+        (v) => getCanonicalColorGroup(v.color) === mainImgColorGroup,
+      );
+      if (match?.color) return match.color;
+    }
 
+    // 2. Колір через variant_id головного зображення
     if (mainImage?.variant_id) {
       const match = product.variants?.find(
         (v) => v.id === mainImage.variant_id,
@@ -77,53 +143,55 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       if (match?.color) return match.color;
     }
 
+    // 3. Фолбек на колір першого варіанта
     return product.variants?.[0]?.color || "";
   }, [mainImage, product.variants]);
 
-  // Стан для відстеження зміни товару та обраного кольору
   const [prevProductId, setPrevProductId] = useState(product.id);
   const [selectedColor, setSelectedColor] = useState<ProductColor | string>(
     defaultColor,
   );
 
-  // Синхронізація стану ПІД ЧАС РЕНДЕРУ (замість useEffect)
   if (prevProductId !== product.id) {
     setPrevProductId(product.id);
     setSelectedColor(defaultColor);
   }
 
   const activeVariant = useMemo(() => {
-    const target = normalizeColor(selectedColor);
+    const targetGroup = getCanonicalColorGroup(selectedColor);
     return (
       product.variants?.find(
-        (v) => normalizeColor(v.color) === target && (v.stock ?? 1) > 0,
+        (v) =>
+          getCanonicalColorGroup(v.color) === targetGroup && (v.stock ?? 1) > 0,
       ) ||
-      product.variants?.find((v) => normalizeColor(v.color) === target) ||
+      product.variants?.find(
+        (v) => getCanonicalColorGroup(v.color) === targetGroup,
+      ) ||
       product.variants?.[0]
     );
   }, [product.variants, selectedColor]);
 
-  // Фільтрація картинок strictly під обраний колір
+  // Фільтрація картинок за канонічною групою кольору
   const imagesToRender = useMemo(() => {
     if (!product.images || product.images.length === 0) {
       return [{ url: "/placeholder-product.webp", id: 0 }];
     }
 
-    const targetColor = normalizeColor(selectedColor);
+    const targetGroup = getCanonicalColorGroup(selectedColor);
 
-    if (targetColor) {
+    if (targetGroup) {
       const filtered = product.images.filter((img) => {
-        const imgColor = normalizeColor(
+        const imgGroup = getCanonicalColorGroup(
           img.color || parseColorFromUrl(img.url),
         );
-        if (imgColor && imgColor === targetColor) {
+        if (imgGroup && imgGroup === targetGroup) {
           return true;
         }
         if (img.variant_id) {
           const variant = product.variants?.find(
             (v) => v.id === img.variant_id,
           );
-          return normalizeColor(variant?.color) === targetColor;
+          return getCanonicalColorGroup(variant?.color) === targetGroup;
         }
         return false;
       });
