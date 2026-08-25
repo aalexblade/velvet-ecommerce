@@ -56,7 +56,7 @@ function CartView() {
         <div className="w-full lg:col-span-7 flex flex-col gap-6">
           {items.map((item) => (
             <div
-              key={item.variantId}
+              key={String(item.variantId)}
               className="flex gap-4 sm:gap-6 pb-6 border-b border-zinc-100 last:border-0 last:pb-0 items-start group w-full"
             >
               {/* Фото товару */}
@@ -78,7 +78,7 @@ function CartView() {
                     {item.title}
                   </h2>
                   <button
-                    onClick={() => removeFromCart(item.variantId)}
+                    onClick={() => removeFromCart(String(item.variantId))}
                     className="p-1 text-zinc-400 hover:text-red-600 transition-colors cursor-pointer shrink-0"
                     aria-label="Видалити товар"
                   >
@@ -108,7 +108,10 @@ function CartView() {
                   <div className="flex items-center border border-zinc-300 rounded-md h-8 bg-white">
                     <button
                       onClick={() =>
-                        updateQuantity(item.variantId, item.quantity - 1)
+                        updateQuantity(
+                          String(item.variantId),
+                          item.quantity - 1,
+                        )
                       }
                       disabled={item.quantity <= 1}
                       className="px-2.5 h-full flex items-center justify-center text-zinc-500 hover:text-zinc-900 disabled:opacity-30 cursor-pointer"
@@ -120,7 +123,10 @@ function CartView() {
                     </span>
                     <button
                       onClick={() =>
-                        updateQuantity(item.variantId, item.quantity + 1)
+                        updateQuantity(
+                          String(item.variantId),
+                          item.quantity + 1,
+                        )
                       }
                       className="px-2.5 h-full flex items-center justify-center text-zinc-500 hover:text-zinc-900 cursor-pointer"
                     >
@@ -138,7 +144,6 @@ function CartView() {
         </div>
 
         {/* 📊 ПРАВА ЗОНА: БЛОК ПІДСУМКУ ЗАМОВЛЕННЯ (Займає 5 колонок) */}
-        {/* Прибрали зайву висоту, зафіксували чітку структуру без розтягування h-full */}
         <div className="w-full lg:col-span-5 flex flex-col lg:sticky lg:top-28">
           <div className="w-full bg-zinc-50 border border-zinc-100 rounded-2xl p-6 md:p-8 flex flex-col gap-6">
             <h2 className="text-sm font-bold uppercase tracking-wider text-zinc-900 pb-2 border-b border-zinc-200">

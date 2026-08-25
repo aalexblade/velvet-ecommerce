@@ -198,7 +198,7 @@ function CheckoutView() {
 
       // 2. Map responsive frontend collections into atomic bulk line-item data structures
       const itemsPayload = items.map((item) => ({
-        variant_id: item.variantId,
+        variant_id: String(item.variantId),
         title: item.title,
         color: item.color || "Default",
         size: item.size || "Default",
@@ -552,7 +552,7 @@ function CheckoutView() {
             <div className="flex flex-col gap-4 max-h-48 overflow-y-auto pr-1 no-scrollbar border-b border-zinc-200/60 pb-4">
               {items.map((item) => (
                 <div
-                  key={item.variantId}
+                  key={String(item.variantId)}
                   className="flex items-center gap-3 justify-between text-xs"
                 >
                   <div className="flex items-center gap-3 min-w-0">
