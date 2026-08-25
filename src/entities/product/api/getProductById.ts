@@ -65,7 +65,7 @@ export async function getProductById(id: string): Promise<Product | null> {
   const sortedImages = [...rawImages].sort((a, b) => a.sort_order - b.sort_order);
 
   return {
-    id: String(prod.id),
+    id: prod.id,
     title: prod.title,
     slug: prod.slug,
     description: prod.description || "",
@@ -74,15 +74,15 @@ export async function getProductById(id: string): Promise<Product | null> {
     created_at: prod.created_at,
     images: sortedImages.map((img) => ({
       id: img.id,
-      product_id: String(img.product_id),
+      product_id: img.product_id,
       variant_id: null,
       url: img.url,
       is_main: img.is_main,
       sort_order: img.sort_order,
     })),
     variants: (prod.product_variants || []).map((v) => ({
-      id: String(v.id),
-      product_id: String(v.product_id),
+      id: v.id,
+      product_id: v.product_id,
       sku: v.sku,
       color: v.color as ProductColor,
       size: v.size,

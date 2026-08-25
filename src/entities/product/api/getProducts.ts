@@ -66,7 +66,7 @@ function mapDBProductToProduct(prod: DBProductResponse): Product {
   );
 
   return {
-    id: String(prod.id),
+    id: prod.id,
     title: prod.title,
     slug: prod.slug,
     description: prod.description || "",
@@ -75,15 +75,15 @@ function mapDBProductToProduct(prod: DBProductResponse): Product {
     created_at: prod.created_at,
     images: sortedImages.map((img) => ({
       id: img.id,
-      product_id: String(img.product_id),
+      product_id: img.product_id,
       variant_id: null,
       url: img.url,
       is_main: img.is_main,
       sort_order: img.sort_order,
     })),
     variants: (prod.product_variants || []).map((v) => ({
-      id: String(v.id),
-      product_id: String(v.product_id),
+      id: v.id,
+      product_id: v.product_id,
       sku: v.sku,
       color: v.color as ProductColor,
       size: v.size,
@@ -223,7 +223,7 @@ export async function getProducts(
       } else if (sort === "newest") {
         products.sort(
           (a, b) =>
-            new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+            new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime(),
         );
       }
     }
