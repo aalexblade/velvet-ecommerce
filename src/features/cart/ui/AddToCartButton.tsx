@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useSyncExternalStore } from "react";
 import { useCartStore } from "../model/cartStore";
 import { Button } from "@/shared/ui";
 import { ShoppingBag } from "lucide-react";
@@ -17,23 +17,29 @@ interface AddToCartButtonProps {
   className?: string;
 }
 
+const emptySubscribe = () => () => {};
+
+function useIsMounted() {
+  return useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false
+  );
+}
+
 export function AddToCartButton({ 
   variantId, 
   productId,
   title,
   price,
   image,
-  color,
-  size,
+  color = "",
+  size = "",
   className = "" 
 }: AddToCartButtonProps) {
-  const [isMounted, setIsMounted] = useState(false);
+  const isMounted = useIsMounted();
   const addToCart = useCartStore((state) => state.addToCart);
   const items = useCartStore((state) => state.items);
-
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
 
   const isInCart = items.some((item) => item.variantId === variantId);
 
