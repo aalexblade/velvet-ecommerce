@@ -82,33 +82,36 @@ const getCanonicalColorGroup = (color?: string | null): string => {
 // Зчитування кольору з назви файлу зображення
 const parseColorFromUrl = (url?: string): string | null => {
   if (!url) return null;
-  const lower = url.toLowerCase();
+  const filename =
+    url.split("/").pop()?.split("?")[0].split(".")[0].toLowerCase() || "";
 
-  if (lower.includes("-white") || lower.includes("-milk")) return "white";
-  if (lower.includes("-black") || lower.includes("-dark")) return "black";
-  if (lower.includes("-beige") || lower.includes("-nude")) return "beige";
+  if (filename.includes("white") || filename.includes("milk")) return "white";
+  if (filename.includes("black") || filename.includes("dark")) return "black";
+  if (filename.includes("beige") || filename.includes("nude")) return "beige";
   if (
-    lower.includes("-blue") ||
-    lower.includes("-navy") ||
-    lower.includes("-electric")
+    filename.includes("blue") ||
+    filename.includes("navy") ||
+    filename.includes("electric")
   )
     return "blue";
   if (
-    lower.includes("-red") ||
-    lower.includes("-burgundy") ||
-    lower.includes("-marsala")
+    filename.includes("red") ||
+    filename.includes("burgundy") ||
+    filename.includes("marsala") ||
+    filename.includes("ruby")
   )
     return "red";
   if (
-    lower.includes("-green") ||
-    lower.includes("-emerald") ||
-    lower.includes("-sage") ||
-    lower.includes("-mint")
+    filename.includes("green") ||
+    filename.includes("emerald") ||
+    filename.includes("sage") ||
+    filename.includes("mint")
   )
     return "green";
-  if (lower.includes("-purple") || lower.includes("-lavender")) return "purple";
-  if (lower.includes("-pink")) return "pink";
-  if (lower.includes("-terracotta") || lower.includes("-orange"))
+  if (filename.includes("purple") || filename.includes("lavender"))
+    return "purple";
+  if (filename.includes("pink")) return "pink";
+  if (filename.includes("terracotta") || filename.includes("orange"))
     return "orange";
 
   return null;
@@ -124,7 +127,6 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   }, [product.images]);
 
   const defaultColor = useMemo(() => {
-    // 1. Колір з поля чи URL головного зображення
     const mainImgColorGroup = getCanonicalColorGroup(
       mainImage?.color || parseColorFromUrl(mainImage?.url),
     );
@@ -135,7 +137,6 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       if (match?.color) return match.color;
     }
 
-    // 2. Колір через variant_id головного зображення
     if (mainImage?.variant_id) {
       const match = product.variants?.find(
         (v) => v.id === mainImage.variant_id,
@@ -143,7 +144,6 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       if (match?.color) return match.color;
     }
 
-    // 3. Фолбек на колір першого варіанта
     return product.variants?.[0]?.color || "";
   }, [mainImage, product.variants]);
 
@@ -171,7 +171,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     );
   }, [product.variants, selectedColor]);
 
-  // Фільтрація картинок за канонічною групою кольору
+  // Фільтрація картинок за канонічною групою кольору з надійним фолбеком
   const imagesToRender = useMemo(() => {
     if (!product.images || product.images.length === 0) {
       return [{ url: "/placeholder-product.webp", id: 0 }];
@@ -199,8 +199,9 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       if (filtered.length > 0) return filtered;
     }
 
-    return [mainImage || product.images[0]];
-  }, [product.images, product.variants, selectedColor, mainImage]);
+    // Якщо точного збігу не знайдено, показуємо всі фото товару замість зникнення
+    return product.images;
+  }, [product.images, product.variants, selectedColor]);
 
   const [emblaRef, emblaApi] = useEmblaCarousel({
     loop: true,

@@ -23,7 +23,7 @@ export const ProductDetailsBlock: React.FC<ProductDetailsBlockProps> = ({
   const addToCart = useCartStore((state) => state.addToCart);
 
   const uniqueColors = useMemo(
-    () => Array.from(new Set(product.variants.map((v) => v.color))),
+    () => Array.from(new Set(product.variants.map((v) => v.color as ProductColor))),
     [product.variants],
   );
   const uniqueSizes = useMemo(
@@ -32,7 +32,7 @@ export const ProductDetailsBlock: React.FC<ProductDetailsBlockProps> = ({
   );
 
   const [selectedColor, setSelectedColor] = useState<ProductColor>(
-    uniqueColors[0] || "White",
+    uniqueColors[0] || ("White" as ProductColor),
   );
 
   // Helper function to derive the first available size for a given color during runtime transitions
@@ -47,7 +47,7 @@ export const ProductDetailsBlock: React.FC<ProductDetailsBlockProps> = ({
 
   // Safely initialize state directly during the initial render without relying on client effects
   const [selectedSize, setSelectedSize] = useState(() =>
-    getFirstAvailableSize(uniqueColors[0] || "White"),
+    getFirstAvailableSize(uniqueColors[0] || ("White" as ProductColor)),
   );
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState<TabType>("description");
@@ -124,7 +124,7 @@ export const ProductDetailsBlock: React.FC<ProductDetailsBlockProps> = ({
           {
             url: "/placeholder-product.webp",
             id: 0,
-            product_id: "0",
+            product_id: 0,
             variant_id: null,
             is_main: true,
             sort_order: 1,
@@ -141,8 +141,8 @@ export const ProductDetailsBlock: React.FC<ProductDetailsBlockProps> = ({
       imagesToRender[0].url;
 
     addToCart({
-      variantId: currentVariant.id,
-      productId: product.id,
+      variantId: String(currentVariant.id),
+      productId: String(product.id),
       title: product.title,
       price: currentVariant.price,
       quantity: quantity,
@@ -191,7 +191,6 @@ export const ProductDetailsBlock: React.FC<ProductDetailsBlockProps> = ({
           </div>
         )}
 
-        {/* 🛠️ ЗМІНИ ТУТ: Загортаємо в overflow-hidden viewport та додаємо чіткі flex-параметри для слайдів */}
         <div
           className="relative aspect-3/4 flex-1 bg-zinc-50 rounded-lg overflow-hidden border border-zinc-100"
           ref={emblaRef}
