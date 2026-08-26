@@ -171,7 +171,6 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     );
   }, [product.variants, selectedColor]);
 
-  // Фільтрація картинок за канонічною групою кольору з надійним фолбеком
   const imagesToRender = useMemo(() => {
     if (!product.images || product.images.length === 0) {
       return [{ url: "/placeholder-product.webp", id: 0 }];
@@ -199,7 +198,6 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       if (filtered.length > 0) return filtered;
     }
 
-    // Якщо точного збігу не знайдено, показуємо всі фото товару замість зникнення
     return product.images;
   }, [product.images, product.variants, selectedColor]);
 
