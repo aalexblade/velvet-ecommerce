@@ -1,5 +1,5 @@
 import { createSupabaseServerClient } from "@/shared/api/supabase/serverClient";
-import { Product, ProductColor } from "../model/types";
+import { Product, ProductColorGroup, ProductVariant, ProductImage } from "../model/types";
 
 export interface ProductFilters {
   color?: string | string[];
@@ -19,25 +19,6 @@ export interface ProductFilters {
   collection?: string | string[];
 }
 
-interface DBProductImage {
-  id: number;
-  product_id: number;
-  url: string;
-  is_main: boolean;
-  sort_order: number;
-}
-
-interface DBProductVariant {
-  id: number;
-  product_id: number;
-  sku: string;
-  color: string;
-  size: string;
-  price: number;
-  old_price: number | null;
-  stock: number;
-}
-
 interface DBProductResponse {
   id: number;
   title: string;
@@ -46,8 +27,7 @@ interface DBProductResponse {
   category_id: number;
   is_active: boolean;
   created_at: string;
-  product_variants: DBProductVariant[];
-  product_images: DBProductImage[];
+  product_color_groups: ProductColorGroup[];
 }
 
 export interface GetProductsResult {
@@ -57,13 +37,31 @@ export interface GetProductsResult {
 }
 
 /**
- * Helper mapper to convert DB response to domain Product model
+ * Mapper for converting DB response with color groups to domain Product model
  */
 function mapDBProductToProduct(prod: DBProductResponse): Product {
-  const rawImages = prod.product_images || [];
-  const sortedImages = [...rawImages].sort(
-    (a, b) => a.sort_order - b.sort_order,
-  );
+  const colorGroups = prod.product_color_groups || [];
+
+  // Flatten nested variants and images for backward compatibility
+  const allVariants: ProductVariant[] = [];
+  const allImages: ProductImage[] = [];
+
+  colorGroups.forEach((group) => {
+    if (group.product_variants) {
+      group.product_variants.forEach((v) => {
+        allVariants.push({
+          ...v,
+          color: v.color || group.colors?.name_uk || group.color_slug,
+        });
+      });
+    }
+
+    if (group.product_images) {
+      group.product_images.forEach((img) => {
+        allImages.push(img);
+      });
+    }
+  });
 
   return {
     id: prod.id,
@@ -73,42 +71,31 @@ function mapDBProductToProduct(prod: DBProductResponse): Product {
     category_id: prod.category_id,
     is_active: prod.is_active,
     created_at: prod.created_at,
-    images: sortedImages.map((img) => ({
-      id: img.id,
-      product_id: img.product_id,
-      variant_id: null,
-      url: img.url,
-      is_main: img.is_main,
-      sort_order: img.sort_order,
-    })),
-    variants: (prod.product_variants || []).map((v) => ({
-      id: v.id,
-      product_id: v.product_id,
-      sku: v.sku,
-      color: v.color as ProductColor,
-      size: v.size,
-      price: Number(v.price),
-      old_price: v.old_price ? Number(v.old_price) : null,
-      stock: Number(v.stock),
-    })),
+    product_color_groups: colorGroups,
+    variants: allVariants,
+    images: allImages,
   };
 }
 
+const SELECT_QUERY = `
+  *,
+  product_color_groups (
+    *,
+    colors (*),
+    product_images (*),
+    product_variants (*)
+  )
+`;
+
 /**
- * Server-side function to fetch bestsellers (IDs 1, 2, 3, 4)
+ * Server-side function to fetch bestsellers
  */
 export async function getBestsellers(): Promise<Product[]> {
   const supabase = await createSupabaseServerClient();
 
   const { data, error } = await supabase
     .from("products")
-    .select(
-      `
-      *,
-      product_variants (*),
-      product_images (*)
-    `,
-    )
+    .select(SELECT_QUERY)
     .in("id", [1, 2, 3, 4])
     .eq("is_active", true)
     .order("id", { ascending: true });
@@ -133,16 +120,9 @@ export async function getProducts(
 ): Promise<GetProductsResult> {
   const supabase = await createSupabaseServerClient();
 
-  // 1. Fetch all active products
   const { data, error } = await supabase
     .from("products")
-    .select(
-      `
-      *,
-      product_variants (*),
-      product_images (*)
-    `,
-    )
+    .select(SELECT_QUERY)
     .eq("is_active", true)
     .order("id", { ascending: true });
 
@@ -152,11 +132,9 @@ export async function getProducts(
   }
 
   const rawProducts = data as unknown as DBProductResponse[];
-
-  // 2. MAPPING
   let products: Product[] = rawProducts.map(mapDBProductToProduct);
 
-  // 3. FILTERING
+  // FILTERING
   if (filters) {
     if (filters.search) {
       const searchTerms = Array.isArray(filters.search)
@@ -174,7 +152,9 @@ export async function getProducts(
         : [filters.color.toLowerCase()];
 
       products = products.filter((product) =>
-        product.variants?.some((v) => colors.includes(v.color.toLowerCase())),
+        product.variants?.some(
+          (v) => v.color && colors.includes(v.color.toLowerCase()),
+        ),
       );
     }
 
@@ -184,7 +164,9 @@ export async function getProducts(
         : [filters.size.toLowerCase()];
 
       products = products.filter((product) =>
-        product.variants?.some((v) => sizes.includes(v.size.toLowerCase())),
+        product.variants?.some(
+          (v) => v.size && sizes.includes(v.size.toLowerCase()),
+        ),
       );
     }
 
@@ -229,7 +211,7 @@ export async function getProducts(
     }
   }
 
-  // 4. IN-MEMORY PAGINATION
+  // IN-MEMORY PAGINATION
   const totalCount = products.length;
   const totalPages = Math.ceil(totalCount / limit) || 1;
   const startIndex = (page - 1) * limit;
