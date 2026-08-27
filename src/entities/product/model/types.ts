@@ -31,27 +31,47 @@ export type ProductColor =
   | "Beige"
   | "Nude";
 
-export interface ProductVariant {
-  id: number;
-  product_id: number;
-  sku: string;
-  color: ProductColor | string;
-  size: string;
-  price: number;
-  old_price: number | null;
-  stock: number;
-  created_at?: string;
+export interface Color {
+  slug: string;
+  name_uk: string;
+  hex: string;
+  tailwind_class?: string;
 }
 
 export interface ProductImage {
   id: number;
-  product_id: number;
+  product_id?: number;
+  color_group_id?: number;
   variant_id?: number | null;
   color?: ProductColor | string | null;
   url: string;
-  is_main: boolean;
-  sort_order: number;
+  is_main?: boolean;
+  sort_order?: number;
   created_at?: string;
+}
+
+export interface ProductVariant {
+  id: number;
+  product_id?: number;
+  color_group_id?: number;
+  sku?: string;
+  color?: ProductColor | string;
+  size: string;
+  price: number;
+  old_price?: number | null;
+  stock?: number;
+  created_at?: string;
+}
+
+export interface ProductColorGroup {
+  id: number;
+  product_id: number;
+  color_slug: string;
+  is_main?: boolean;
+  created_at?: string;
+  colors?: Color;
+  product_images?: ProductImage[];
+  product_variants?: ProductVariant[];
 }
 
 export interface Product {
@@ -62,6 +82,8 @@ export interface Product {
   category_id?: number;
   is_active?: boolean;
   created_at?: string;
-  variants: ProductVariant[];
-  images: ProductImage[];
+  product_color_groups?: ProductColorGroup[];
+  // Optional arrays kept for backward compatibility if needed
+  variants?: ProductVariant[];
+  images?: ProductImage[];
 }
