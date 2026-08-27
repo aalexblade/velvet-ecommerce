@@ -7,7 +7,7 @@ import Link from "next/link";
 import useEmblaCarousel from "embla-carousel-react";
 import { Heart, ShoppingBag, ChevronLeft, ChevronRight, X } from "lucide-react";
 import { cn } from "@/shared/lib";
-import { Product, ProductColor } from "../model/types";
+import { Product } from "../model/types";
 import { useCartStore } from "@/features/cart/model/cartStore";
 import { ProductDetailsBlock } from "@/widgets/product-details-block";
 import { ProductColorSwatches } from "./ProductColorSwatches";
@@ -16,191 +16,75 @@ interface ProductCardProps {
   product: Product;
 }
 
-// Канонічна нормалізація кольорів для збігу з ProductColorSwatches
-const getCanonicalColorGroup = (color?: string | null): string => {
-  if (!color) return "";
-  const val = color.trim().toLowerCase();
-
-  if (val.includes("black") || val.includes("чорн")) return "black";
-  if (val.includes("white") || val.includes("біл") || val.includes("молоч"))
-    return "white";
-  if (
-    val.includes("beige") ||
-    val.includes("nude") ||
-    val.includes("беж") ||
-    val.includes("нюд") ||
-    val.includes("тілес")
-  )
-    return "beige";
-  if (
-    val.includes("red") ||
-    val.includes("ruby") ||
-    val.includes("червон") ||
-    val.includes("бордо") ||
-    val.includes("марсал")
-  )
-    return "red";
-  if (
-    val.includes("blue") ||
-    val.includes("син") ||
-    val.includes("блакит") ||
-    val.includes("волошк")
-  )
-    return "blue";
-  if (
-    val.includes("green") ||
-    val.includes("emerald") ||
-    val.includes("mint") ||
-    val.includes("sage") ||
-    val.includes("зелен") ||
-    val.includes("смарагд") ||
-    val.includes("м'ят") ||
-    val.includes("фісташ") ||
-    val.includes("шавл")
-  )
-    return "green";
-  if (
-    val.includes("purple") ||
-    val.includes("lavender") ||
-    val.includes("фіолет") ||
-    val.includes("лаванд") ||
-    val.includes("бузк")
-  )
-    return "purple";
-  if (
-    val.includes("orange") ||
-    val.includes("terracotta") ||
-    val.includes("помаранч") ||
-    val.includes("теракот")
-  )
-    return "orange";
-  if (val.includes("pink") || val.includes("рожев")) return "pink";
-
-  return val;
-};
-
-// Зчитування кольору з назви файлу зображення
-const parseColorFromUrl = (url?: string): string | null => {
-  if (!url) return null;
-  const filename =
-    url.split("/").pop()?.split("?")[0].split(".")[0].toLowerCase() || "";
-
-  if (filename.includes("white") || filename.includes("milk")) return "white";
-  if (filename.includes("black") || filename.includes("dark")) return "black";
-  if (filename.includes("beige") || filename.includes("nude")) return "beige";
-  if (
-    filename.includes("blue") ||
-    filename.includes("navy") ||
-    filename.includes("electric")
-  )
-    return "blue";
-  if (
-    filename.includes("red") ||
-    filename.includes("burgundy") ||
-    filename.includes("marsala") ||
-    filename.includes("ruby")
-  )
-    return "red";
-  if (
-    filename.includes("green") ||
-    filename.includes("emerald") ||
-    filename.includes("sage") ||
-    filename.includes("mint")
-  )
-    return "green";
-  if (filename.includes("purple") || filename.includes("lavender"))
-    return "purple";
-  if (filename.includes("pink")) return "pink";
-  if (filename.includes("terracotta") || filename.includes("orange"))
-    return "orange";
-
-  return null;
-};
-
 export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const addToCart = useCartStore((state) => state.addToCart);
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
   const [isWishlist, setIsWishlist] = useState(false);
 
-  const mainImage = useMemo(() => {
-    return product.images?.find((img) => img.is_main) || product.images?.[0];
-  }, [product.images]);
-
-  const defaultColor = useMemo(() => {
-    const mainImgColorGroup = getCanonicalColorGroup(
-      mainImage?.color || parseColorFromUrl(mainImage?.url),
-    );
-    if (mainImgColorGroup) {
-      const match = product.variants?.find(
-        (v) => getCanonicalColorGroup(v.color) === mainImgColorGroup,
-      );
-      if (match?.color) return match.color;
-    }
-
-    if (mainImage?.variant_id) {
-      const match = product.variants?.find(
-        (v) => v.id === mainImage.variant_id,
-      );
-      if (match?.color) return match.color;
-    }
-
-    return product.variants?.[0]?.color || "";
-  }, [mainImage, product.variants]);
-
-  const [prevProductId, setPrevProductId] = useState(product.id);
-  const [selectedColor, setSelectedColor] = useState<ProductColor | string>(
-    defaultColor,
+  // 1. Отримуємо колірні групи товару
+  const colorGroups = useMemo(
+    () => product.product_color_groups || [],
+    [product.product_color_groups],
   );
 
+  // 2. Дефолтна група (головний колір або перша група)
+  const defaultGroup = useMemo(
+    () => colorGroups.find((g) => g.is_main) || colorGroups[0],
+    [colorGroups],
+  );
+
+  // 3. Стан обраної колірної групи
+  const [prevProductId, setPrevProductId] = useState(product.id);
+  const [selectedGroupId, setSelectedGroupId] = useState<number | string | null>(
+    defaultGroup?.id ?? null,
+  );
+
+  // Скидаємо колір при зміні об'єкта товару
   if (prevProductId !== product.id) {
     setPrevProductId(product.id);
-    setSelectedColor(defaultColor);
+    setSelectedGroupId(defaultGroup?.id ?? null);
   }
 
-  const activeVariant = useMemo(() => {
-    const targetGroup = getCanonicalColorGroup(selectedColor);
-    return (
-      product.variants?.find(
-        (v) =>
-          getCanonicalColorGroup(v.color) === targetGroup && (v.stock ?? 1) > 0,
-      ) ||
-      product.variants?.find(
-        (v) => getCanonicalColorGroup(v.color) === targetGroup,
-      ) ||
-      product.variants?.[0]
-    );
-  }, [product.variants, selectedColor]);
+  // 4. Активна колірна група (з фолбеком на defaultGroup)
+  const activeGroup = useMemo(() => {
+    if (!colorGroups.length) return null;
+    return colorGroups.find((g) => String(g.id) === String(selectedGroupId)) || defaultGroup;
+  }, [colorGroups, selectedGroupId, defaultGroup]);
 
+  // 5. Галерея зображень (з глибоким фолбеком для збереження відображення)
   const imagesToRender = useMemo(() => {
-    if (!product.images || product.images.length === 0) {
-      return [{ url: "/placeholder-product.webp", id: 0 }];
+    let images = activeGroup?.product_images;
+
+    // 1-й рівень фолбеку: шукаємо першу колірну групу, у якої є зображення
+    if (!images || images.length === 0) {
+      const groupWithImages = colorGroups.find(
+        (g) => g.product_images && g.product_images.length > 0,
+      );
+      images = groupWithImages?.product_images;
     }
 
-    const targetGroup = getCanonicalColorGroup(selectedColor);
-
-    if (targetGroup) {
-      const filtered = product.images.filter((img) => {
-        const imgGroup = getCanonicalColorGroup(
-          img.color || parseColorFromUrl(img.url),
-        );
-        if (imgGroup && imgGroup === targetGroup) {
-          return true;
-        }
-        if (img.variant_id) {
-          const variant = product.variants?.find(
-            (v) => v.id === img.variant_id,
-          );
-          return getCanonicalColorGroup(variant?.color) === targetGroup;
-        }
-        return false;
-      });
-
-      if (filtered.length > 0) return filtered;
+    // 2-й рівень фолбеку: беремо плоский масив зображень з об'єкта товару (якщо є)
+    if (!images || images.length === 0) {
+      images = product.images;
     }
 
-    return product.images;
-  }, [product.images, product.variants, selectedColor]);
+    // 3-й рівень фолбеку: заглушка
+    if (!images || images.length === 0) {
+      return [{ id: "placeholder", url: "/placeholder-product.webp" }];
+    }
 
+    return [...images].sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
+  }, [activeGroup, colorGroups, product.images]);
+
+  // 6. Варіанти розмірів та ціна
+  const activeVariant = useMemo(() => {
+    const variants = activeGroup?.product_variants || product.variants || [];
+    return variants.find((v) => (v.stock ?? 1) > 0) || variants[0];
+  }, [activeGroup, product.variants]);
+
+  const price = activeVariant?.price || 0;
+
+  // 7. Налаштування Embla Carousel
   const [emblaRef, emblaApi] = useEmblaCarousel({
     loop: true,
     duration: 25,
@@ -212,7 +96,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       emblaApi.reInit();
       emblaApi.scrollTo(0);
     }
-  }, [selectedColor, emblaApi, imagesToRender]);
+  }, [selectedGroupId, emblaApi, imagesToRender]);
 
   const scrollPrev = useCallback(
     (e: React.MouseEvent) => {
@@ -232,8 +116,6 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     [emblaApi],
   );
 
-  const price = activeVariant?.price || product.variants?.[0]?.price || 0;
-
   const handleQuickAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -246,7 +128,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       price: activeVariant.price,
       quantity: 1,
       image: imagesToRender[0]?.url || "/placeholder-product.webp",
-      color: activeVariant.color,
+      color: activeGroup?.colors?.name_uk || activeGroup?.color_slug || "",
       size: activeVariant.size,
     });
   };
@@ -277,7 +159,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           </div>
 
           <Link
-            href={`/product/${product.id}`}
+            href={`/product/${product.slug || product.id}`}
             className="absolute inset-0 z-10"
           />
 
@@ -320,11 +202,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         <div className="flex flex-col gap-1.5 px-1 grow">
           <div className="flex items-center justify-between w-full min-h-6">
             <ProductColorSwatches
-              variants={product.variants}
-              selectedColor={selectedColor}
-              onSelectColor={setSelectedColor}
+              colorGroups={colorGroups}
+              selectedGroupId={activeGroup?.id || ""}
+              onSelectGroup={setSelectedGroupId}
               maxDisplay={4}
-              showAllBaseColors={false}
             />
 
             <div className="flex items-center gap-2 ml-auto z-20 relative">
@@ -356,7 +237,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             </div>
           </div>
 
-          <Link href={`/product/${product.id}`} className="block">
+          <Link href={`/product/${product.slug || product.id}`} className="block">
             <h2 className="text-sm font-normal text-zinc-800 line-clamp-1 group-hover/card:text-[#C8205C] transition-colors tracking-tight">
               {product.title}
             </h2>
@@ -385,7 +266,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
               <X className="w-4 h-4" />
             </button>
 
-            <ProductDetailsBlock product={product} />
+            <ProductDetailsBlock product={product} initialGroupId={activeGroup?.id} />
           </div>
         </div>
       )}
