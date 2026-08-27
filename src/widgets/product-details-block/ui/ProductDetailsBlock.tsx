@@ -5,79 +5,119 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import Image from "next/image";
 import useEmblaCarousel from "embla-carousel-react";
 import { Heart, Minus, Plus, Star, Ruler, Check, X } from "lucide-react";
-import { cn, getProductColorClass } from "@/shared/lib";
-import { Product, ProductColor } from "@/entities/product/model/types";
+import { cn } from "@/shared/lib";
+import { Product } from "@/entities/product/model/types";
 import { useCartStore } from "@/features/cart/model/cartStore";
 import { SizeCalculatorForm } from "@/features/product-size-calculator/ui/SizeCalculatorForm";
 
 interface ProductDetailsBlockProps {
   product: Product;
+  initialGroupId?: number | string;
 }
 
 type TabType = "description" | "delivery" | "recommendations";
 
 export const ProductDetailsBlock: React.FC<ProductDetailsBlockProps> = ({
   product,
+  initialGroupId,
 }) => {
-  // Bind dynamic add action controller from global Zustand state storage
   const addToCart = useCartStore((state) => state.addToCart);
 
-  const uniqueColors = useMemo(
-    () => Array.from(new Set(product.variants.map((v) => v.color as ProductColor))),
-    [product.variants],
-  );
-  const uniqueSizes = useMemo(
-    () => Array.from(new Set(product.variants.map((v) => v.size))),
-    [product.variants],
+  // 1. Extract color groups
+  const colorGroups = useMemo(
+    () => product.product_color_groups || [],
+    [product.product_color_groups],
   );
 
-  const [selectedColor, setSelectedColor] = useState<ProductColor>(
-    uniqueColors[0] || ("White" as ProductColor),
+  // 2. Compute default group
+  const defaultGroup = useMemo(() => {
+    if (initialGroupId) {
+      const matchedGroup = colorGroups.find(
+        (g) => g.id === Number(initialGroupId),
+      );
+      if (matchedGroup) return matchedGroup;
+    }
+    return colorGroups.find((g) => g.is_main) || colorGroups[0];
+  }, [colorGroups, initialGroupId]);
+
+  // 3. State management with state-during-render adjustments (Replaces Effect #1)
+  const [selectedGroupId, setSelectedGroupId] = useState<number | string>(
+    defaultGroup?.id || "",
+  );
+  const [prevInitialGroupId, setPrevInitialGroupId] = useState(initialGroupId);
+
+  if (initialGroupId !== prevInitialGroupId) {
+    setPrevInitialGroupId(initialGroupId);
+    if (initialGroupId) {
+      setSelectedGroupId(Number(initialGroupId));
+    }
+  }
+
+  // 4. Derive active group
+  const activeGroup = useMemo(
+    () => colorGroups.find((g) => g.id === selectedGroupId) || defaultGroup,
+    [colorGroups, selectedGroupId, defaultGroup],
   );
 
-  // Helper function to derive the first available size for a given color during runtime transitions
-  const getFirstAvailableSize = useCallback(
-    (color: ProductColor) => {
-      const nextVariants = product.variants.filter((v) => v.color === color);
-      const firstAvailable = nextVariants.find((v) => v.stock > 0);
-      return firstAvailable ? firstAvailable.size : nextVariants[0]?.size || "";
-    },
-    [product.variants],
+  // 5. Derive images
+  const imagesToRender = useMemo(() => {
+    const images = activeGroup?.product_images || [];
+    if (images.length === 0) {
+      return [
+        {
+          id: "placeholder",
+          url: "/placeholder-product.webp",
+          sort_order: 1,
+        },
+      ];
+    }
+    return [...images].sort(
+      (a, b) => (a.sort_order || 0) - (b.sort_order || 0),
+    );
+  }, [activeGroup]);
+
+  // 6. Derive sizes & available variants
+  const activeVariants = useMemo(
+    () => activeGroup?.product_variants || [],
+    [activeGroup],
   );
 
-  // Safely initialize state directly during the initial render without relying on client effects
-  const [selectedSize, setSelectedSize] = useState(() =>
-    getFirstAvailableSize(uniqueColors[0] || ("White" as ProductColor)),
+  const availableSizes = useMemo(
+    () => Array.from(new Set(activeVariants.map((v) => v.size))),
+    [activeVariants],
   );
+
+  // Derive initial/fallback size cleanly without state sync effects
+  const defaultSize = useMemo(() => {
+    const firstInStock = activeVariants.find((v) => (v.stock ?? 1) > 0);
+    return firstInStock ? firstInStock.size : activeVariants[0]?.size || "";
+  }, [activeVariants]);
+
+  const [selectedSize, setSelectedSize] = useState<string>(defaultSize);
+
+  // Reset size state if currently selected size doesn't exist in active group
+  const [prevSelectedGroupId, setPrevSelectedGroupId] =
+    useState(selectedGroupId);
+
+  if (selectedGroupId !== prevSelectedGroupId) {
+    setPrevSelectedGroupId(selectedGroupId);
+    setSelectedSize(defaultSize);
+  }
+
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState<TabType>("description");
   const [isWishlist, setIsWishlist] = useState(false);
   const [isAdded, setIsAdded] = useState(false);
   const [isSizeModalOpen, setIsSizeModalOpen] = useState(false);
 
-  const availableVariantsForColor = useMemo(() => {
-    return product.variants.filter((v) => v.color === selectedColor);
-  }, [product.variants, selectedColor]);
-
+  // 7. Derive active variant object
   const currentVariant = useMemo(() => {
     return (
-      product.variants.find(
-        (v) => v.color === selectedColor && v.size === selectedSize,
-      ) || product.variants[0]
+      activeVariants.find((v) => v.size === selectedSize) || activeVariants[0]
     );
-  }, [product.variants, selectedColor, selectedSize]);
+  }, [activeVariants, selectedSize]);
 
-  // Perform operational atomic transitions directly inside the interaction handler
-  const handleColorChange = (color: ProductColor) => {
-    setSelectedColor(color);
-    setQuantity(1);
-    setIsAdded(false);
-
-    const nextSize = getFirstAvailableSize(color);
-    setSelectedSize(nextSize);
-  };
-
-  // 1. Ініціалізуємо Embla з точними параметрами
+  // Embla Carousel setup
   const [emblaRef, emblaApi] = useEmblaCarousel({
     loop: true,
     duration: 25,
@@ -100,6 +140,13 @@ export const ProductDetailsBlock: React.FC<ProductDetailsBlockProps> = ({
     };
   }, [emblaApi, onSelect]);
 
+  useEffect(() => {
+    if (emblaApi) {
+      emblaApi.reInit();
+      emblaApi.scrollTo(0);
+    }
+  }, [selectedGroupId, emblaApi]);
+
   const scrollTo = useCallback(
     (index: number) => {
       if (emblaApi) emblaApi.scrollTo(index);
@@ -107,38 +154,12 @@ export const ProductDetailsBlock: React.FC<ProductDetailsBlockProps> = ({
     [emblaApi],
   );
 
-  useEffect(() => {
-    if (!emblaApi || !currentVariant) return;
-    const variantImageIndex = product.images.findIndex(
-      (img) => img.variant_id === currentVariant?.id,
-    );
-    if (variantImageIndex !== -1) {
-      emblaApi.scrollTo(variantImageIndex);
-    }
-  }, [currentVariant, emblaApi, product.images]);
-
-  const imagesToRender =
-    product.images.length > 0
-      ? product.images
-      : [
-          {
-            url: "/placeholder-product.webp",
-            id: 0,
-            product_id: 0,
-            variant_id: null,
-            is_main: true,
-            sort_order: 1,
-          },
-        ];
-  const isOutOfStock = !currentVariant || currentVariant.stock === 0;
+  const isOutOfStock =
+    !currentVariant ||
+    (currentVariant.stock !== undefined && currentVariant.stock <= 0);
 
   const handleAddToCart = () => {
     if (isOutOfStock || !currentVariant) return;
-
-    const variantImage =
-      product.images.find((img) => img.variant_id === currentVariant.id)?.url ||
-      product.images.find((img) => img.is_main)?.url ||
-      imagesToRender[0].url;
 
     addToCart({
       variantId: String(currentVariant.id),
@@ -146,8 +167,8 @@ export const ProductDetailsBlock: React.FC<ProductDetailsBlockProps> = ({
       title: product.title,
       price: currentVariant.price,
       quantity: quantity,
-      image: variantImage,
-      color: currentVariant.color,
+      image: imagesToRender[0]?.url || "/placeholder-product.webp",
+      color: activeGroup?.colors?.name_uk || activeGroup?.color_slug || "",
       size: currentVariant.size,
     });
 
@@ -156,20 +177,21 @@ export const ProductDetailsBlock: React.FC<ProductDetailsBlockProps> = ({
   };
 
   const handleSizeCalculated = (calculatedSize: string) => {
-    if (uniqueSizes.includes(calculatedSize)) {
+    if (availableSizes.includes(calculatedSize)) {
       setSelectedSize(calculatedSize);
     }
   };
 
   return (
-    <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 py-2 items-start text-zinc-900">
-      {/* 📸 LEFT GALLERY ZONE */}
+    <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 py-2 items-start text-zinc-900 font-sans">
+      {/* 📸 GALLERY */}
       <div className="flex flex-col-reverse md:flex-row lg:col-span-7 gap-4 h-full w-full overflow-hidden">
         {imagesToRender.length > 1 && (
           <div className="hidden md:flex flex-col gap-2 shrink-0 w-16 overflow-y-auto no-scrollbar max-h-136">
             {imagesToRender.map((img, idx) => (
               <button
                 key={`thumb-${img.id || idx}`}
+                type="button"
                 onClick={() => scrollTo(idx)}
                 className={cn(
                   "relative aspect-3/4 w-16 bg-zinc-50 rounded-md overflow-hidden border transition-all cursor-pointer",
@@ -216,19 +238,17 @@ export const ProductDetailsBlock: React.FC<ProductDetailsBlockProps> = ({
         </div>
       </div>
 
-      {/* 📝 RIGHT INFO ZONE */}
-      <div className="flex flex-col lg:col-span-5 gap-5 font-sans">
-        {/* Title & SKU */}
+      {/* 📝 DETAILS */}
+      <div className="flex flex-col lg:col-span-5 gap-5">
         <div className="flex flex-col gap-2">
           <h1 className="text-2xl font-medium tracking-tight text-zinc-900 leading-tight">
             {product.title}
           </h1>
           <span className="text-sm text-zinc-500 font-normal">
-            Арт. {currentVariant?.sku || "565940"}
+            Арт. {currentVariant?.sku || currentVariant?.id || "565940"}
           </span>
         </div>
 
-        {/* Rating */}
         <div className="flex items-center gap-2 text-sm">
           <div className="flex items-center text-amber-400">
             {[...Array(5)].map((_, i) => (
@@ -245,28 +265,40 @@ export const ProductDetailsBlock: React.FC<ProductDetailsBlockProps> = ({
         </div>
 
         {/* Colors */}
-        {uniqueColors.length > 0 && (
+        {colorGroups.length > 0 && (
           <div className="flex flex-col gap-2">
-            <span className="text-sm text-zinc-600">Колір:</span>
-            <div className="flex flex-wrap gap-3 items-center">
-              {uniqueColors.map((color) => {
-                const isSelected = selectedColor === color;
+            <span className="text-sm text-zinc-600">
+              Колір:{" "}
+              <span className="font-semibold text-zinc-900">
+                {activeGroup?.colors?.name_uk || activeGroup?.color_slug}
+              </span>
+            </span>
+            <div className="flex flex-wrap gap-2.5 items-center">
+              {colorGroups.map((group) => {
+                const isSelected = group.id === activeGroup?.id;
+                const colorHex = group.colors?.hex || "#CCCCCC";
+
                 return (
                   <button
-                    key={`detail-color-${color}`}
-                    onClick={() => handleColorChange(color)}
+                    key={`detail-color-group-${group.id}`}
+                    type="button"
+                    onClick={() => {
+                      setSelectedGroupId(group.id);
+                      setSelectedSize(defaultSize);
+                      setQuantity(1);
+                      setIsAdded(false);
+                    }}
+                    title={group.colors?.name_uk || group.color_slug}
                     className={cn(
-                      "w-7 h-7 rounded-md flex items-center justify-center p-0.5 transition-all cursor-pointer border",
+                      "w-7 h-7 rounded-md flex items-center justify-center p-0.5 transition-all cursor-pointer border relative",
                       isSelected
-                        ? "border-zinc-900 scale-105"
+                        ? "border-zinc-900 scale-105 ring-1 ring-zinc-900"
                         : "border-zinc-200 hover:border-zinc-400",
                     )}
                   >
                     <span
-                      className={cn(
-                        "w-full h-full rounded-md shadow-xs",
-                        getProductColorClass(color),
-                      )}
+                      className="w-full h-full rounded-md shadow-xs block"
+                      style={{ backgroundColor: colorHex }}
                     />
                   </button>
                 );
@@ -276,20 +308,22 @@ export const ProductDetailsBlock: React.FC<ProductDetailsBlockProps> = ({
         )}
 
         {/* Sizes */}
-        {uniqueSizes.length > 0 && (
+        {availableSizes.length > 0 && (
           <div className="flex flex-col gap-2">
             <span className="text-sm text-zinc-600">Розмір:</span>
             <div className="flex flex-wrap gap-2">
-              {uniqueSizes.map((size) => {
+              {availableSizes.map((size) => {
                 const isSelected = selectedSize === size;
-                const variantForSize = availableVariantsForColor.find(
+                const variantForSize = activeVariants.find(
                   (v) => v.size === size,
                 );
-                const hasStock = variantForSize && variantForSize.stock > 0;
+                const hasStock =
+                  variantForSize && (variantForSize.stock ?? 1) > 0;
 
                 return (
                   <button
                     key={`detail-size-${size}`}
+                    type="button"
                     disabled={!hasStock}
                     onClick={() => {
                       setSelectedSize(size);
@@ -314,8 +348,8 @@ export const ProductDetailsBlock: React.FC<ProductDetailsBlockProps> = ({
           </div>
         )}
 
-        {/* Size Calculator Trigger */}
         <button
+          type="button"
           onClick={() => setIsSizeModalOpen(true)}
           className="flex items-center gap-2 text-xs text-[#C8205C] hover:underline cursor-pointer font-medium -mt-1 w-max"
         >
@@ -326,6 +360,7 @@ export const ProductDetailsBlock: React.FC<ProductDetailsBlockProps> = ({
         {/* Quantity */}
         <div className="flex items-center border border-zinc-300 rounded-md h-9 w-max bg-white">
           <button
+            type="button"
             onClick={() => setQuantity((q) => (q > 1 ? q - 1 : 1))}
             disabled={quantity <= 1 || isOutOfStock}
             className="px-3 h-full flex items-center justify-center text-zinc-500 hover:text-zinc-900 disabled:opacity-30 cursor-pointer"
@@ -336,8 +371,11 @@ export const ProductDetailsBlock: React.FC<ProductDetailsBlockProps> = ({
             {isOutOfStock ? 0 : quantity}
           </span>
           <button
+            type="button"
             onClick={() =>
-              setQuantity((q) => (q < (currentVariant?.stock || 1) ? q + 1 : q))
+              setQuantity((q) =>
+                q < (currentVariant?.stock ?? 99) ? q + 1 : q,
+              )
             }
             disabled={isOutOfStock}
             className="px-3 h-full flex items-center justify-center text-zinc-500 hover:text-zinc-900 disabled:opacity-30 cursor-pointer"
@@ -346,14 +384,15 @@ export const ProductDetailsBlock: React.FC<ProductDetailsBlockProps> = ({
           </button>
         </div>
 
-        {/* Price */}
         <div className="text-xl font-semibold tracking-tight text-zinc-900 -mt-1">
-          {currentVariant ? currentVariant.price : 650} UAH
+          {currentVariant ? currentVariant.price.toLocaleString("uk-UA") : 0}{" "}
+          UAH
         </div>
 
-        {/* Call to Action Row */}
+        {/* Actions */}
         <div className="flex gap-3 items-center w-full">
           <button
+            type="button"
             disabled={isOutOfStock}
             onClick={handleAddToCart}
             className={cn(
@@ -378,6 +417,7 @@ export const ProductDetailsBlock: React.FC<ProductDetailsBlockProps> = ({
           </button>
 
           <button
+            type="button"
             onClick={() => setIsWishlist(!isWishlist)}
             className="h-11 w-11 rounded-md border border-zinc-300 flex items-center justify-center text-zinc-400 hover:text-[#C8205C] hover:border-[#C8205C] cursor-pointer active:scale-95 transition-all shrink-0"
           >
@@ -392,13 +432,14 @@ export const ProductDetailsBlock: React.FC<ProductDetailsBlockProps> = ({
           </button>
         </div>
 
-        {/* Tabs System Layout Panel */}
+        {/* Tabs */}
         <div className="flex flex-col gap-4 mt-2 border-t border-zinc-200 pt-4">
           <div className="flex items-center gap-6 border-b border-zinc-100 pb-1 text-xs font-bold uppercase tracking-wider">
             {(["description", "delivery", "recommendations"] as TabType[]).map(
               (tab) => (
                 <button
                   key={tab}
+                  type="button"
                   onClick={() => setActiveTab(tab)}
                   className={cn(
                     "pb-2 relative cursor-pointer transition-colors",
@@ -424,7 +465,6 @@ export const ProductDetailsBlock: React.FC<ProductDetailsBlockProps> = ({
             {activeTab === "description" && (
               <div className="flex flex-col gap-4 animate-in fade-in duration-150">
                 <p>{product.description}</p>
-
                 <div className="border-t border-zinc-200 pt-3 flex flex-col gap-1.5 text-zinc-900 font-light">
                   <div>
                     <strong className="font-semibold">Посадка:</strong> середня
@@ -443,50 +483,26 @@ export const ProductDetailsBlock: React.FC<ProductDetailsBlockProps> = ({
                     класична на спині
                   </div>
                 </div>
-
-                <div className="border-t border-zinc-200 pt-3">
-                  <span className="font-semibold block uppercase tracking-wider text-[10px] text-zinc-500 mb-1">
-                    Тканина:
-                  </span>
-                  <div className="flex flex-col gap-1">
-                    <div>
-                      <strong className="font-medium">Верх:</strong> ніжне
-                      мереживо з еластичними волокнами
-                    </div>
-                    <div>
-                      <strong className="font-medium">
-                        Внутрішня частина чашок:
-                      </strong>{" "}
-                      бавовна для комфорту шкіри
-                    </div>
-                    <div>
-                      <strong className="font-medium">Основна тканина:</strong>{" "}
-                      мікрофібра з додаванням еластану
-                    </div>
-                  </div>
-                </div>
               </div>
             )}
 
             {activeTab === "delivery" && (
               <p className="animate-in fade-in duration-150">
                 Ми піклуємося про вашу конфіденційність, тому всі замовлення
-                відправляються в абсолютно анонімній та непрозорій упаковці.
-                Доставка Новою Поштою по всій Україні протягом 1-2 днів.
+                відправляються в анонімній упаковці.
               </p>
             )}
 
             {activeTab === "recommendations" && (
               <p className="animate-in fade-in duration-150 text-zinc-400 italic">
-                Секція супутніх аксесуарів та трусиків для комплекту
-                з&apos;явиться незабаром.
+                Секція супутніх товарів з&apos;явиться незабаром.
               </p>
             )}
           </div>
         </div>
       </div>
 
-      {/* 💎 PREMIUM MODAL OVERLAY: SIZE CALCULATOR */}
+      {/* MODAL */}
       {isSizeModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 animate-in fade-in duration-200">
           <div
@@ -494,21 +510,17 @@ export const ProductDetailsBlock: React.FC<ProductDetailsBlockProps> = ({
             className="absolute inset-0 bg-black/40 backdrop-blur-xs transition-opacity"
           />
 
-          <div className="relative bg-white w-full max-w-lg rounded-2xl p-6 md:p-8 shadow-2xl border border-zinc-100 z-10 flex flex-col gap-5 animate-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto no-scrollbar font-sans">
+          <div className="relative bg-white w-full max-w-lg rounded-2xl p-6 md:p-8 shadow-2xl border border-zinc-100 z-10 flex flex-col gap-5 max-h-[90vh] overflow-y-auto no-scrollbar font-sans">
             <div className="flex justify-between items-start">
               <div className="flex flex-col gap-1">
                 <h3 className="text-lg font-bold uppercase tracking-wider text-zinc-900">
                   Підбір ідеального розміру
                 </h3>
-                <p className="text-xs text-zinc-400 font-light leading-snug">
-                  Введіть ваші точні анатомічні заміри в сантиметрах для
-                  розрахунку відповідної білизни за канонами нашого бренду.
-                </p>
               </div>
               <button
+                type="button"
                 onClick={() => setIsSizeModalOpen(false)}
-                className="p-1 rounded-md text-zinc-400 hover:text-zinc-900 hover:bg-zinc-50 transition-all cursor-pointer shrink-0 active:scale-95"
-                aria-label="Close size advisor modal layer"
+                className="p-1 rounded-md text-zinc-400 hover:text-zinc-900 hover:bg-zinc-50 transition-all cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -518,7 +530,7 @@ export const ProductDetailsBlock: React.FC<ProductDetailsBlockProps> = ({
             <SizeCalculatorForm
               onSizeCalculated={handleSizeCalculated}
               onApplyFilter={(size) => {
-                if (uniqueSizes.includes(size)) {
+                if (availableSizes.includes(size)) {
                   setSelectedSize(size);
                 }
                 setIsSizeModalOpen(false);
