@@ -35,9 +35,9 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
   // 3. Стан обраної колірної групи
   const [prevProductId, setPrevProductId] = useState(product.id);
-  const [selectedGroupId, setSelectedGroupId] = useState<number | string | null>(
-    defaultGroup?.id ?? null,
-  );
+  const [selectedGroupId, setSelectedGroupId] = useState<
+    number | string | null
+  >(defaultGroup?.id ?? null);
 
   // Скидаємо колір при зміні об'єкта товару
   if (prevProductId !== product.id) {
@@ -48,7 +48,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   // 4. Активна колірна група (з фолбеком на defaultGroup)
   const activeGroup = useMemo(() => {
     if (!colorGroups.length) return null;
-    return colorGroups.find((g) => String(g.id) === String(selectedGroupId)) || defaultGroup;
+    return (
+      colorGroups.find((g) => String(g.id) === String(selectedGroupId)) ||
+      defaultGroup
+    );
   }, [colorGroups, selectedGroupId, defaultGroup]);
 
   // 5. Галерея зображень (з глибоким фолбеком для збереження відображення)
@@ -70,10 +73,12 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
     // 3-й рівень фолбеку: заглушка
     if (!images || images.length === 0) {
-      return [{ id: "placeholder", url: "/placeholder-product.webp" }];
+      return [{ id: "placeholder", url: "/404 _ot_Found/404_Not_Found.jpg" }];
     }
 
-    return [...images].sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
+    return [...images].sort(
+      (a, b) => (a.sort_order || 0) - (b.sort_order || 0),
+    );
   }, [activeGroup, colorGroups, product.images]);
 
   // 6. Варіанти розмірів та ціна
@@ -127,7 +132,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       title: product.title,
       price: activeVariant.price,
       quantity: 1,
-      image: imagesToRender[0]?.url || "/placeholder-product.webp",
+      image: imagesToRender[0]?.url || "/404 _ot_Found/404_Not_Found.jpg",
       color: activeGroup?.colors?.name_uk || activeGroup?.color_slug || "",
       size: activeVariant.size,
     });
@@ -202,9 +207,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         <div className="flex flex-col gap-1.5 px-1 grow">
           <div className="flex items-center justify-between w-full min-h-6">
             <ProductColorSwatches
-              colorGroups={colorGroups}
-              selectedGroupId={activeGroup?.id || ""}
-              onSelectGroup={setSelectedGroupId}
+              colorGroups={product.product_color_groups}
               maxDisplay={4}
             />
 
@@ -237,7 +240,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             </div>
           </div>
 
-          <Link href={`/product/${product.slug || product.id}`} className="block">
+          <Link
+            href={`/product/${product.slug || product.id}`}
+            className="block"
+          >
             <h2 className="text-sm font-normal text-zinc-800 line-clamp-1 group-hover/card:text-[#C8205C] transition-colors tracking-tight">
               {product.title}
             </h2>
@@ -266,7 +272,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
               <X className="w-4 h-4" />
             </button>
 
-            <ProductDetailsBlock product={product} initialGroupId={activeGroup?.id} />
+            <ProductDetailsBlock
+              product={product}
+              initialGroupId={activeGroup?.id}
+            />
           </div>
         </div>
       )}
