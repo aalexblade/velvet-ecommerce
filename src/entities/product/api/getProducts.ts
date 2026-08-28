@@ -1,5 +1,10 @@
 import { createSupabaseServerClient } from "@/shared/api/supabase/serverClient";
-import { Product, ProductColorGroup, ProductVariant, ProductImage } from "../model/types";
+import {
+  Product,
+  ProductColorGroup,
+  ProductVariant,
+  ProductImage,
+} from "../model/types";
 
 export interface ProductFilters {
   color?: string | string[];
@@ -81,7 +86,7 @@ const SELECT_QUERY = `
   *,
   product_color_groups (
     *,
-    colors (*),
+    colors!fk_product_color_groups_colors (*),
     product_images (*),
     product_variants (*)
   )
@@ -205,7 +210,8 @@ export async function getProducts(
       } else if (sort === "newest") {
         products.sort(
           (a, b) =>
-            new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime(),
+            new Date(b.created_at || 0).getTime() -
+            new Date(a.created_at || 0).getTime(),
         );
       }
     }
