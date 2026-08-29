@@ -21,31 +21,31 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
   const [isWishlist, setIsWishlist] = useState(false);
 
-  // 1. Отримуємо колірні групи товару
+
   const colorGroups = useMemo(
     () => product.product_color_groups || [],
     [product.product_color_groups],
   );
 
-  // 2. Дефолтна група (головний колір або перша група)
+  
   const defaultGroup = useMemo(
     () => colorGroups.find((g) => g.is_main) || colorGroups[0],
     [colorGroups],
   );
 
-  // 3. Стан обраної колірної групи
+ 
   const [prevProductId, setPrevProductId] = useState(product.id);
   const [selectedGroupId, setSelectedGroupId] = useState<
     number | string | null
   >(defaultGroup?.id ?? null);
 
-  // Скидаємо колір при зміні об'єкта товару
+  
   if (prevProductId !== product.id) {
     setPrevProductId(product.id);
     setSelectedGroupId(defaultGroup?.id ?? null);
   }
 
-  // 4. Активна колірна група (з фолбеком на defaultGroup)
+  
   const activeGroup = useMemo(() => {
     if (!colorGroups.length) return null;
     return (
@@ -54,11 +54,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     );
   }, [colorGroups, selectedGroupId, defaultGroup]);
 
-  // 5. Галерея зображень (з глибоким фолбеком для збереження відображення)
+ 
   const imagesToRender = useMemo(() => {
     let images = activeGroup?.product_images;
 
-    // 1-й рівень фолбеку: шукаємо першу колірну групу, у якої є зображення
+    
     if (!images || images.length === 0) {
       const groupWithImages = colorGroups.find(
         (g) => g.product_images && g.product_images.length > 0,
@@ -66,12 +66,12 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       images = groupWithImages?.product_images;
     }
 
-    // 2-й рівень фолбеку: беремо плоский масив зображень з об'єкта товару (якщо є)
+    
     if (!images || images.length === 0) {
       images = product.images;
     }
 
-    // 3-й рівень фолбеку: заглушка
+    
     if (!images || images.length === 0) {
       return [{ id: "placeholder", url: "/404 _ot_Found/404_Not_Found.jpg" }];
     }
@@ -81,7 +81,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     );
   }, [activeGroup, colorGroups, product.images]);
 
-  // 6. Варіанти розмірів та ціна
+  
   const activeVariant = useMemo(() => {
     const variants = activeGroup?.product_variants || product.variants || [];
     return variants.find((v) => (v.stock ?? 1) > 0) || variants[0];
@@ -89,7 +89,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
   const price = activeVariant?.price || 0;
 
-  // 7. Налаштування Embla Carousel
+
   const [emblaRef, emblaApi] = useEmblaCarousel({
     loop: true,
     duration: 25,
