@@ -11,15 +11,14 @@ export interface Subcategory {
 /**
  * Server-side function to fetch subcategories for a specific parent category slug.
  *
- * @param parentSlug - The slug of the parent category (e.g., 'bilyzna')
- * @returns {Promise<Subcategory[]>} Array of child subcategories from Supabase
+ * @param parentSlug
+ * @returns {Promise<Subcategory[]>}
  */
 export async function getSubcategories(
   parentSlug: string,
 ): Promise<Subcategory[]> {
   const supabase = await createSupabaseServerClient();
 
-  // 1. Спочатку знаходимо ID батьківської категорії за її slug
   const { data: parentCategory, error: parentError } = await supabase
     .from("categories")
     .select("id")
