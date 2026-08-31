@@ -47,23 +47,32 @@ export interface GetProductsResult {
 function mapDBProductToProduct(prod: DBProductResponse): Product {
   const colorGroups = prod.product_color_groups || [];
 
-  // Flatten nested variants and images for backward compatibility
   const allVariants: ProductVariant[] = [];
   const allImages: ProductImage[] = [];
+  const seenImageUrls = new Set<string>();
 
   colorGroups.forEach((group) => {
+    // 1. Мапимо варіанти з прив'язкою колірних даних
     if (group.product_variants) {
       group.product_variants.forEach((v) => {
         allVariants.push({
           ...v,
           color: v.color || group.colors?.name_uk || group.color_slug,
+          color_group_id: group.id,
         });
       });
     }
 
+    // 2. Додаємо лише УНІКАЛЬНІ картинки
     if (group.product_images) {
       group.product_images.forEach((img) => {
-        allImages.push(img);
+        if (img.url && !seenImageUrls.has(img.url)) {
+          seenImageUrls.add(img.url);
+          allImages.push({
+            ...img,
+            color_group_id: img.color_group_id || group.id,
+          });
+        }
       });
     }
   });
@@ -81,7 +90,6 @@ function mapDBProductToProduct(prod: DBProductResponse): Product {
     images: allImages,
   };
 }
-
 const SELECT_QUERY = `
   *,
   product_color_groups (
