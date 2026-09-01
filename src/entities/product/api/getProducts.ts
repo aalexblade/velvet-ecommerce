@@ -32,6 +32,11 @@ interface DBProductResponse {
   category_id: number;
   is_active: boolean;
   created_at: string;
+  categories?: {
+    id: number;
+    slug: string;
+    parent_id: number | null;
+  } | null;
   product_color_groups: ProductColorGroup[];
 }
 
@@ -41,9 +46,6 @@ export interface GetProductsResult {
   totalPages: number;
 }
 
-/**
- * Mapper for converting DB response with color groups to domain Product model
- */
 function mapDBProductToProduct(prod: DBProductResponse): Product {
   const colorGroups = prod.product_color_groups || [];
 
@@ -51,9 +53,10 @@ function mapDBProductToProduct(prod: DBProductResponse): Product {
   const allImages: ProductImage[] = [];
   const seenImageUrls = new Set<string>();
 
-  colorGroups.forEach((group) => {
-    // 1. Мапимо варіанти з прив'язкою колірних даних
-    if (group.product_variants) {
+  const sortedColorGroups = [...colorGroups].sort((a, b) => a.id - b.id);
+
+  sortedColorGroups.forEach((group) => {
+    if (group.product_variants && Array.isArray(group.product_variants)) {
       group.product_variants.forEach((v) => {
         allVariants.push({
           ...v,
@@ -63,9 +66,12 @@ function mapDBProductToProduct(prod: DBProductResponse): Product {
       });
     }
 
-    // 2. Додаємо лише УНІКАЛЬНІ картинки
-    if (group.product_images) {
-      group.product_images.forEach((img) => {
+    if (group.product_images && Array.isArray(group.product_images)) {
+      const sortedImages = [...group.product_images].sort(
+        (a, b) => a.id - b.id,
+      );
+
+      sortedImages.forEach((img) => {
         if (img.url && !seenImageUrls.has(img.url)) {
           seenImageUrls.add(img.url);
           allImages.push({
@@ -85,13 +91,15 @@ function mapDBProductToProduct(prod: DBProductResponse): Product {
     category_id: prod.category_id,
     is_active: prod.is_active,
     created_at: prod.created_at,
-    product_color_groups: colorGroups,
+    product_color_groups: sortedColorGroups,
     variants: allVariants,
     images: allImages,
   };
 }
+
 const SELECT_QUERY = `
   *,
+  categories (*),
   product_color_groups (
     *,
     colors!fk_product_color_groups_colors (*),
@@ -100,9 +108,6 @@ const SELECT_QUERY = `
   )
 `;
 
-/**
- * Server-side function to fetch bestsellers
- */
 export async function getBestsellers(): Promise<Product[]> {
   const supabase = await createSupabaseServerClient();
 
@@ -122,9 +127,6 @@ export async function getBestsellers(): Promise<Product[]> {
   return rawProducts.map(mapDBProductToProduct);
 }
 
-/**
- * Server-side function to fetch paginated products based on URL slug criteria and filters.
- */
 export async function getProducts(
   slug: string[],
   filters?: ProductFilters,
@@ -133,11 +135,57 @@ export async function getProducts(
 ): Promise<GetProductsResult> {
   const supabase = await createSupabaseServerClient();
 
-  const { data, error } = await supabase
+  // 1. Отримуємо всі категорії для аналізу ієрархії
+  const { data: allCategories, error: catError } = await supabase
+    .from("categories")
+    .select("id, slug, parent_id");
+
+  if (catError) {
+    console.error("Error fetching categories:", catError.message);
+  }
+
+  const currentSlug =
+    slug && slug.length > 0 ? slug[slug.length - 1].toLowerCase() : null;
+
+  const targetCategoryIds: number[] = [];
+
+  if (currentSlug && allCategories) {
+    const matchedCategory = allCategories.find(
+      (c) => c.slug?.toLowerCase() === currentSlug,
+    );
+
+    if (matchedCategory) {
+      targetCategoryIds.push(matchedCategory.id);
+
+      // Рекурсивно додаємо підкатегорії
+      const addChildren = (parentId: number) => {
+        const children = allCategories.filter((c) => c.parent_id === parentId);
+        children.forEach((child) => {
+          targetCategoryIds.push(child.id);
+          addChildren(child.id);
+        });
+      };
+
+      addChildren(matchedCategory.id);
+    }
+  }
+
+  // 2. Запит до Supabase
+  let query = supabase
     .from("products")
     .select(SELECT_QUERY)
     .eq("is_active", true)
     .order("id", { ascending: true });
+
+  if (currentSlug) {
+    if (targetCategoryIds.length > 0) {
+      query = query.in("category_id", targetCategoryIds);
+    } else {
+      return { products: [], totalCount: 0, totalPages: 1 };
+    }
+  }
+
+  const { data, error } = await query;
 
   if (error || !data) {
     console.error("Supabase getProducts execution failure:", error?.message);
@@ -147,7 +195,7 @@ export async function getProducts(
   const rawProducts = data as unknown as DBProductResponse[];
   let products: Product[] = rawProducts.map(mapDBProductToProduct);
 
-  // FILTERING
+  // IN-MEMORY FILTERING
   if (filters) {
     if (filters.search) {
       const searchTerms = Array.isArray(filters.search)
