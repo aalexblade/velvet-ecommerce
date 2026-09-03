@@ -21,31 +21,26 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
   const [isWishlist, setIsWishlist] = useState(false);
 
-
   const colorGroups = useMemo(
     () => product.product_color_groups || [],
     [product.product_color_groups],
   );
 
-  
   const defaultGroup = useMemo(
     () => colorGroups.find((g) => g.is_main) || colorGroups[0],
     [colorGroups],
   );
 
- 
   const [prevProductId, setPrevProductId] = useState(product.id);
   const [selectedGroupId, setSelectedGroupId] = useState<
     number | string | null
   >(defaultGroup?.id ?? null);
 
-  
   if (prevProductId !== product.id) {
     setPrevProductId(product.id);
     setSelectedGroupId(defaultGroup?.id ?? null);
   }
 
-  
   const activeGroup = useMemo(() => {
     if (!colorGroups.length) return null;
     return (
@@ -54,11 +49,9 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     );
   }, [colorGroups, selectedGroupId, defaultGroup]);
 
- 
   const imagesToRender = useMemo(() => {
     let images = activeGroup?.product_images;
 
-    
     if (!images || images.length === 0) {
       const groupWithImages = colorGroups.find(
         (g) => g.product_images && g.product_images.length > 0,
@@ -66,12 +59,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       images = groupWithImages?.product_images;
     }
 
-    
     if (!images || images.length === 0) {
       images = product.images;
     }
 
-    
     if (!images || images.length === 0) {
       return [{ id: "placeholder", url: "/404 _ot_Found/404_Not_Found.jpg" }];
     }
@@ -81,14 +72,12 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     );
   }, [activeGroup, colorGroups, product.images]);
 
-  
   const activeVariant = useMemo(() => {
     const variants = activeGroup?.product_variants || product.variants || [];
     return variants.find((v) => (v.stock ?? 1) > 0) || variants[0];
   }, [activeGroup, product.variants]);
 
   const price = activeVariant?.price || 0;
-
 
   const [emblaRef, emblaApi] = useEmblaCarousel({
     loop: true,
@@ -153,10 +142,9 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                     src={img.url}
                     alt={product.title}
                     fill
-                    className="object-cover object-center pointer-events-none"
-                    sizes="(max-width: 768px) 50vw, 25vw"
+                    className="object-cover object-center pointer-events-none transition-transform duration-300 group-hover/card:scale-105"
+                    sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
                     priority={index === 0}
-                    unoptimized
                   />
                 </div>
               ))}
