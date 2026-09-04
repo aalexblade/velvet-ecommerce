@@ -36,7 +36,6 @@ export default function AboutPage() {
 
   return (
     <div className="min-h-screen bg-white text-zinc-900 font-sans pt-32 md:pt-36 pb-20 selection:bg-pink-100 selection:text-[#C8205C]">
-      {/* КРИХТИ */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <nav className="flex text-xs uppercase tracking-wider text-zinc-400 gap-2 font-medium">
           <Link href="/" className="hover:text-zinc-900 transition-colors">
@@ -47,14 +46,12 @@ export default function AboutPage() {
         </nav>
       </div>
 
-      {/* ЗАГОЛОВОК СТОРІНКИ */}
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 mt-6 md:mt-8 text-center">
         <h1 className="text-3xl md:text-5xl font-black tracking-tight text-zinc-900 uppercase">
           Про нас
         </h1>
       </div>
 
-      {/* ШАХОВІ БЛОКИ ІСТОРІЇ БРЕНДУ */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mt-10 md:mt-12 flex flex-col gap-16 md:gap-24">
         {aboutSections.map((section: AboutSection, index: number) => {
           const isReverse = index % 2 !== 0;
@@ -66,7 +63,6 @@ export default function AboutPage() {
                 isReverse ? "md:direction-rtl" : ""
               }`}
             >
-              {/* Контейнер картинки */}
               <div
                 className={`md:col-span-6 relative aspect-16/10 w-full bg-zinc-100 rounded-2xl overflow-hidden shadow-xs ${
                   isReverse ? "md:order-last" : ""
@@ -84,7 +80,6 @@ export default function AboutPage() {
                 )}
               </div>
 
-              {/* Текстовий блок */}
               <div className="md:col-span-6 flex flex-col gap-3 md:px-4">
                 {section.title && (
                   <h2 className="text-xl md:text-2xl font-bold tracking-tight text-zinc-900">
@@ -98,7 +93,6 @@ export default function AboutPage() {
                   </h2>
                 )}
 
-                {/* Абзаци */}
                 {section.content?.paragraphs?.map(
                   (paragraph: string, pIdx: number) => (
                     <p
@@ -110,7 +104,6 @@ export default function AboutPage() {
                   ),
                 )}
 
-                {/* Список */}
                 {section.content?.list && (
                   <ul className="space-y-2 pt-1">
                     {section.content.list.map((item: string, lIdx: number) => (
@@ -129,7 +122,7 @@ export default function AboutPage() {
           );
         })}
 
-        {/* КНОПКА ПЕРЕХОДУ ДО КАТАЛОГУ */}
+        {/*GO TO CATALOG BUTTON */}
         <div className="flex justify-center pt-4">
           <Link
             href="/catalog"
