@@ -101,7 +101,7 @@ export function Header() {
     );
   };
 
-  // Функції управління ховером із плавним таймером
+  // Hover control functions with smooth timer
   const handleMouseEnter = (categoryData: Category | null) => {
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
@@ -115,7 +115,7 @@ export function Header() {
     }
     timeoutRef.current = setTimeout(() => {
       setHoveredCategory(null);
-    }, 150); // 150ms затримки дає ідеальний комфорт для переміщення мишки
+    }, 150);
   };
 
   const isMegaHovered = Boolean(hoveredCategory);
@@ -184,7 +184,7 @@ export function Header() {
                         />
                       )}
 
-                      {/* Тоненька риска підкреслення */}
+                      {/* Thin underline */}
                       <span
                         className={cn(
                           "absolute bottom-0 left-0 w-full h-px bg-accent transition-transform duration-300 origin-left scale-x-0 group-hover:scale-x-100",
