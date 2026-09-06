@@ -35,6 +35,46 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
   const [api, setApi] = React.useState<CarouselApi>();
   const [current, setCurrent] = React.useState(0);
 
+  // Трансформація: Розгортаємо один товар з N колірними групами у N окремих карток
+  const displayProducts = React.useMemo(() => {
+    if (!products || products.length === 0) return [];
+
+    return products.flatMap((product) => {
+      const colorGroups = product.product_color_groups || [];
+
+      // Якщо колірних груп немає або вона одна — виводимо товар як є
+      if (colorGroups.length <= 1) {
+        return [product];
+      }
+
+      // Для кожної колірної групи створюємо віртуальну картку
+      return colorGroups.map((group) => {
+        // Отримуємо картинки саме для цієї колірної групи
+        const groupImages = (product.images || []).filter(
+          (img) => img.color_group_id === group.id,
+        );
+
+        // Переставляємо колірні групи так, щоб поточна була першою (головною)
+        const reorderedGroups = [
+          { ...group, is_main: true },
+          ...colorGroups
+            .filter((g) => g.id !== group.id)
+            .map((g) => ({ ...g, is_main: false })),
+        ];
+
+        return {
+          ...product,
+          // Унікальний ключ для React key (наприклад, "13-24", "13-51")
+          id: `${product.id}-${group.id}` as unknown as number,
+          // Задаємо зображення активної колірної групи
+          images: groupImages.length > 0 ? groupImages : product.images,
+          // Оновлюємо порядок колірних груп для сватчів у картці та модалці
+          product_color_groups: reorderedGroups,
+        };
+      });
+    });
+  }, [products]);
+
   const autoplayPlugin = React.useMemo(
     () =>
       Autoplay({
@@ -64,10 +104,10 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
   }, [api]);
 
   React.useEffect(() => {
-    if (api && products.length > 0) {
+    if (api && displayProducts.length > 0) {
       api.reInit();
     }
-  }, [api, products]);
+  }, [api, displayProducts]);
 
   const skeletonItems = Array.from({ length: skeletonCount });
 
@@ -80,7 +120,7 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
             showPromo ? "lg:grid-cols-12" : "grid-cols-1",
           )}
         >
-          {/* 1. LEFT PROMO BANNER (Займає 7 колонок, зберігає гарну вертикальну пропорцію) */}
+          {/* 1. LEFT PROMO BANNER */}
           {showPromo && (
             <div className="relative w-full aspect-4/5 lg:aspect-auto lg:h-full rounded-2xl overflow-hidden hidden lg:block border border-border lg:col-span-7">
               <Image
@@ -94,7 +134,7 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
             </div>
           )}
 
-          {/* 2. RIGHT PRODUCTS SECTION (Займає 5 колонок) */}
+          {/* 2. RIGHT PRODUCTS SECTION */}
           <div
             className={cn(
               "flex flex-col h-full justify-between overflow-hidden",
@@ -118,25 +158,27 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
                 </div>
               )}
 
-              {/* DESKTOP GRID (Компактні картки: обмежено ширину кожної картки, щоб вони не розтягувались) */}
+              {/* DESKTOP GRID */}
               <div
                 className={cn(
                   "hidden lg:grid gap-4 mb-4",
-                  showPromo ? "grid-cols-2 justify-items-center" : "grid-cols-2 lg:grid-cols-4",
+                  showPromo
+                    ? "grid-cols-2 justify-items-center"
+                    : "grid-cols-2 lg:grid-cols-4",
                 )}
               >
                 {isLoading
                   ? skeletonItems.map((_, index) => (
                       <ProductCardSkeleton key={`desktop-skeleton-${index}`} />
                     ))
-                  : products.map((product) => (
+                  : displayProducts.map((product) => (
                       <div key={product.id} className="w-full max-w-55">
                         <ProductCard product={product} />
                       </div>
                     ))}
               </div>
 
-              {/* MOBILE & TABLET CAROUSEL (0px - 1023px) */}
+              {/* MOBILE & TABLET CAROUSEL */}
               <div className="block lg:hidden my-4">
                 <Carousel
                   setApi={setApi}
@@ -158,7 +200,7 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
                             <ProductCardSkeleton />
                           </CarouselItem>
                         ))
-                      : products.map((product) => (
+                      : displayProducts.map((product) => (
                           <CarouselItem
                             key={product.id}
                             className="pl-3 basis-4/5 sm:basis-[40%] md:basis-[40%]"
@@ -169,9 +211,9 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
                   </CarouselContent>
 
                   {/* Navigation Dots */}
-                  {!isLoading && products.length > 0 && (
+                  {!isLoading && displayProducts.length > 0 && (
                     <div className="flex justify-center gap-1.5 mt-4">
-                      {products.map((_, index) => (
+                      {displayProducts.map((_, index) => (
                         <button
                           key={index}
                           type="button"
