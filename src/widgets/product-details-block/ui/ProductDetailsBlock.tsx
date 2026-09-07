@@ -17,6 +17,9 @@ interface ProductDetailsBlockProps {
 
 type TabType = "description" | "delivery" | "recommendations";
 
+// Точний шлях до заглушки у public/404NotFound/404NotFound.jpg
+const PLACEHOLDER_IMAGE = "/404NotFound/404NotFound.jpg";
+
 export const ProductDetailsBlock: React.FC<ProductDetailsBlockProps> = ({
   product,
   initialGroupId,
@@ -40,9 +43,9 @@ export const ProductDetailsBlock: React.FC<ProductDetailsBlockProps> = ({
     return colorGroups.find((g) => g.is_main) || colorGroups[0];
   }, [colorGroups, initialGroupId]);
 
-  // 3. State management with state-during-render adjustments (Replaces Effect #1)
+  // 3. State management for selected group with state-during-render sync
   const [selectedGroupId, setSelectedGroupId] = useState<number | string>(
-    defaultGroup?.id || "",
+    () => defaultGroup?.id || "",
   );
   const [prevInitialGroupId, setPrevInitialGroupId] = useState(initialGroupId);
 
@@ -59,14 +62,14 @@ export const ProductDetailsBlock: React.FC<ProductDetailsBlockProps> = ({
     [colorGroups, selectedGroupId, defaultGroup],
   );
 
-  // 5. Derive images
+  // 5. Derive images with 404 fallback
   const imagesToRender = useMemo(() => {
     const images = activeGroup?.product_images || [];
     if (images.length === 0) {
       return [
         {
           id: "placeholder",
-          url: "/placeholder-product.webp",
+          url: PLACEHOLDER_IMAGE,
           sort_order: 1,
         },
       ];
@@ -87,15 +90,14 @@ export const ProductDetailsBlock: React.FC<ProductDetailsBlockProps> = ({
     [activeVariants],
   );
 
-  // Derive initial/fallback size cleanly without state sync effects
   const defaultSize = useMemo(() => {
     const firstInStock = activeVariants.find((v) => (v.stock ?? 1) > 0);
     return firstInStock ? firstInStock.size : activeVariants[0]?.size || "";
   }, [activeVariants]);
 
-  const [selectedSize, setSelectedSize] = useState<string>(defaultSize);
+  const [selectedSize, setSelectedSize] = useState<string>(() => defaultSize);
 
-  // Reset size state if currently selected size doesn't exist in active group
+  // Reset size state during render if selectedGroupId changes
   const [prevSelectedGroupId, setPrevSelectedGroupId] =
     useState(selectedGroupId);
 
@@ -145,7 +147,18 @@ export const ProductDetailsBlock: React.FC<ProductDetailsBlockProps> = ({
       emblaApi.reInit();
       emblaApi.scrollTo(0);
     }
-  }, [selectedGroupId, emblaApi]);
+  }, [activeGroup?.id, emblaApi]);
+
+  // Handle ESC key for modal
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setIsSizeModalOpen(false);
+    };
+    if (isSizeModalOpen) {
+      window.addEventListener("keydown", handleKeyDown);
+    }
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isSizeModalOpen]);
 
   const scrollTo = useCallback(
     (index: number) => {
@@ -167,7 +180,7 @@ export const ProductDetailsBlock: React.FC<ProductDetailsBlockProps> = ({
       title: product.title,
       price: currentVariant.price,
       quantity: quantity,
-      image: imagesToRender[0]?.url || "/placeholder-product.webp",
+      image: imagesToRender[0]?.url || PLACEHOLDER_IMAGE,
       color: activeGroup?.colors?.name_uk || activeGroup?.color_slug || "",
       size: currentVariant.size,
     });
@@ -284,11 +297,11 @@ export const ProductDetailsBlock: React.FC<ProductDetailsBlockProps> = ({
                     type="button"
                     onClick={() => {
                       setSelectedGroupId(group.id);
-                      setSelectedSize(defaultSize);
                       setQuantity(1);
                       setIsAdded(false);
                     }}
                     title={group.colors?.name_uk || group.color_slug}
+                    aria-label={group.colors?.name_uk || group.color_slug}
                     className={cn(
                       "w-7 h-7 rounded-md flex items-center justify-center p-0.5 transition-all cursor-pointer border relative",
                       isSelected
@@ -419,6 +432,7 @@ export const ProductDetailsBlock: React.FC<ProductDetailsBlockProps> = ({
           <button
             type="button"
             onClick={() => setIsWishlist(!isWishlist)}
+            aria-label="Додати до обраного"
             className="h-11 w-11 rounded-md border border-zinc-300 flex items-center justify-center text-zinc-400 hover:text-[#C8205C] hover:border-[#C8205C] cursor-pointer active:scale-95 transition-all shrink-0"
           >
             <Heart
@@ -520,6 +534,7 @@ export const ProductDetailsBlock: React.FC<ProductDetailsBlockProps> = ({
               <button
                 type="button"
                 onClick={() => setIsSizeModalOpen(false)}
+                aria-label="Закрити"
                 className="p-1 rounded-md text-zinc-400 hover:text-zinc-900 hover:bg-zinc-50 transition-all cursor-pointer"
               >
                 <X className="w-5 h-5" />
