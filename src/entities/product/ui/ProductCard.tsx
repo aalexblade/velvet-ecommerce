@@ -16,6 +16,8 @@ interface ProductCardProps {
   product: Product;
 }
 
+const FALLBACK_IMAGE = "/404NotFound/404NotFound.jpg";
+
 export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const addToCart = useCartStore((state) => state.addToCart);
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
@@ -50,8 +52,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   }, [colorGroups, selectedGroupId, defaultGroup]);
 
   const imagesToRender = useMemo(() => {
+    // 1. Пробуємо взяти картинки з активної колірної групи
     let images = activeGroup?.product_images;
 
+    // 2. Якщо в цій групі немає картинок, шукаємо будь-яку групу товару з картинками
     if (!images || images.length === 0) {
       const groupWithImages = colorGroups.find(
         (g) => g.product_images && g.product_images.length > 0,
@@ -59,17 +63,25 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       images = groupWithImages?.product_images;
     }
 
+    // 3. Якщо і в групах немає, беремо загальний масив картинок товару
     if (!images || images.length === 0) {
       images = product.images;
     }
 
-    if (!images || images.length === 0) {
-      return [{ id: "placeholder", url: "/404 _ot_Found/404_Not_Found.jpg" }];
+    // 4. Фільтруємо невалідні записи та порожні URL
+    const validImages = (images || []).filter(
+      (img) => img && typeof img.url === "string" && img.url.trim() !== "",
+    );
+
+    // 5. Повертаємо відсортований масив валідних картинок
+    if (validImages.length > 0) {
+      return [...validImages].sort(
+        (a, b) => (a.sort_order || 0) - (b.sort_order || 0),
+      );
     }
 
-    return [...images].sort(
-      (a, b) => (a.sort_order || 0) - (b.sort_order || 0),
-    );
+    // 6. Якщо картинки взагалі відсутні — повертаємо фолбек
+    return [{ id: "placeholder", url: FALLBACK_IMAGE }];
   }, [activeGroup, colorGroups, product.images]);
 
   const activeVariant = useMemo(() => {
@@ -121,7 +133,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       title: product.title,
       price: activeVariant.price,
       quantity: 1,
-      image: imagesToRender[0]?.url || "/404 _ot_Found/404_Not_Found.jpg",
+      image: imagesToRender[0]?.url || FALLBACK_IMAGE,
       color: activeGroup?.colors?.name_uk || activeGroup?.color_slug || "",
       size: activeVariant.size,
     });
@@ -145,6 +157,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                     className="object-cover object-center pointer-events-none transition-transform duration-300 group-hover/card:scale-105"
                     sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
                     priority={index === 0}
+                    unoptimized={img.url.startsWith("/")}
                   />
                 </div>
               ))}
@@ -196,6 +209,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           <div className="flex items-center justify-between w-full min-h-6">
             <ProductColorSwatches
               colorGroups={product.product_color_groups}
+              activeGroupId={activeGroup?.id}
+              onSelectGroup={(id) => setSelectedGroupId(id)}
               maxDisplay={4}
             />
 
