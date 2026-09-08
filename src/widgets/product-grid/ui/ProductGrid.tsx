@@ -35,26 +35,21 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
   const [api, setApi] = React.useState<CarouselApi>();
   const [current, setCurrent] = React.useState(0);
 
-  // Трансформація: Розгортаємо один товар з N колірними групами у N окремих карток
   const displayProducts = React.useMemo(() => {
     if (!products || products.length === 0) return [];
 
     return products.flatMap((product) => {
       const colorGroups = product.product_color_groups || [];
 
-      // Якщо колірних груп немає або вона одна — виводимо товар як є
       if (colorGroups.length <= 1) {
         return [product];
       }
 
-      // Для кожної колірної групи створюємо віртуальну картку
       return colorGroups.map((group) => {
-        // Отримуємо картинки саме для цієї колірної групи
         const groupImages = (product.images || []).filter(
           (img) => img.color_group_id === group.id,
         );
 
-        // Переставляємо колірні групи так, щоб поточна була першою (головною)
         const reorderedGroups = [
           { ...group, is_main: true },
           ...colorGroups
@@ -64,11 +59,11 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
 
         return {
           ...product,
-          // Унікальний ключ для React key (наприклад, "13-24", "13-51")
+
           id: `${product.id}-${group.id}` as unknown as number,
-          // Задаємо зображення активної колірної групи
+
           images: groupImages.length > 0 ? groupImages : product.images,
-          // Оновлюємо порядок колірних груп для сватчів у картці та модалці
+
           product_color_groups: reorderedGroups,
         };
       });
