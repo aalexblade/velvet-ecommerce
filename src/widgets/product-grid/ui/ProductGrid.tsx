@@ -115,7 +115,7 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
             showPromo ? "lg:grid-cols-12" : "grid-cols-1",
           )}
         >
-          {/* 1. LEFT PROMO BANNER */}
+          {/* 1. LEFT PROMO BANNER _*/}
           {showPromo && (
             <div className="relative w-full aspect-4/5 lg:aspect-auto lg:h-full rounded-2xl overflow-hidden hidden lg:block border border-border lg:col-span-7">
               <Image
