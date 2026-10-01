@@ -7,9 +7,15 @@ import Link from "next/link";
 import useEmblaCarousel from "embla-carousel-react";
 import { Heart, ShoppingBag, ChevronLeft, ChevronRight, X } from "lucide-react";
 import { cn } from "@/shared/lib";
-import { Product } from "../model/types";
+
+// 1. Імпорт типів з Public API entities/product
+import type { Product } from "@/entities/product";
+
+// 2. Імпорти з features та інших widgets
 import { useCartStore } from "@/features/cart/model/cartStore";
 import { ProductDetailsBlock } from "@/widgets/product-details-block";
+
+// 3. Відносний імпорт внутрішнього компонента віджета
 import { ProductColorSwatches } from "./ProductColorSwatches";
 
 interface ProductCardProps {
