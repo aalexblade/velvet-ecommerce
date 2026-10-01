@@ -4,7 +4,7 @@ import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import Autoplay from "embla-carousel-autoplay";
-import { ProductCard, ProductCardSkeleton, Product } from "@/entities/product";
+import { ProductCard, ProductCardSkeleton } from "@/widgets/product-card";
 import {
   Carousel,
   CarouselContent,
@@ -12,6 +12,12 @@ import {
   type CarouselApi,
 } from "@/shared/ui/carousel";
 import { cn } from "@/shared/lib";
+
+import type {
+  Product,
+  ProductColorGroup,
+  ProductImage,
+} from "@/entities/product";
 
 export interface ProductGridProps {
   products: Product[];
@@ -35,7 +41,7 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
   const [api, setApi] = React.useState<CarouselApi>();
   const [current, setCurrent] = React.useState(0);
 
-  const displayProducts = React.useMemo(() => {
+  const displayProducts = React.useMemo<Product[]>(() => {
     if (!products || products.length === 0) return [];
 
     return products.flatMap((product) => {
@@ -45,25 +51,22 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
         return [product];
       }
 
-      return colorGroups.map((group) => {
+      return colorGroups.map((group: ProductColorGroup) => {
         const groupImages = (product.images || []).filter(
-          (img) => img.color_group_id === group.id,
+          (img: ProductImage) => img.color_group_id === group.id,
         );
 
-        const reorderedGroups = [
+        const reorderedGroups: ProductColorGroup[] = [
           { ...group, is_main: true },
           ...colorGroups
-            .filter((g) => g.id !== group.id)
-            .map((g) => ({ ...g, is_main: false })),
+            .filter((g: ProductColorGroup) => g.id !== group.id)
+            .map((g: ProductColorGroup) => ({ ...g, is_main: false })),
         ];
 
         return {
           ...product,
-
-          id: `${product.id}-${group.id}` as unknown as number,
-
+          id: product.id,
           images: groupImages.length > 0 ? groupImages : product.images,
-
           product_color_groups: reorderedGroups,
         };
       });
@@ -115,7 +118,7 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
             showPromo ? "lg:grid-cols-12" : "grid-cols-1",
           )}
         >
-          {/* 1. LEFT PROMO BANNER _*/}
+          {/* 1. LEFT PROMO BANNER */}
           {showPromo && (
             <div className="relative w-full aspect-4/5 lg:aspect-auto lg:h-full rounded-2xl overflow-hidden hidden lg:block border border-border lg:col-span-7">
               <Image
@@ -166,8 +169,11 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
                   ? skeletonItems.map((_, index) => (
                       <ProductCardSkeleton key={`desktop-skeleton-${index}`} />
                     ))
-                  : displayProducts.map((product) => (
-                      <div key={product.id} className="w-full max-w-55">
+                  : displayProducts.map((product, idx) => (
+                      <div
+                        key={`${product.id}-${idx}`}
+                        className="w-full max-w-55"
+                      >
                         <ProductCard product={product} />
                       </div>
                     ))}
@@ -195,9 +201,9 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
                             <ProductCardSkeleton />
                           </CarouselItem>
                         ))
-                      : displayProducts.map((product) => (
+                      : displayProducts.map((product, idx) => (
                           <CarouselItem
-                            key={product.id}
+                            key={`${product.id}-${idx}`}
                             className="pl-3 basis-4/5 sm:basis-[40%] md:basis-[40%]"
                           >
                             <ProductCard product={product} />
