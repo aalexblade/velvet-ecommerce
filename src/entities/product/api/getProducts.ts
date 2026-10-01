@@ -119,7 +119,13 @@ export async function getBestsellers(): Promise<Product[]> {
     .order("id", { ascending: true });
 
   if (error || !data) {
-    console.error("Supabase getBestsellers failure:", error?.message);
+    console.error("Supabase getBestsellers failure details:", {
+      message: error?.message,
+      details: error?.details,
+      hint: error?.hint,
+      code: error?.code,
+      rawError: error,
+    });
     return [];
   }
 
@@ -141,7 +147,13 @@ export async function getProducts(
     .select("id, slug, parent_id");
 
   if (catError) {
-    console.error("Error fetching categories:", catError.message);
+    console.error("Error fetching categories details:", {
+      message: catError.message,
+      details: catError.details,
+      hint: catError.hint,
+      code: catError.code,
+      rawError: catError,
+    });
   }
 
   const currentSlug =
@@ -188,7 +200,13 @@ export async function getProducts(
   const { data, error } = await query;
 
   if (error || !data) {
-    console.error("Supabase getProducts execution failure:", error?.message);
+    console.error("Supabase getProducts execution failure details:", {
+      message: error?.message,
+      details: error?.details,
+      hint: error?.hint,
+      code: error?.code,
+      rawError: error,
+    });
     return { products: [], totalCount: 0, totalPages: 1 };
   }
 
