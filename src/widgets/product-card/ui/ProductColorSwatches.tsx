@@ -2,7 +2,7 @@
 
 import React, { useMemo } from "react";
 import { cn } from "@/shared/lib";
-import { ProductColorGroup } from "../model/types";
+import { ProductColorGroup } from "@/entities/product";
 
 interface ProductColorSwatchesProps {
   colorGroups?: ProductColorGroup[];
