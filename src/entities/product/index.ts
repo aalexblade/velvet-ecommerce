@@ -1,8 +1,15 @@
 // src/entities/product/index.ts
 
-// Export presentation components and skeletons
-export { ProductCard } from './ui/ProductCard';
-export { ProductCardSkeleton, ProductGridSkeleton } from './ui/ProductCardSkeleton';
+// Export domain types
+export type {
+  Product,
+  ProductColor,
+  ProductColorGroup,
+  ProductVariant,
+  ProductImage,
+} from "./model/types";
 
-// Export types
-export type { Product, ProductColor, ProductVariant, ProductImage } from './model/types';
+// Export domain API services
+export { getProductById } from "./api/getProductById";
+export { getProducts } from "./api/getProducts";
+export { getSubcategories } from "./api/getSubcategories";
