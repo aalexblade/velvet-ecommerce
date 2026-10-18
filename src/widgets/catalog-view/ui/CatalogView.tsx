@@ -8,7 +8,6 @@ import { ChevronRight, X } from "lucide-react";
 import { ProductCard } from "@/widgets/product-card";
 import type { Product } from "@/entities/product";
 import { CatalogFilters } from "@/features/filters";
-import { ProductDetailsBlock } from "@/widgets/product-details-block";
 import { SizeCalculatorForm } from "@/features/product-size-calculator";
 import { Pagination } from "@/shared/ui/Pagination";
 
@@ -39,22 +38,16 @@ export function CatalogView({
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  const [selectedQuickView, setSelectedQuickView] = useState<Product | null>(
-    null,
-  );
-  // State for controlling size calculator modal visibility
   const [isSizeGuideOpen, setIsSizeGuideOpen] = useState(false);
 
   const products = useMemo(() => initialProducts, [initialProducts]);
 
-  // Handle pagination navigation retaining current search params
   const handlePageChange = (page: number) => {
     const params = new URLSearchParams(searchParams.toString());
     params.set("page", page.toString());
     router.push(`${pathname}?${params.toString()}`);
   };
 
-  // Page title mapping according to the design mockup
   const currentCategoryTitle = useMemo(() => {
     if (!slug || slug.length === 0) return "Бюстгальтери";
     const lastSegment = slug[slug.length - 1].toLowerCase();
@@ -73,7 +66,6 @@ export function CatalogView({
 
   return (
     <div className="min-h-screen bg-background text-foreground antialiased pt-28 md:pt-32 pb-16">
-      {/* --- Breadcrumbs Navigation (Matching Figma with Chevron Icons) --- */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <nav className="flex items-center gap-2 text-xs md:text-sm text-muted-foreground whitespace-nowrap overflow-x-auto no-scrollbar">
           <Link
@@ -96,7 +88,6 @@ export function CatalogView({
         </nav>
       </div>
 
-      {/* --- Category Header & Description --- */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4 md:mt-6">
         <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">
           {currentCategoryTitle}
@@ -107,7 +98,6 @@ export function CatalogView({
         </p>
       </div>
 
-      {/* --- Subcategories Grid / Slider Section --- */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6 md:mt-8">
         <div className="flex gap-4 overflow-x-auto pb-4 pt-1 no-scrollbar snap-x scroll-smooth">
           {initialSubcategories.map((sub, index) => {
@@ -115,7 +105,6 @@ export function CatalogView({
             const fallbackImage =
               "https://mylhoikievakodeutzsi.supabase.co/storage/v1/object/public/assets/categories/bralette.jpg";
 
-            // Open size guide modal or handle navigation
             const handleClick = (e: React.MouseEvent) => {
               if (isSizeGuide) {
                 e.preventDefault();
@@ -131,7 +120,6 @@ export function CatalogView({
                 onClick={handleClick}
                 className="shrink-0 w-36 sm:w-44 md:w-48 bg-card rounded-xl overflow-hidden border border-border/50 shadow-xs hover:shadow-md transition-all duration-300 group snap-start flex flex-col cursor-pointer"
               >
-                {/* Image Box Container - Full cover without internal paddings */}
                 <div className="w-full aspect-square relative bg-muted/20 overflow-hidden">
                   <Image
                     src={sub.image || fallbackImage}
@@ -144,7 +132,6 @@ export function CatalogView({
                   />
                 </div>
 
-                {/* Subcategory Label Box */}
                 <div className="p-3 bg-card border-t border-border/40">
                   <h3 className="text-xs sm:text-sm font-medium text-foreground group-hover:text-accent transition-colors line-clamp-1">
                     {sub.title}
@@ -156,7 +143,6 @@ export function CatalogView({
         </div>
       </div>
 
-      {/* --- Main Content Area --- */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 flex flex-col gap-6 overflow-visible">
         <div className="w-full shrink-0 overflow-visible">
           <CatalogFilters />
@@ -176,7 +162,6 @@ export function CatalogView({
             </div>
           )}
 
-          {/* --- Dynamic Pagination Component --- */}
           {totalPages > 1 && (
             <div className="mt-12 flex justify-center">
               <Pagination
@@ -189,38 +174,13 @@ export function CatalogView({
         </div>
       </div>
 
-      {/* --- Quick View Modal System Layer --- */}
-      {selectedQuickView && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-6 animate-in fade-in duration-200">
-          <div
-            onClick={() => setSelectedQuickView(null)}
-            className="absolute inset-0 bg-black/40 backdrop-blur-md transition-opacity cursor-pointer"
-          />
-
-          <div className="relative bg-background text-foreground w-full max-w-5xl rounded-3xl shadow-2xl border border-border overflow-y-auto no-scrollbar max-h-[90vh] p-6 md:p-8 z-10 scale-in duration-300">
-            <button
-              onClick={() => setSelectedQuickView(null)}
-              className="absolute top-4 right-4 md:top-6 md:right-6 p-2 rounded-full border border-border text-muted-foreground hover:text-foreground hover:bg-muted cursor-pointer transition-all z-30"
-              aria-label="Закрити вікно"
-            >
-              <X className="w-4 h-4" />
-            </button>
-
-            <ProductDetailsBlock product={selectedQuickView} />
-          </div>
-        </div>
-      )}
-
-      {/* --- Size Calculator Modal Layer --- */}
       {isSizeGuideOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-6 animate-in fade-in duration-200">
-          {/* Backdrop (Only clicking here closes the modal) */}
           <div
             onClick={() => setIsSizeGuideOpen(false)}
             className="absolute inset-0 bg-black/40 backdrop-blur-xs transition-opacity cursor-pointer"
           />
 
-          {/* Modal Container (Event propagation blocked) */}
           <div
             onClick={(e) => e.stopPropagation()}
             className="relative bg-background text-foreground w-full max-w-lg rounded-2xl shadow-2xl border border-border/40 overflow-hidden p-6 md:p-8 z-10 scale-in duration-200"
