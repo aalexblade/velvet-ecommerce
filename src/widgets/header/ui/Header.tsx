@@ -15,28 +15,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/shared/lib";
 import { useCartStore } from "@/features/cart";
-import { createSupabaseBrowserClient } from "@/shared/api/supabase/browserClient";
-
-// ==========================================
-// TYPES & NAV LINKS
-// ==========================================
-
-export interface MenuLink {
-  label: string;
-  href: string;
-}
-
-export interface MenuColumn {
-  image_url: string;
-  links: MenuLink[];
-}
-
-export interface Category {
-  id: number;
-  title: string;
-  slug: string;
-  menu_columns?: MenuColumn[] | null;
-}
+import { getCategories, type Category } from "@/entities/category";
 
 const STATIC_NAV_LINKS = [
   { label: "Новинки", href: "/catalog/novynky", slug: "novynky" },
@@ -56,7 +35,6 @@ export function Header() {
   const [hoveredCategory, setHoveredCategory] = useState<Category | null>(null);
   const [openMobileSlug, setOpenMobileSlug] = useState<string | null>(null);
 
-  // Реф для зберігання таймера затримки закриття
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const isWhiteHeaderPage = pathname === "/cart" || pathname === "/checkout";
@@ -68,17 +46,9 @@ export function Header() {
   );
 
   useEffect(() => {
-    const supabase = createSupabaseBrowserClient();
-
     async function fetchCategories() {
-      const { data, error } = await supabase
-        .from("categories")
-        .select("id, title, slug, menu_columns")
-        .is("parent_id", null);
-
-      if (!error && data) {
-        setCategories(data as Category[]);
-      }
+      const data = await getCategories();
+      setCategories(data);
     }
     fetchCategories();
   }, []);
@@ -101,7 +71,6 @@ export function Header() {
     );
   };
 
-  // Hover control functions with smooth timer
   const handleMouseEnter = (categoryData: Category | null) => {
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
@@ -132,7 +101,6 @@ export function Header() {
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-11">
-            {/* --- BRAND LOGO --- */}
             <Link href="/" className="relative flex items-center shrink-0">
               <Image
                 src={
@@ -149,7 +117,6 @@ export function Header() {
               />
             </Link>
 
-            {/* --- DESKTOP NAV BAR --- */}
             <nav className="hidden lg:flex items-center gap-6 xl:gap-8 h-full">
               {STATIC_NAV_LINKS.map((link, linkIdx) => {
                 const categoryData = getCategoryData(link.slug);
@@ -184,7 +151,6 @@ export function Header() {
                         />
                       )}
 
-                      {/* Thin underline */}
                       <span
                         className={cn(
                           "absolute bottom-0 left-0 w-full h-px bg-accent transition-transform duration-300 origin-left scale-x-0 group-hover:scale-x-100",
@@ -197,7 +163,6 @@ export function Header() {
               })}
             </nav>
 
-            {/* --- UTILITY ICON BUTTONS BAR --- */}
             <div className="flex items-center gap-1 sm:gap-2">
               <button
                 className="p-1.5 hover:opacity-70 transition-opacity cursor-pointer"
@@ -234,7 +199,6 @@ export function Header() {
                 <User size={19} strokeWidth={1.75} />
               </button>
 
-              {/* --- BURGER TRIGGER FOR MOBILE/TABLET --- */}
               <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                 className="lg:hidden p-1.5 -mr-1 hover:opacity-70 transition-opacity cursor-pointer ml-1"
@@ -246,9 +210,6 @@ export function Header() {
           </div>
         </div>
 
-        {/* ==========================================
-            DESKTOP MEGA MENU CANVAS OVERLAY
-            ========================================== */}
         <div
           onMouseEnter={() =>
             hoveredCategory && handleMouseEnter(hoveredCategory)
@@ -294,9 +255,6 @@ export function Header() {
         </div>
       </header>
 
-      {/* ==========================================
-          MOBILE / TABLET BURGER DRAWER
-          ========================================== */}
       <div
         className={cn(
           "fixed inset-0 bg-black/50 backdrop-blur-xs z-50 transition-opacity duration-300 lg:hidden",
