@@ -5,17 +5,14 @@ import { useState, useCallback, useMemo, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import useEmblaCarousel from "embla-carousel-react";
-import { Heart, ShoppingBag, ChevronLeft, ChevronRight, X } from "lucide-react";
+import { Heart, ShoppingBag, ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/shared/lib";
 
-// 1. Імпорт типів з Public API entities/product
 import type { Product } from "@/entities/product";
 
-// 2. Імпорти з features та інших widgets
 import { useCartStore } from "@/features/cart/model/cartStore";
-import { ProductDetailsBlock } from "@/widgets/product-details-block";
+import { ProductQuickViewModal } from "@/features/product-quick-view";
 
-// 3. Відносний імпорт внутрішнього компонента віджета
 import { ProductColorSwatches } from "./ProductColorSwatches";
 
 interface ProductCardProps {
@@ -58,10 +55,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   }, [colorGroups, selectedGroupId, defaultGroup]);
 
   const imagesToRender = useMemo(() => {
-    // 1. Пробуємо взяти картинки з активної колірної групи
     let images = activeGroup?.product_images;
 
-    // 2. Якщо в цій групі немає картинок, шукаємо будь-яку групу товару з картинками
     if (!images || images.length === 0) {
       const groupWithImages = colorGroups.find(
         (g) => g.product_images && g.product_images.length > 0,
@@ -69,24 +64,20 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       images = groupWithImages?.product_images;
     }
 
-    // 3. Якщо і в групах немає, беремо загальний масив картинок товару
     if (!images || images.length === 0) {
       images = product.images;
     }
 
-    // 4. Фільтруємо невалідні записи та порожні URL
     const validImages = (images || []).filter(
       (img) => img && typeof img.url === "string" && img.url.trim() !== "",
     );
 
-    // 5. Повертаємо відсортований масив валідних картинок
     if (validImages.length > 0) {
       return [...validImages].sort(
         (a, b) => (a.sort_order || 0) - (b.sort_order || 0),
       );
     }
 
-    // 6. Якщо картинки взагалі відсутні — повертаємо фолбек
     return [{ id: "placeholder", url: FALLBACK_IMAGE }];
   }, [activeGroup, colorGroups, product.images]);
 
@@ -264,30 +255,12 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         </div>
       </div>
 
-      {isQuickViewOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-6 animate-in fade-in duration-200">
-          <div
-            onClick={() => setIsQuickViewOpen(false)}
-            className="absolute inset-0 bg-black/40 backdrop-blur-md transition-opacity cursor-pointer"
-          />
-
-          <div className="relative bg-white w-full max-w-5xl rounded-3xl shadow-2xl border border-zinc-100 overflow-y-auto no-scrollbar max-h-[90vh] p-6 md:p-8 z-10">
-            <button
-              type="button"
-              onClick={() => setIsQuickViewOpen(false)}
-              className="absolute top-4 right-4 md:top-6 md:right-6 p-2 rounded-full border border-zinc-100 text-zinc-400 hover:text-zinc-900 hover:bg-zinc-50 cursor-pointer transition-all z-30 bg-white"
-              aria-label="Закрити вікно"
-            >
-              <X className="w-4 h-4" />
-            </button>
-
-            <ProductDetailsBlock
-              product={product}
-              initialGroupId={activeGroup?.id}
-            />
-          </div>
-        </div>
-      )}
+      <ProductQuickViewModal
+        product={product}
+        initialGroupId={activeGroup?.id}
+        isOpen={isQuickViewOpen}
+        onClose={() => setIsQuickViewOpen(false)}
+      />
     </>
   );
 };
