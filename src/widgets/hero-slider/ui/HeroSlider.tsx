@@ -1,98 +1,77 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import Image from "next/image"
-import Link from "next/link"
-import Autoplay from "embla-carousel-autoplay"
-import { Loader2 } from "lucide-react"
+import * as React from "react";
+import Image from "next/image";
+import Link from "next/link";
+import Autoplay from "embla-carousel-autoplay";
+import { Loader2 } from "lucide-react";
 
 import {
   Carousel,
   CarouselContent,
   CarouselItem,
   type CarouselApi,
-} from "@/shared/ui/carousel"
-import { Button } from "@/shared/ui/button"
-import { cn } from "@/shared/lib"
-import { createSupabaseBrowserClient } from "@/shared/api/supabase/browserClient"
-
-interface HeroSlide {
-  id: number
-  title: string
-  description: string
-  button_text: string
-  link: string
-  image_url: string
-  mobile_image_url?: string
-  display_order: number
-}
-
-const supabase = createSupabaseBrowserClient()
+} from "@/shared/ui/carousel";
+import { Button } from "@/shared/ui/button";
+import { cn } from "@/shared/lib";
+import { getHeroSlides, type HeroSlide } from "@/entities/hero-slide";
 
 export const HeroSlider = () => {
-  const [slides, setSlides] = React.useState<HeroSlide[]>([])
-  const [loading, setLoading] = React.useState(true)
-  const [api, setApi] = React.useState<CarouselApi>()
-  const [current, setCurrent] = React.useState(0)
+  const [slides, setSlides] = React.useState<HeroSlide[]>([]);
+  const [loading, setLoading] = React.useState(true);
+  const [api, setApi] = React.useState<CarouselApi>();
+  const [current, setCurrent] = React.useState(0);
 
   React.useEffect(() => {
     const fetchSlides = async () => {
       try {
-        setLoading(true)
-        const { data, error } = await supabase
-          .from("hero_slides")
-          .select("*")
-          .order("display_order", { ascending: true })
-
-        if (error) {
-          console.error("Помилка завантаження слайдів Supabase:", error.message)
-        } else if (data) {
-          setSlides(data)
-        }
+        setLoading(true);
+        const data = await getHeroSlides();
+        setSlides(data);
       } catch (err) {
-        console.error("Помилка при отриманні даних:", err)
+        console.error("Помилка при отриманні даних:", err);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
+    };
 
-    fetchSlides()
-  }, [])
+    fetchSlides();
+  }, []);
 
   const plugins = React.useMemo(
     () => [Autoplay({ delay: 5000, stopOnInteraction: false })],
-    []
-  )
+    [],
+  );
 
   React.useEffect(() => {
-    if (!api) return
+    if (!api) return;
 
     const updateActiveIndex = () => {
-      setCurrent(api.selectedScrollSnap())
-    }
+      setCurrent(api.selectedScrollSnap());
+    };
 
-    api.on("init", updateActiveIndex)
-    api.on("select", updateActiveIndex)
+    api.on("init", updateActiveIndex);
+    api.on("select", updateActiveIndex);
 
     if (api.scrollSnapList().length > 0) {
-      updateActiveIndex()
+      updateActiveIndex();
     }
 
     return () => {
-      api.off("init", updateActiveIndex)
-      api.off("select", updateActiveIndex)
-    }
-  }, [api])
+      api.off("init", updateActiveIndex);
+      api.off("select", updateActiveIndex);
+    };
+  }, [api]);
 
   if (loading) {
     return (
       <section className="w-full h-screen bg-primary flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-accent" />
       </section>
-    )
+    );
   }
 
-  if (slides.length === 0) return null
+  if (slides.length === 0) return null;
 
   return (
     <section className="relative w-full h-screen min-h-125 overflow-hidden bg-primary font-sans">
@@ -104,8 +83,10 @@ export const HeroSlider = () => {
       >
         <CarouselContent className="ml-0 h-full">
           {slides.map((slide) => (
-            <CarouselItem key={slide.id} className="pl-0 h-full w-full relative basis-full">
-              
+            <CarouselItem
+              key={slide.id}
+              className="pl-0 h-full w-full relative basis-full"
+            >
               {/* 1. Десктопна картинка */}
               <div className="absolute inset-0 hidden sm:block h-full w-full">
                 <Image
@@ -157,7 +138,6 @@ export const HeroSlider = () => {
                   </div>
                 </div>
               </div>
-
             </CarouselItem>
           ))}
         </CarouselContent>
@@ -173,12 +153,12 @@ export const HeroSlider = () => {
               "h-1 rounded-full transition-all duration-500 ease-in-out cursor-pointer",
               current === index
                 ? "w-10 sm:w-14 bg-accent"
-                : "w-4 sm:w-6 bg-white/40 hover:bg-white/70"
+                : "w-4 sm:w-6 bg-white/40 hover:bg-white/70",
             )}
             aria-label={`Перейти до слайду ${index + 1}`}
           />
         ))}
       </div>
     </section>
-  )
-}
+  );
+};
