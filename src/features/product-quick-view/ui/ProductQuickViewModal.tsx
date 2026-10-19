@@ -3,7 +3,7 @@
 import React from "react";
 import { X } from "lucide-react";
 import type { Product } from "@/entities/product";
-import { ProductDetailsBlock } from "@/widgets/product-details-block";
+import { ProductDetailsBlock } from "@/entities/product";
 
 interface ProductQuickViewModalProps {
   product: Product;
