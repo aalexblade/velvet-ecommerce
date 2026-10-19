@@ -1,3 +1,4 @@
+// src/entities/product/api/getSubcategories.ts
 import { createSupabaseServerClient } from "@/shared/api/supabase/serverClient";
 
 export interface Subcategory {

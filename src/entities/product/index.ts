@@ -9,7 +9,5 @@ export type {
   ProductImage,
 } from "./model/types";
 
-// Export domain API services
-export { getProductById } from "./api/getProductById";
-export { getProducts } from "./api/getProducts";
-export { getSubcategories } from "./api/getSubcategories";
+// Export client-safe UI components
+export { ProductDetailsBlock } from "./ui/ProductDetailsBlock";
