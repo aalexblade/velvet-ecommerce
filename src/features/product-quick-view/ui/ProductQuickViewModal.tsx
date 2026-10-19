@@ -1,45 +1,69 @@
 "use client";
 
-import React from "react";
+import * as React from "react";
 import { X } from "lucide-react";
-import type { Product } from "@/entities/product";
 import { ProductDetailsBlock } from "@/entities/product";
+import { Product } from "@/entities/product/model/types";
+import { useCartStore } from "@/features/cart/model/cartStore";
+import { SizeCalculatorForm } from "@/features/product-size-calculator/ui/SizeCalculatorForm";
 
 interface ProductQuickViewModalProps {
-  product: Product;
-  initialGroupId?: number | string;
+  product: Product | null;
   isOpen: boolean;
   onClose: () => void;
+  initialGroupId?: number | string;
 }
 
 export const ProductQuickViewModal: React.FC<ProductQuickViewModalProps> = ({
   product,
-  initialGroupId,
   isOpen,
   onClose,
+  initialGroupId,
 }) => {
-  if (!isOpen) return null;
+  const addToCart = useCartStore((state) => state.addToCart);
+
+  if (!isOpen || !product) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-6 animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 animate-in fade-in duration-200">
       <div
         onClick={onClose}
-        className="absolute inset-0 bg-black/40 backdrop-blur-md transition-opacity cursor-pointer"
+        className="absolute inset-0 bg-black/50 backdrop-blur-xs transition-opacity"
       />
 
-      <div className="relative bg-white w-full max-w-5xl rounded-3xl shadow-2xl border border-zinc-100 overflow-y-auto no-scrollbar max-h-[90vh] p-6 md:p-8 z-10">
+      <div className="relative bg-white w-full max-w-4xl rounded-2xl p-6 md:p-8 shadow-2xl border border-zinc-100 z-10 max-h-[90vh] overflow-y-auto no-scrollbar">
         <button
           type="button"
           onClick={onClose}
-          className="absolute top-4 right-4 md:top-6 md:right-6 p-2 rounded-full border border-zinc-100 text-zinc-400 hover:text-zinc-900 hover:bg-zinc-50 cursor-pointer transition-all z-30 bg-white"
-          aria-label="Закрити вікно"
+          aria-label="Закрити"
+          className="absolute top-4 right-4 p-2 rounded-full text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 transition-all z-20 cursor-pointer"
         >
-          <X className="w-4 h-4" />
+          <X className="w-5 h-5" />
         </button>
 
         <ProductDetailsBlock
           product={product}
           initialGroupId={initialGroupId}
+          onAddToCart={addToCart}
+          sizeCalculatorSlot={({
+            availableSizes,
+            onSelectSize,
+            onCloseModal,
+          }) => (
+            <SizeCalculatorForm
+              onSizeCalculated={(calculatedSize) => {
+                if (availableSizes.includes(calculatedSize)) {
+                  onSelectSize(calculatedSize);
+                }
+              }}
+              onApplyFilter={(size) => {
+                if (availableSizes.includes(size)) {
+                  onSelectSize(size);
+                }
+                onCloseModal();
+              }}
+            />
+          )}
         />
       </div>
     </div>
