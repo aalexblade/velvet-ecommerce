@@ -1,1 +1,0 @@
-export { ProductDetailsBlock } from "./ui/ProductDetailsBlock";
