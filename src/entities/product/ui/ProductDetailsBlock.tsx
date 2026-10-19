@@ -7,25 +7,39 @@ import useEmblaCarousel from "embla-carousel-react";
 import { Heart, Minus, Plus, Star, Ruler, Check, X } from "lucide-react";
 import { cn } from "@/shared/lib";
 import { Product } from "@/entities/product/model/types";
-import { useCartStore } from "@/features/cart/model/cartStore";
-import { SizeCalculatorForm } from "@/features/product-size-calculator/ui/SizeCalculatorForm";
+
+export interface ProductAddToCartPayload {
+  variantId: string;
+  productId: string;
+  title: string;
+  price: number;
+  quantity: number;
+  image: string;
+  color: string;
+  size: string;
+}
 
 interface ProductDetailsBlockProps {
   product: Product;
   initialGroupId?: number | string;
+  onAddToCart?: (payload: ProductAddToCartPayload) => void;
+  sizeCalculatorSlot?: (props: {
+    availableSizes: string[];
+    onSelectSize: (size: string) => void;
+    onCloseModal: () => void;
+  }) => React.ReactNode;
 }
 
 type TabType = "description" | "delivery" | "recommendations";
 
-// Точний шлях до заглушки у public/404NotFound/404NotFound.jpg
 const PLACEHOLDER_IMAGE = "/404NotFound/404NotFound.jpg";
 
 export const ProductDetailsBlock: React.FC<ProductDetailsBlockProps> = ({
   product,
   initialGroupId,
+  onAddToCart,
+  sizeCalculatorSlot,
 }) => {
-  const addToCart = useCartStore((state) => state.addToCart);
-
   // 1. Extract color groups
   const colorGroups = useMemo(
     () => product.product_color_groups || [],
@@ -174,25 +188,21 @@ export const ProductDetailsBlock: React.FC<ProductDetailsBlockProps> = ({
   const handleAddToCart = () => {
     if (isOutOfStock || !currentVariant) return;
 
-    addToCart({
-      variantId: String(currentVariant.id),
-      productId: String(product.id),
-      title: product.title,
-      price: currentVariant.price,
-      quantity: quantity,
-      image: imagesToRender[0]?.url || PLACEHOLDER_IMAGE,
-      color: activeGroup?.colors?.name_uk || activeGroup?.color_slug || "",
-      size: currentVariant.size,
-    });
+    if (onAddToCart) {
+      onAddToCart({
+        variantId: String(currentVariant.id),
+        productId: String(product.id),
+        title: product.title,
+        price: currentVariant.price,
+        quantity: quantity,
+        image: imagesToRender[0]?.url || PLACEHOLDER_IMAGE,
+        color: activeGroup?.colors?.name_uk || activeGroup?.color_slug || "",
+        size: currentVariant.size,
+      });
+    }
 
     setIsAdded(true);
     setTimeout(() => setIsAdded(false), 2000);
-  };
-
-  const handleSizeCalculated = (calculatedSize: string) => {
-    if (availableSizes.includes(calculatedSize)) {
-      setSelectedSize(calculatedSize);
-    }
   };
 
   return (
@@ -361,14 +371,16 @@ export const ProductDetailsBlock: React.FC<ProductDetailsBlockProps> = ({
           </div>
         )}
 
-        <button
-          type="button"
-          onClick={() => setIsSizeModalOpen(true)}
-          className="flex items-center gap-2 text-xs text-[#C8205C] hover:underline cursor-pointer font-medium -mt-1 w-max"
-        >
-          <Ruler className="w-3.5 h-3.5 transform rotate-45" />
-          <span>Підібрати розмір</span>
-        </button>
+        {sizeCalculatorSlot && (
+          <button
+            type="button"
+            onClick={() => setIsSizeModalOpen(true)}
+            className="flex items-center gap-2 text-xs text-[#C8205C] hover:underline cursor-pointer font-medium -mt-1 w-max"
+          >
+            <Ruler className="w-3.5 h-3.5 transform rotate-45" />
+            <span>Підібрати розмір</span>
+          </button>
+        )}
 
         {/* Quantity */}
         <div className="flex items-center border border-zinc-300 rounded-md h-9 w-max bg-white">
@@ -517,7 +529,7 @@ export const ProductDetailsBlock: React.FC<ProductDetailsBlockProps> = ({
       </div>
 
       {/* MODAL */}
-      {isSizeModalOpen && (
+      {isSizeModalOpen && sizeCalculatorSlot && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 animate-in fade-in duration-200">
           <div
             onClick={() => setIsSizeModalOpen(false)}
@@ -542,15 +554,15 @@ export const ProductDetailsBlock: React.FC<ProductDetailsBlockProps> = ({
             </div>
 
             <hr className="border-zinc-100 -mx-6 md:-mx-8" />
-            <SizeCalculatorForm
-              onSizeCalculated={handleSizeCalculated}
-              onApplyFilter={(size) => {
+            {sizeCalculatorSlot({
+              availableSizes,
+              onSelectSize: (size) => {
                 if (availableSizes.includes(size)) {
                   setSelectedSize(size);
                 }
-                setIsSizeModalOpen(false);
-              }}
-            />
+              },
+              onCloseModal: () => setIsSizeModalOpen(false),
+            })}
           </div>
         </div>
       )}
