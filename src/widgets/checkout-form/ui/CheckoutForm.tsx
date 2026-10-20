@@ -23,6 +23,7 @@ import {
   NPWarehouse,
 } from "@/shared/api/novaposhta/deliveryService";
 import {
+  buildOrderPayload,
   calculateCheckoutTotals,
   validateCheckoutForm,
 } from "@/features/checkout";
@@ -156,27 +157,18 @@ export function CheckoutForm() {
     }
 
     try {
-      const orderPayload = {
-        first_name: formData.firstName,
-        last_name: formData.lastName,
-        phone: formData.phone,
-        city: formData.city,
-        delivery_warehouse: formData.warehouse,
-        payment_method: formData.paymentMethod,
-        total_price: totalPrice,
-        shipping_cost: shippingCost,
-        grand_total: grandTotal,
-      };
-
-      const itemsPayload = items.map((item) => ({
-        variant_id: String(item.variantId),
-        title: item.title,
-        color: item.color || "Default",
-        size: item.size || "Default",
-        price: item.price,
-        quantity: item.quantity,
-        image: item.image,
-      }));
+      const { orderPayload, itemsPayload } = buildOrderPayload(
+        {
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          phone: formData.phone,
+          city: formData.city,
+          warehouse: formData.warehouse,
+          paymentMethod: formData.paymentMethod,
+        },
+        { totalPrice, shippingCost, grandTotal },
+        items,
+      );
 
       const order = await createOrder(orderPayload, itemsPayload);
 
