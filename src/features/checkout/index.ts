@@ -8,3 +8,5 @@ export {
   validateCheckoutForm,
   type CheckoutValidationResult,
 } from "./model/validateCheckoutForm";
+
+export { buildOrderPayload } from "./model/buildOrderPayload";
