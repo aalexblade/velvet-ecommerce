@@ -22,6 +22,7 @@ import {
   NPCity,
   NPWarehouse,
 } from "@/shared/api/novaposhta/deliveryService";
+import { calculateCheckoutTotals } from "@/features/checkout";
 
 export function CheckoutForm() {
   const router = useRouter();
@@ -92,12 +93,10 @@ export function CheckoutForm() {
     loadWarehouses();
   }, [formData.cityRef]);
 
-  const totalPrice = useMemo(() => {
-    return items.reduce((acc, item) => acc + item.price * item.quantity, 0);
-  }, [items]);
-
-  const shippingCost = totalPrice >= 2000 ? 0 : 150;
-  const grandTotal = totalPrice + shippingCost;
+  const { totalPrice, shippingCost, grandTotal } = useMemo(
+    () => calculateCheckoutTotals(items),
+    [items],
+  );
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
