@@ -22,7 +22,10 @@ import {
   NPCity,
   NPWarehouse,
 } from "@/shared/api/novaposhta/deliveryService";
-import { calculateCheckoutTotals } from "@/features/checkout";
+import {
+  calculateCheckoutTotals,
+  validateCheckoutForm,
+} from "@/features/checkout";
 
 export function CheckoutForm() {
   const router = useRouter();
@@ -143,23 +146,11 @@ export function CheckoutForm() {
     setErrorMessage(null);
     setPhoneError(false);
 
-    if (
-      !formData.phone ||
-      formData.phone.trim() === "+380" ||
-      formData.phone.length < 13
-    ) {
-      setErrorMessage(
-        "Будь ласка, введіть коректний та повний номер телефону (наприклад, +380931234567).",
-      );
-      setPhoneError(true);
-      setIsSubmitting(false);
-      return;
-    }
+    const validation = validateCheckoutForm(formData);
 
-    if (!formData.cityRef || !formData.warehouse) {
-      setErrorMessage(
-        "Будь ласка, оберіть коректне місто та відділення Нової Пошти зі списку.",
-      );
+    if (validation.errorMessage) {
+      setErrorMessage(validation.errorMessage);
+      setPhoneError(validation.phoneError);
       setIsSubmitting(false);
       return;
     }
