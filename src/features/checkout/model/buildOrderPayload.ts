@@ -2,7 +2,7 @@ import type {
   CreateOrderItemPayload,
   CreateOrderPayload,
 } from "@/entities/order";
-import type { CartItem } from "@/features/cart/model/cartStore";
+import type { CartItem } from "@/entities/cart";
 import type { CheckoutTotals } from "./calculateCheckoutTotals";
 
 interface CheckoutCustomerData {
