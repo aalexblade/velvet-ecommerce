@@ -1,39 +1,39 @@
 # Velvet Secrets — E-commerce
 
-Інтернет-магазин бренду Velvet Secrets. Проєкт побудований на Next.js App Router і TypeScript; каталог та замовлення працюють із Supabase, кошик зберігається на клієнті, а сповіщення про нові замовлення надсилаються в Telegram.
+An e-commerce store for the Velvet Secrets brand. The project is built with Next.js App Router and TypeScript. The product catalog and order workflows use Supabase, the shopping cart is persisted on the client, and new-order notifications are sent through Telegram.
 
-## Стек
+## Tech Stack
 
 - **Next.js 16** (App Router)
 - **React 19 + TypeScript**
-- **Supabase** — база даних та клієнтський доступ через `@supabase/ssr`
-- **Zustand** — стан кошика з persist
+- **Supabase** — database and client access via `@supabase/ssr`
+- **Zustand** — persisted shopping cart state
 - **Tailwind CSS 4**
-- **Radix UI / shadcn** — UI-примітиви
-- **Telegram Bot API** — повідомлення про замовлення
+- **Radix UI / shadcn** — UI primitives
+- **Telegram Bot API** — order notifications
 
-## Функціональність
+## Features
 
-- Каталог товарів і категорій
-- Сторінка товару та швидкий перегляд
-- Кошик із керуванням кількістю товарів
-- Оформлення замовлення з доставкою Новою поштою
-- Розрахунок вартості доставки та суми замовлення
-- Сповіщення про замовлення через Telegram
-- Адміністративні маршрути для роботи із замовленнями
+- Product and category catalog
+- Product detail pages and quick view
+- Shopping cart with quantity controls
+- Checkout with Nova Poshta delivery
+- Shipping cost and order total calculation
+- Telegram order notifications
+- Admin routes for order management
 
-> Наявність окремих можливостей залежить від налаштування Supabase та змінних середовища.
+> Feature availability depends on the Supabase configuration and environment variables.
 
-## Початок роботи
+## Getting Started
 
-### 1. Вимоги
+### 1. Requirements
 
 - Node.js LTS
 - npm
-- Проєкт Supabase із налаштованими таблицями та правами доступу
-- Telegram-бот і chat ID для сповіщень про замовлення
+- A Supabase project with the required tables and access policies configured
+- A Telegram bot and chat ID for order notifications
 
-### 2. Встановлення
+### 2. Installation
 
 ```bash
 git clone https://github.com/aalexblade/velvet-ecommerce.git
@@ -41,9 +41,9 @@ cd velvet-ecommerce
 npm install
 ```
 
-### 3. Змінні середовища
+### 3. Environment Variables
 
-Створіть файл `.env.local` у корені проєкту:
+Create a `.env.local` file in the project root:
 
 ```dotenv
 NEXT_PUBLIC_SUPABASE_URL=https://YOUR_PROJECT.supabase.co
@@ -53,17 +53,17 @@ TELEGRAM_BOT_TOKEN=your_telegram_bot_token
 TELEGRAM_CHAT_ID=your_telegram_chat_id
 ```
 
-Замініть приклади на власні значення з налаштувань Supabase і Telegram. Не додавайте `.env.local` до Git і не публікуйте секрети. Змінні `NEXT_PUBLIC_*` доступні клієнтському коду; використовуйте лише публічний anon/publishable key і належно налаштуйте RLS у Supabase. **Не використовуйте service-role key у клієнтських змінних.**
+Replace the example values with your own Supabase and Telegram credentials. Do not commit `.env.local` or publish secrets. Variables prefixed with `NEXT_PUBLIC_*` are exposed to client-side code, so use only the public anon/publishable key and configure Supabase Row Level Security (RLS) appropriately. **Never expose a service-role key in client-side environment variables.**
 
-### 4. Запуск у режимі розробки
+### 4. Run in Development
 
 ```bash
 npm run dev
 ```
 
-Відкрийте [http://localhost:3000](http://localhost:3000).
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-### 5. Перевірки та production-запуск
+### 5. Checks and Production
 
 ```bash
 npx tsc --noEmit
@@ -72,46 +72,46 @@ npm run build
 npm run start
 ```
 
-`npm run start` запускає production-збірку, тому спочатку виконайте `npm run build`.
+`npm run start` runs the production build, so run `npm run build` first.
 
-## Структура проєкту
+## Project Structure
 
-Основний код розташований у `src/`:
+The main application code lives in `src/`:
 
 ```text
 src/
-├── app/        # маршрути Next.js App Router, layout та API routes
-├── views/      # сторінкові композиції, що ще перебувають у процесі реорганізації
-├── widgets/    # великі частини інтерфейсу: header, footer, catalog, cart, checkout
-├── features/   # користувацькі дії та сценарії: cart, checkout, filters
-├── entities/   # доменні сутності та їхні API/model/ui
-└── shared/     # спільна інфраструктура, API-клієнти та UI
+├── app/        # Next.js App Router routes, layouts, and API routes
+├── views/      # Page compositions currently being reorganized
+├── widgets/    # Large UI sections: header, footer, catalog, cart, checkout
+├── features/   # User actions and scenarios: cart, checkout, filters
+├── entities/   # Domain entities and their API/model/UI
+└── shared/     # Shared infrastructure, API clients, and UI
 ```
 
-Проєкт поступово приводиться до **Feature-Sliced Design (FSD)**. Під час рефакторингу дотримуйтеся напрямку залежностей від шарів верхнього рівня до нижчого: `app → pages/views → widgets → features → entities → shared`. Уникайте циклічних залежностей і імпортів між сусідніми слайсами одного шару; використовуйте публічні API слайсів.
+The codebase is gradually being aligned with **Feature-Sliced Design (FSD)**. Keep dependencies flowing from higher-level layers to lower-level layers: `app → pages/views → widgets → features → entities → shared`. Avoid circular dependencies and imports between neighboring slices at the same layer; use each slice's public API.
 
-## Важливі маршрути
+## Key Routes
 
-- `/` — головна сторінка
-- `/catalog` — каталог товарів
-- `/product/[id]` — сторінка товару
-- `/cart` — кошик
-- `/checkout` — оформлення замовлення
-- `/admin/orders` — адміністративна сторінка замовлень
+- `/` — home page
+- `/catalog` — product catalog
+- `/product/[id]` — product details
+- `/cart` — shopping cart
+- `/checkout` — checkout
+- `/admin/orders` — admin order management
 
-Фактичні доступність маршрутів і поведінка залежать від актуального коду та конфігурації середовища.
+Actual route availability and behavior depend on the current code and environment configuration.
 
-## API та інтеграції
+## API and Integrations
 
-- `src/app/api/telegram/route.ts` — серверний endpoint для відправлення повідомлень у Telegram.
-- `src/shared/api/supabase/` — клієнти Supabase.
-- `src/entities/` — доменні API та типи для сутностей.
+- `src/app/api/telegram/route.ts` — server endpoint for sending Telegram notifications.
+- `src/shared/api/supabase/` — Supabase clients.
+- `src/entities/` — domain APIs and entity types.
 
-Переконайтеся, що схема Supabase відповідає очікуванням застосунку, а RLS-політики дозволяють лише потрібні операції. Перед production-релізом окремо перевірте атомарність створення замовлення та його позицій.
+Ensure the Supabase schema matches the application's expectations and that RLS policies allow only the required operations. Before a production release, separately verify that order creation and order-item insertion are atomic.
 
-## Робота над проєктом
+## Development Workflow
 
-Перед комітом рекомендовано запускати:
+Before committing, it is recommended to run:
 
 ```bash
 npx tsc --noEmit
@@ -119,8 +119,8 @@ npm run lint
 npm run build
 ```
 
-## Посилання
+## Links
 
-- [Репозиторій GitHub](https://github.com/aalexblade/velvet-ecommerce)
-- [Документація Next.js](https://nextjs.org/docs)
-- [Документація Supabase](https://supabase.com/docs)
+- [GitHub Repository](https://github.com/aalexblade/velvet-ecommerce)
+- [Next.js Documentation](https://nextjs.org/docs)
+- [Supabase Documentation](https://supabase.com/docs)
