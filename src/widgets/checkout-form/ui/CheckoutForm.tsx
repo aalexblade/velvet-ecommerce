@@ -26,6 +26,7 @@ import {
   buildOrderPayload,
   calculateCheckoutTotals,
   validateCheckoutForm,
+  notifyOrderTelegram,
 } from "@/features/checkout";
 
 export function CheckoutForm() {
@@ -179,28 +180,18 @@ export function CheckoutForm() {
       }
 
       try {
-        await fetch("/api/telegram", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            orderId: orderId || "NEW_ORDER",
-            firstName: formData.firstName,
-            lastName: formData.lastName,
-            phone: formData.phone,
-            city: formData.city,
-            warehouse: formData.warehouse,
-            paymentMethod: formData.paymentMethod,
-            totalPrice: totalPrice,
-            shippingCost: shippingCost,
-            grandTotal: grandTotal,
-            items: items.map((item) => ({
-              title: item.title,
-              color: item.color || "Default",
-              size: item.size || "Default",
-              quantity: item.quantity,
-              price: item.price,
-            })),
-          }),
+        await notifyOrderTelegram({
+          orderId: orderId || "NEW_ORDER",
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          phone: formData.phone,
+          city: formData.city,
+          warehouse: formData.warehouse,
+          paymentMethod: formData.paymentMethod,
+          totalPrice,
+          shippingCost,
+          grandTotal,
+          items,
         });
       } catch (telegramErr) {
         console.error(
