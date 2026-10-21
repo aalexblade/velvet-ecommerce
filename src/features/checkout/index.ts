@@ -12,3 +12,5 @@ export {
 export { buildOrderPayload } from "./model/buildOrderPayload";
 
 export { notifyOrderTelegram } from "./api/notifyOrderTelegram";
+
+export { useNovaPoshtaDelivery } from "./model/useNovaPoshtaDelivery";
