@@ -1,36 +1,126 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Velvet Secrets — E-commerce
 
-## Getting Started
+Інтернет-магазин бренду Velvet Secrets. Проєкт побудований на Next.js App Router і TypeScript; каталог та замовлення працюють із Supabase, кошик зберігається на клієнті, а сповіщення про нові замовлення надсилаються в Telegram.
 
-First, run the development server:
+## Стек
+
+- **Next.js 16** (App Router)
+- **React 19 + TypeScript**
+- **Supabase** — база даних та клієнтський доступ через `@supabase/ssr`
+- **Zustand** — стан кошика з persist
+- **Tailwind CSS 4**
+- **Radix UI / shadcn** — UI-примітиви
+- **Telegram Bot API** — повідомлення про замовлення
+
+## Функціональність
+
+- Каталог товарів і категорій
+- Сторінка товару та швидкий перегляд
+- Кошик із керуванням кількістю товарів
+- Оформлення замовлення з доставкою Новою поштою
+- Розрахунок вартості доставки та суми замовлення
+- Сповіщення про замовлення через Telegram
+- Адміністративні маршрути для роботи із замовленнями
+
+> Наявність окремих можливостей залежить від налаштування Supabase та змінних середовища.
+
+## Початок роботи
+
+### 1. Вимоги
+
+- Node.js LTS
+- npm
+- Проєкт Supabase із налаштованими таблицями та правами доступу
+- Telegram-бот і chat ID для сповіщень про замовлення
+
+### 2. Встановлення
+
+```bash
+git clone https://github.com/aalexblade/velvet-ecommerce.git
+cd velvet-ecommerce
+npm install
+```
+
+### 3. Змінні середовища
+
+Створіть файл `.env.local` у корені проєкту:
+
+```dotenv
+NEXT_PUBLIC_SUPABASE_URL=https://YOUR_PROJECT.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+
+TELEGRAM_BOT_TOKEN=your_telegram_bot_token
+TELEGRAM_CHAT_ID=your_telegram_chat_id
+```
+
+Замініть приклади на власні значення з налаштувань Supabase і Telegram. Не додавайте `.env.local` до Git і не публікуйте секрети. Змінні `NEXT_PUBLIC_*` доступні клієнтському коду; використовуйте лише публічний anon/publishable key і належно налаштуйте RLS у Supabase. **Не використовуйте service-role key у клієнтських змінних.**
+
+### 4. Запуск у режимі розробки
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Відкрийте [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 5. Перевірки та production-запуск
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npx tsc --noEmit
+npm run lint
+npm run build
+npm run start
+```
 
-## Learn More
+`npm run start` запускає production-збірку, тому спочатку виконайте `npm run build`.
 
-To learn more about Next.js, take a look at the following resources:
+## Структура проєкту
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Основний код розташований у `src/`:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```text
+src/
+├── app/        # маршрути Next.js App Router, layout та API routes
+├── views/      # сторінкові композиції, що ще перебувають у процесі реорганізації
+├── widgets/    # великі частини інтерфейсу: header, footer, catalog, cart, checkout
+├── features/   # користувацькі дії та сценарії: cart, checkout, filters
+├── entities/   # доменні сутності та їхні API/model/ui
+└── shared/     # спільна інфраструктура, API-клієнти та UI
+```
 
-## Deploy on Vercel
+Проєкт поступово приводиться до **Feature-Sliced Design (FSD)**. Під час рефакторингу дотримуйтеся напрямку залежностей від шарів верхнього рівня до нижчого: `app → pages/views → widgets → features → entities → shared`. Уникайте циклічних залежностей і імпортів між сусідніми слайсами одного шару; використовуйте публічні API слайсів.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Важливі маршрути
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `/` — головна сторінка
+- `/catalog` — каталог товарів
+- `/product/[id]` — сторінка товару
+- `/cart` — кошик
+- `/checkout` — оформлення замовлення
+- `/admin/orders` — адміністративна сторінка замовлень
+
+Фактичні доступність маршрутів і поведінка залежать від актуального коду та конфігурації середовища.
+
+## API та інтеграції
+
+- `src/app/api/telegram/route.ts` — серверний endpoint для відправлення повідомлень у Telegram.
+- `src/shared/api/supabase/` — клієнти Supabase.
+- `src/entities/` — доменні API та типи для сутностей.
+
+Переконайтеся, що схема Supabase відповідає очікуванням застосунку, а RLS-політики дозволяють лише потрібні операції. Перед production-релізом окремо перевірте атомарність створення замовлення та його позицій.
+
+## Робота над проєктом
+
+Перед комітом рекомендовано запускати:
+
+```bash
+npx tsc --noEmit
+npm run lint
+npm run build
+```
+
+## Посилання
+
+- [Репозиторій GitHub](https://github.com/aalexblade/velvet-ecommerce)
+- [Документація Next.js](https://nextjs.org/docs)
+- [Документація Supabase](https://supabase.com/docs)
