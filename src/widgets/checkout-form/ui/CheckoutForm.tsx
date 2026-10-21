@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useMemo, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -16,17 +16,13 @@ import {
 } from "lucide-react";
 import { useCartStore } from "@/features/cart/model/cartStore";
 import { createOrder } from "@/entities/order";
-import {
-  fetchNPCities,
-  fetchNPWarehouses,
-  NPCity,
-  NPWarehouse,
-} from "@/shared/api/novaposhta/deliveryService";
+import type { NPCity } from "@/shared/api/novaposhta/deliveryService";
 import {
   buildOrderPayload,
   calculateCheckoutTotals,
   validateCheckoutForm,
   notifyOrderTelegram,
+  useNovaPoshtaDelivery,
 } from "@/features/checkout";
 
 export function CheckoutForm() {
@@ -50,53 +46,20 @@ export function CheckoutForm() {
     paymentMethod: "card",
   });
 
-  const [cityInput, setCityInput] = useState("");
-  const [citiesList, setCitiesList] = useState<NPCity[]>([]);
-  const [warehousesList, setWarehousesList] = useState<NPWarehouse[]>([]);
-  const [isSearchingCities, setIsSearchingCities] = useState(false);
-  const [isSearchingWarehouses, setIsSearchingWarehouses] = useState(false);
-  const [showCityDropdown, setShowCityDropdown] = useState(false);
-
-  useEffect(() => {
-    if (cityInput.length < 2 || cityInput === formData.city) {
-      return;
-    }
-
-    const delayDebounceId = setTimeout(async () => {
-      setIsSearchingCities(true);
-      try {
-        const data = await fetchNPCities(cityInput);
-        setCitiesList(data);
-        setShowCityDropdown(data.length > 0);
-      } catch (err) {
-        console.error("Error fetching cities:", err);
-      } finally {
-        setIsSearchingCities(false);
-      }
-    }, 400);
-
-    return () => clearTimeout(delayDebounceId);
-  }, [cityInput, formData.city]);
-
-  useEffect(() => {
-    if (!formData.cityRef) {
-      return;
-    }
-
-    const loadWarehouses = async () => {
-      setIsSearchingWarehouses(true);
-      try {
-        const data = await fetchNPWarehouses(formData.cityRef);
-        setWarehousesList(data);
-      } catch (err) {
-        console.error("Error fetching warehouses:", err);
-      } finally {
-        setIsSearchingWarehouses(false);
-      }
-    };
-
-    loadWarehouses();
-  }, [formData.cityRef]);
+  const {
+    cityInput,
+    citiesList,
+    warehousesList,
+    isSearchingCities,
+    isSearchingWarehouses,
+    showCityDropdown,
+    setShowCityDropdown,
+    handleCityInputChange,
+    handleSelectCity,
+  } = useNovaPoshtaDelivery({
+    cityRef: formData.cityRef,
+    selectedCity: formData.city,
+  });
 
   const { totalPrice, shippingCost, grandTotal } = useMemo(
     () => calculateCheckoutTotals(items),
@@ -110,30 +73,25 @@ export function CheckoutForm() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleCityInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setCityInput(value);
+  const handleCityInputChangeEvent = (
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    handleCityInputChange(e.target.value);
+  };
 
-    if (value.length < 2) {
-      setCitiesList([]);
-      setShowCityDropdown(false);
-    }
+  const handleSelectCityOption = (city: NPCity) => {
+    const selected = handleSelectCity(city);
+
+    setFormData((prev) => ({
+      ...prev,
+      city: selected.Description,
+      cityRef: selected.Ref,
+      warehouse: "",
+    }));
   };
 
   const handlePaymentChange = (method: string) => {
     setFormData((prev) => ({ ...prev, paymentMethod: method }));
-  };
-
-  const handleSelectCity = (city: NPCity) => {
-    setFormData((prev) => ({
-      ...prev,
-      city: city.Description,
-      cityRef: city.Ref,
-      warehouse: "",
-    }));
-    setCityInput(city.Description);
-    setCitiesList([]);
-    setShowCityDropdown(false);
   };
 
   const handleCloseSuccessModal = () => {
@@ -370,7 +328,7 @@ export function CheckoutForm() {
                     type="text"
                     required
                     value={cityInput}
-                    onChange={handleCityInputChange}
+                    onChange={handleCityInputChangeEvent}
                     onFocus={() =>
                       citiesList.length > 0 && setShowCityDropdown(true)
                     }
@@ -387,7 +345,7 @@ export function CheckoutForm() {
                     {citiesList.map((city) => (
                       <div
                         key={city.Ref}
-                        onClick={() => handleSelectCity(city)}
+                        onClick={() => handleSelectCityOption(city)}
                         className="px-3 py-2 text-sm hover:bg-zinc-50 cursor-pointer text-zinc-900 border-b border-zinc-100 last:border-0"
                       >
                         {city.Description}
