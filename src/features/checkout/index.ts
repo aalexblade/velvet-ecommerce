@@ -10,3 +10,5 @@ export {
 } from "./model/validateCheckoutForm";
 
 export { buildOrderPayload } from "./model/buildOrderPayload";
+
+export { notifyOrderTelegram } from "./api/notifyOrderTelegram";
