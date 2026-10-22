@@ -61,7 +61,6 @@ export function useNovaPoshtaDelivery({
     };
   }, [cityInput, selectedCity]);
 
-  // Ефект для завантаження відділень Нової Пошти за cityRef
   useEffect(() => {
     if (!cityRef) {
       return;
@@ -113,7 +112,6 @@ export function useNovaPoshtaDelivery({
     return city;
   };
 
-  // Автоматичне очищення списку відділень, якщо cityRef порожній
   const activeWarehousesList = cityRef ? warehousesList : [];
 
   return {
