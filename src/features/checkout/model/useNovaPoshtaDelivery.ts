@@ -22,11 +22,9 @@ export function useNovaPoshtaDelivery({
   const [isSearchingWarehouses, setIsSearchingWarehouses] = useState(false);
   const [showCityDropdown, setShowCityDropdown] = useState(false);
 
-  // Стан для міст і відділень
   const [citiesList, setCitiesList] = useState<NPCity[]>([]);
   const [warehousesList, setWarehousesList] = useState<NPWarehouse[]>([]);
 
-  // Ефект для завантаження міст з урахуванням дебаунсу
   useEffect(() => {
     if (cityInput.length < 2 || cityInput === selectedCity) {
       return;
