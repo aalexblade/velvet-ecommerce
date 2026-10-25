@@ -31,7 +31,7 @@ export async function proxy(request: NextRequest) {
     },
   );
 
-  // Refresh session if expired - required for Server Components
+
   await supabase.auth.getUser();
 
   return response;
