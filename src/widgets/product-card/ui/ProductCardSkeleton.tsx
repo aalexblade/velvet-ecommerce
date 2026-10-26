@@ -6,7 +6,7 @@ import React from "react";
 export const ProductCardSkeleton: React.FC = () => {
   return (
     <div className="flex flex-col gap-3 animate-pulse">
-      {/* Product Image Skeleton */}
+      
       <div className="w-full aspect-3/4 bg-zinc-200 dark:bg-zinc-800 rounded-xl" />
 
       {/* Color Swatches Skeleton */}
