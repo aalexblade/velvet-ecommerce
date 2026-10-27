@@ -1,4 +1,3 @@
-// API client service for Nova Poshta delivery integration
 const API_URL = "https://api.novaposhta.ua/v2.0/json/";
 const API_KEY = process.env.NEXT_PUBLIC_NOVAPOSHTA_API_KEY || "";
 
@@ -45,8 +44,9 @@ export async function fetchNPCities(query: string): Promise<NPCity[]> {
   }
 }
 
-// Fetch list of warehouses for a specific city reference token
-export async function fetchNPWarehouses(cityRef: string): Promise<NPWarehouse[]> {
+export async function fetchNPWarehouses(
+  cityRef: string,
+): Promise<NPWarehouse[]> {
   if (!cityRef) return [];
 
   try {
