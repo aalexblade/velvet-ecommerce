@@ -11,7 +11,6 @@ export interface NPWarehouse {
   Description: string;
 }
 
-// Fetch cities matching the query string from Nova Poshta database
 export async function fetchNPCities(query: string): Promise<NPCity[]> {
   if (!query || query.length < 2) return [];
 
