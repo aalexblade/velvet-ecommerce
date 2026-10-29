@@ -14,7 +14,7 @@ import {
   CheckCircle2,
   X,
 } from "lucide-react";
-import { useCartStore } from "@/features/cart/model/cartStore";
+import { useCartStore } from "@/features/cart";
 import type { NPCity } from "@/shared/api/novaposhta/deliveryService";
 import {
   buildOrderPayload,
