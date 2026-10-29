@@ -15,13 +15,12 @@ import {
   X,
 } from "lucide-react";
 import { useCartStore } from "@/features/cart/model/cartStore";
-import { createOrder } from "@/entities/order";
 import type { NPCity } from "@/shared/api/novaposhta/deliveryService";
 import {
   buildOrderPayload,
   calculateCheckoutTotals,
   validateCheckoutForm,
-  notifyOrderTelegram,
+  submitCheckoutOrder,
   useNovaPoshtaDelivery,
 } from "@/features/checkout";
 
@@ -129,17 +128,10 @@ export function CheckoutForm() {
         items,
       );
 
-      const order = await createOrder(orderPayload, itemsPayload);
-
-      let orderId = "";
-      if (order && order.id) {
-        setCreatedOrderId(order.id);
-        orderId = order.id;
-      }
-
-      try {
-        await notifyOrderTelegram({
-          orderId: orderId || "NEW_ORDER",
+      const order = await submitCheckoutOrder({
+        orderPayload,
+        itemsPayload,
+        notification: {
           firstName: formData.firstName,
           lastName: formData.lastName,
           phone: formData.phone,
@@ -150,12 +142,11 @@ export function CheckoutForm() {
           shippingCost,
           grandTotal,
           items,
-        });
-      } catch (telegramErr) {
-        console.error(
-          "Failed to transmit Telegram webhook alert:",
-          telegramErr,
-        );
+        },
+      });
+
+      if (order?.id) {
+        setCreatedOrderId(order.id);
       }
 
       setIsSuccessModalOpen(true);
