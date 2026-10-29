@@ -23,7 +23,14 @@ export function useNovaPoshtaDelivery({
   const [showCityDropdown, setShowCityDropdown] = useState(false);
 
   const [citiesList, setCitiesList] = useState<NPCity[]>([]);
-  const [warehousesList, setWarehousesList] = useState<NPWarehouse[]>([]);
+
+  const [warehousesState, setWarehousesState] = useState<{
+    cityRef: string;
+    items: NPWarehouse[];
+  }>({
+    cityRef: "",
+    items: [],
+  });
 
   useEffect(() => {
     if (cityInput.length < 2 || cityInput === selectedCity) {
@@ -73,7 +80,10 @@ export function useNovaPoshtaDelivery({
         const data = await fetchNPWarehouses(cityRef);
 
         if (!cancelled) {
-          setWarehousesList(data);
+          setWarehousesState({
+            cityRef,
+            items: data,
+          });
         }
       } catch (error) {
         if (!cancelled) {
@@ -110,7 +120,8 @@ export function useNovaPoshtaDelivery({
     return city;
   };
 
-  const activeWarehousesList = cityRef ? warehousesList : [];
+  const activeWarehousesList =
+    warehousesState.cityRef === cityRef ? warehousesState.items : [];
 
   return {
     cityInput,
