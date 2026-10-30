@@ -15,7 +15,7 @@ import {
   X,
 } from "lucide-react";
 import { useCartStore } from "@/features/cart";
-import type { NPCity } from "@/shared/api/novaposhta/deliveryService";
+import type { NPCity } from "@/shared/api/novaposhta";
 import {
   buildOrderPayload,
   calculateCheckoutTotals,
