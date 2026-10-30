@@ -6,7 +6,7 @@ import {
   fetchNPWarehouses,
   type NPCity,
   type NPWarehouse,
-} from "@/shared/api/novaposhta/deliveryService";
+} from "@/shared/api/novaposhta";
 
 interface UseNovaPoshtaDeliveryParams {
   cityRef: string;
