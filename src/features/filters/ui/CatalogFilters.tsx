@@ -4,120 +4,20 @@ import React, { useTransition, useState } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { ChevronDown, Filter, X, Menu } from "lucide-react";
 import { cn } from "@/shared/lib";
-import { ProductColor } from "@/entities/product";
-
-export type SortOption =
-  | "newest"
-  | "price-asc"
-  | "price-desc"
-  | "discount-asc"
-  | "discount-desc"
-  | "popular";
+import {
+  AVAILABLE_SIZES,
+  AVAILABLE_COLORS_DATA,
+  AVAILABLE_FABRICS,
+  AVAILABLE_COLLECTIONS,
+  AVAILABLE_NAMES,
+  SORT_OPTIONS,
+  PRICE_PRESETS,
+  type SortOption,
+} from "../model/filterOptions";
 
 export interface CatalogFiltersProps {
   className?: string;
 }
-
-const AVAILABLE_SIZES = ["XXS", "XS", "S", "M", "L", "XL", "XXL"];
-
-const AVAILABLE_COLORS_DATA: {
-  id: ProductColor;
-  title: string;
-  bgClass: string;
-}[] = [
-  {
-    id: "White",
-    title: "Білий",
-    bgClass: "bg-zinc-100 border border-zinc-300",
-  },
-  {
-    id: "Smoky White",
-    title: "Димчасто-білий",
-    bgClass: "bg-slate-100 border border-zinc-200",
-  },
-  { id: "Lavender", title: "Лавандовий", bgClass: "bg-purple-100" },
-  { id: "Creamy Yellow", title: "Кремово-жовтий", bgClass: "bg-yellow-50" },
-  {
-    id: "Cream",
-    title: "Кремовий",
-    bgClass: "bg-amber-50/60 border border-zinc-200",
-  },
-  { id: "Creamy Velvet", title: "Вершково-кремовий", bgClass: "bg-stone-100" },
-  { id: "Peach", title: "Персиковий", bgClass: "bg-orange-100" },
-  { id: "Cotton Candy", title: "Солодка вата", bgClass: "bg-pink-100" },
-  { id: "Pale Purple", title: "Блідо-пурпуровий", bgClass: "bg-purple-200/60" },
-  { id: "Eggplant", title: "Баклажановий", bgClass: "bg-fuchsia-900" },
-  { id: "Cherry", title: "Вишневий", bgClass: "bg-rose-900" },
-  { id: "Dark Violet", title: "Темно-фіолетовий", bgClass: "bg-violet-900" },
-  { id: "Plum", title: "Сливовий", bgClass: "bg-purple-950" },
-  { id: "Ruby", title: "Рубіновий", bgClass: "bg-rose-700" },
-  { id: "Wine Red", title: "Винно-червоний", bgClass: "bg-red-950" },
-  { id: "Magenta", title: "Червоно-пурпуровий", bgClass: "bg-pink-700" },
-  { id: "Red", title: "Червоний", bgClass: "bg-red-600" },
-  {
-    id: "Mahogany Brown",
-    title: "Махагон коричневий",
-    bgClass: "bg-amber-950",
-  },
-  { id: "Magic Mint", title: "Магічна м'ята", bgClass: "bg-emerald-100" },
-  { id: "Emerald", title: "Смарагдовий", bgClass: "bg-emerald-600" },
-  {
-    id: "Pearl Green",
-    title: "Перламутрово-зелений",
-    bgClass: "bg-emerald-950",
-  },
-  { id: "Azure Blue", title: "Лазурно-синій", bgClass: "bg-sky-600" },
-  { id: "Denim Blue", title: "Джинсовий синій", bgClass: "bg-blue-700" },
-  { id: "Midnight Blue", title: "Нічний синій", bgClass: "bg-blue-950" },
-  { id: "Raw Umber", title: "Сіра умбра", bgClass: "bg-neutral-700" },
-  { id: "Dark", title: "Темний", bgClass: "bg-zinc-800" },
-  { id: "Black", title: "Чорний", bgClass: "bg-black" },
-];
-
-const AVAILABLE_FABRICS = [
-  { id: "viscose", title: "Віскоза" },
-  { id: "cotton", title: "Бавовна" },
-  { id: "wool", title: "Вовна" },
-  { id: "satin", title: "Сатин" },
-  { id: "silk", title: "Шовк" },
-  { id: "atlas", title: "Атлас" },
-];
-
-const AVAILABLE_COLLECTIONS = [
-  { id: "linia-nizhnosti", title: "“Лінії Ніжності”" },
-  { id: "vytonchenist-shchodnia", title: "“Витонченість Щодня”" },
-  { id: "pidtrymka-liuboviu", title: "“Підтримка з Любов’ю”" },
-  { id: "chysta-linia", title: "“Чиста Лінія”" },
-  { id: "nizhna-spokusa", title: "“Ніжна Спокуса”" },
-  { id: "tonkyi-dotyk", title: "“Тонкий Дотик”" },
-  { id: "symba-zhinky", title: "“Сила Жінки”" },
-];
-
-const AVAILABLE_NAMES = [
-  { id: "pajamas", title: "Піжами" },
-  { id: "robes", title: "Халати" },
-  { id: "suits", title: "Костюми" },
-  { id: "bras", title: "Бра" },
-  { id: "panties", title: "Трусики" },
-  { id: "lingerie-set", title: "Комплект білизни" },
-  { id: "body", title: "Боді" },
-];
-
-const SORT_OPTIONS = [
-  { id: "newest", title: "Новинки" },
-  { id: "price-asc", title: "Ціна за зростанням" },
-  { id: "price-desc", title: "Ціна за спаданням" },
-  { id: "discount-asc", title: "Знижка за зростанням" },
-  { id: "discount-desc", title: "Знижка за спаданням" },
-  { id: "popular", title: "Найпопулярніше" },
-];
-
-const PRICE_PRESETS = [
-  { label: "від 300 до 800 UAH", min: "300", max: "800" },
-  { label: "від 800 до 1200 UAH", min: "800", max: "1200" },
-  { label: "від 1200 до 3000 UAH", min: "1200", max: "3000" },
-  { label: "від 3000 до 25 000 UAH", min: "3000", max: "25000" },
-];
 
 export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
   className,
@@ -234,9 +134,6 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
 
   const dropdownContainerClasses =
     "absolute top-full left-0 mt-1 z-50 bg-white border border-zinc-200 shadow-xl rounded-xl opacity-0 pointer-events-none transition-all duration-200 scale-95 origin-top-left group-hover:opacity-100 group-hover:pointer-events-auto group-hover:scale-100 overflow-visible";
-
-  const activeBadgeClasses =
-    "inline-flex items-center justify-center gap-1.5 bg-[#C8205C] text-white rounded-lg px-4 py-2 text-xs font-bold transition-colors cursor-pointer select-none hover:bg-[#a6174a] active:scale-[0.98] shadow-sm";
 
   return (
     <div
@@ -759,7 +656,7 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
                 />
               </button>
               {openAccordion === "size" && (
-                <div className="mt-3 grid grid-cols-4 gap-2 pl-1 animate-in fade-in slide-in-from-top-2 duration-200">
+                <div className="mt-3 grid grid-cols-3 gap-2 pl-1 animate-in fade-in slide-in-from-top-2 duration-200">
                   {AVAILABLE_SIZES.map((size) => {
                     const isSelected = activeSizes.includes(size);
                     return (
@@ -768,10 +665,10 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
                         type="button"
                         onClick={() => updateQueryParams("size", size, true)}
                         className={cn(
-                          "flex items-center justify-center h-11 border rounded-lg text-xs font-bold transition-all cursor-pointer",
+                          "py-2 px-3 rounded-lg text-xs font-bold transition-colors cursor-pointer text-center border",
                           isSelected
-                            ? "border-[#C8205C] bg-[#C8205C] text-white"
-                            : "border-zinc-200 text-zinc-800 active:bg-zinc-50",
+                            ? "bg-[#C8205C] text-white border-[#C8205C]"
+                            : "bg-white text-zinc-700 border-zinc-200 active:bg-zinc-50",
                         )}
                       >
                         {size}
@@ -800,7 +697,7 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
                 />
               </button>
               {openAccordion === "color" && (
-                <div className="mt-3 grid grid-cols-2 gap-2 pl-1 animate-in fade-in slide-in-from-top-2 duration-200">
+                <div className="mt-3 flex flex-col gap-1.5 pl-1 animate-in fade-in slide-in-from-top-2 duration-200">
                   {AVAILABLE_COLORS_DATA.map((color) => {
                     const isSelected = activeColors.some(
                       (c) => c.id === color.id,
@@ -813,19 +710,19 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
                           updateQueryParams("color", color.id, true)
                         }
                         className={cn(
-                          "flex items-center gap-2.5 p-2 rounded-lg border text-left text-xs font-medium transition-all truncate cursor-pointer",
+                          "flex items-center gap-3 w-full py-2 px-3 rounded-lg text-xs font-medium transition-colors cursor-pointer text-left",
                           isSelected
-                            ? "border-[#C8205C] bg-pink-50/40 text-[#C8205C] font-semibold"
-                            : "border-zinc-100 bg-zinc-50 text-zinc-700 active:bg-zinc-100",
+                            ? "bg-pink-50 text-[#C8205C] font-bold"
+                            : "text-zinc-600 active:bg-zinc-50",
                         )}
                       >
                         <span
                           className={cn(
-                            "w-4 h-4 rounded-sm shrink-0 border border-black/5 shadow-sm",
+                            "w-4 h-4 rounded-[5px] shrink-0 shadow-sm",
                             color.bgClass,
                           )}
                         />
-                        <span className="truncate">{color.title}</span>
+                        <span>{color.title}</span>
                       </button>
                     );
                   })}
@@ -916,7 +813,7 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
                           "w-full text-left py-2.5 px-3 rounded-lg text-xs font-medium transition-colors cursor-pointer",
                           isSelected
                             ? "bg-pink-50 text-[#C8205C] font-bold"
-                            : "text-zinc-700 active:bg-zinc-50",
+                            : "text-zinc-600 active:bg-zinc-50",
                         )}
                       >
                         {col.title}
@@ -928,15 +825,12 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
             </div>
           </div>
 
-          <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-zinc-200 bg-white flex items-center gap-3">
+          <div className="p-4 border-t border-zinc-200 bg-white flex gap-3">
             {hasActiveFilters && (
               <button
                 type="button"
-                onClick={() => {
-                  clearAll();
-                  setIsMobileMenuOpen(false);
-                }}
-                className="flex-1 border border-zinc-300 text-zinc-700 font-bold rounded-lg py-3.5 text-xs uppercase tracking-wider active:bg-zinc-50 transition-colors text-center cursor-pointer"
+                onClick={clearAll}
+                className="flex-1 py-3 border border-zinc-300 rounded-lg text-xs font-bold uppercase tracking-wider text-zinc-700 active:bg-zinc-100 transition-colors cursor-pointer"
               >
                 Скинути
               </button>
@@ -944,101 +838,13 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
             <button
               type="button"
               onClick={() => setIsMobileMenuOpen(false)}
-              className="flex-3 bg-[#C8205C] text-white font-bold rounded-lg py-3.5 text-xs uppercase tracking-wider hover:bg-[#a6174a] active:scale-[0.99] transition-all text-center cursor-pointer shadow-sm"
+              className="flex-1 py-3 bg-[#C8205C] text-white rounded-lg text-xs font-bold uppercase tracking-wider active:bg-[#a6174a] transition-colors cursor-pointer shadow-sm"
             >
-              Застосувати фільтри
+              Застосувати
             </button>
           </div>
         </div>
       </div>
-
-      {/* 🏷️ ACTIVE FILTERS HORIZONTAL FLOW CHIPS */}
-      {hasActiveFilters && (
-        <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-4 flex flex-wrap gap-2.5 items-center animate-in fade-in duration-300 overflow-visible">
-          {searchParams.get("search") && (
-            <button
-              type="button"
-              onClick={() => updateQueryParams("search", "")}
-              className={activeBadgeClasses}
-            >
-              <span>Назва: {searchParams.get("search")}</span>
-              <X className="w-3.5 h-3.5" />
-            </button>
-          )}
-
-          {activeCollections.map((col) => (
-            <button
-              key={`badge-col-${col.id}`}
-              type="button"
-              onClick={() => updateQueryParams("collection", col.id, true)}
-              className={activeBadgeClasses}
-            >
-              <span>Колекція: {col.title.replace(/[“”]/g, "")}</span>
-              <X className="w-3.5 h-3.5" />
-            </button>
-          ))}
-
-          {activeFabrics.map((fabric) => (
-            <button
-              key={`badge-fabric-${fabric.id}`}
-              type="button"
-              onClick={() => updateQueryParams("fabric", fabric.id, true)}
-              className={activeBadgeClasses}
-            >
-              <span>Тканина: {fabric.title}</span>
-              <X className="w-3.5 h-3.5" />
-            </button>
-          ))}
-
-          {activeColors.map((color) => (
-            <button
-              key={`badge-color-${color.id}`}
-              type="button"
-              onClick={() => updateQueryParams("color", color.id, true)}
-              className={activeBadgeClasses}
-            >
-              <span>Колір: {color.title}</span>
-              <X className="w-3.5 h-3.5" />
-            </button>
-          ))}
-
-          {activeSizes.map((size) => (
-            <button
-              key={`badge-size-${size}`}
-              type="button"
-              onClick={() => updateQueryParams("size", size, true)}
-              className={activeBadgeClasses}
-            >
-              <span>Розмір: {size}</span>
-              <X className="w-3.5 h-3.5" />
-            </button>
-          ))}
-
-          {(minPrice || maxPrice) && (
-            <button
-              type="button"
-              onClick={() => {
-                updateQueryParams("minPrice", "");
-                updateQueryParams("maxPrice", "");
-              }}
-              className={activeBadgeClasses}
-            >
-              <span>
-                Ціна: {minPrice || "0"} - {maxPrice || "∞"} UAH
-              </span>
-              <X className="w-3.5 h-3.5" />
-            </button>
-          )}
-
-          <button
-            type="button"
-            onClick={clearAll}
-            className="inline-flex items-center justify-center border border-[#C8205C] text-zinc-900 font-bold rounded-lg px-5 py-2 text-xs bg-white cursor-pointer hover:bg-pink-50/60 active:scale-[0.98] transition-all shrink-0 select-none shadow-sm"
-          >
-            Скинути все
-          </button>
-        </div>
-      )}
     </div>
   );
 };
