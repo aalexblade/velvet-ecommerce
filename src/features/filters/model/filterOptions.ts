@@ -1,4 +1,4 @@
-import { ProductColor } from "@/entities/product";
+import type { ProductColor } from "@/entities/product";
 
 export type SortOption =
   | "newest"
