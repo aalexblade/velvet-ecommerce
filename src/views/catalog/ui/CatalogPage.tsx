@@ -1,6 +1,9 @@
 import { CatalogView } from "@/widgets/catalog-view";
-import { getProducts, ProductFilters } from "@/entities/product/api/getProducts";
-import { getSubcategories } from "@/entities/product/api/getSubcategories";
+import {
+  getProducts,
+  getSubcategories,
+  type ProductFilters,
+} from "@/entities/product/server";
 
 export interface CatalogPageProps {
   slug?: string[];
@@ -39,7 +42,7 @@ export async function CatalogPage({ slug, searchParams }: CatalogPageProps) {
     safeSlug,
     filters,
     currentPage,
-    12
+    12,
   );
 
   const subcategories = await getSubcategories("bilyzna");
