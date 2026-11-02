@@ -1,13 +1,10 @@
-// src/entities/product/index.ts
-
-// Export domain types
+// Models & Types (Safe for Client & Server)
 export type {
   Product,
   ProductColor,
   ProductColorGroup,
-  ProductVariant,
   ProductImage,
 } from "./model/types";
 
-// Export client-safe UI components
+// UI Components
 export { ProductDetailsBlock } from "./ui/ProductDetailsBlock";
