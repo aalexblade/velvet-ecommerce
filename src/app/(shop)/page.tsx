@@ -1,6 +1,7 @@
 import { HeroSlider } from "@/widgets/hero-slider";
 import { ProductGrid } from "@/widgets/product-grid";
-import { PromoLook, Reviews, DiscountBanner } from "@/widgets/recommendations";
+import { PromoLook } from "@/widgets/promo-look";
+import { Reviews, DiscountBanner } from "@/widgets/recommendations";
 import { SizeCalculator, SizeHowTo } from "@/widgets/product-size-guide";
 import { getBestsellers } from "@/entities/product/api/getProducts";
 
