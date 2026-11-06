@@ -53,7 +53,7 @@ export async function getProductById(id: string): Promise<Product | null> {
     `)
     .eq("id", numericId)
     .eq("is_active", true)
-    .single(); // Очікуємо рівно один рядок
+    .single(); 
 
   if (error || !data) {
     console.error(`Supabase getProductById failure for ID ${id}:`, error?.message);
