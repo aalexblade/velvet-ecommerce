@@ -8,45 +8,153 @@ Strictly adhere to the rules, architecture, state structures, and design tokens 
 
 ## 🏗️ Architectural Rules (Feature-Sliced Design)
 
-This project strictly follows the **Feature-Sliced Design (FSD)** methodology. All code must be strictly isolated into layers inside `src/`.
+This project follows the **Feature-Sliced Design (FSD)** methodology. All application code must be organized into layers inside `src/`.
 
 ### 1. Layer Directory Structure & Reference Tree
 
-- `app/` — Layer 1: Global routing configurations, root styles (`globals.css`), and metadata.
-  - `(shop)/` — Isolated storefront routing boundary containing pure, lightweight server entries: `page.tsx` (Home), `catalog/[[...slug]]/page.tsx` (Dynamic Catalog Router), `product/[id]/`, `cart/`, and `checkout/`.
-  - **Rule:** App router components must contain ZERO business logic, layouts, or states. They unwrap parameters and return the corresponding page from the `views/` layer.
-- `views/` — Layer 2: Compositions of widgets and features that represent a full page layout.
-  - `catalog/ui/CatalogPage.tsx` — Server Component orchestrator that captures route params/searchParams, fetches public datasets, and feeds them into the widgets layer.
-- `widgets/` — Layer 3: Composite, autonomous, self-contained layout sections of a page.
-  - `catalog-view/ui/CatalogView.tsx` — The interactive core layout view component for the catalogue.
-  - `header/`, `footer/`, `hero-slider/`, `product-grid/`, `cart-summary/`, `checkout-form/`.
-  - `recommendations/` — Core composite widgets for recommendations (banners, reviews, etc.).
-- `features/` — Layer 4: User interactions with distinct business value and dynamic state operations.
-  - `cart/` — Holds the decentralized Zustand state store (`model/cartStore.ts`) and interaction elements (`ui/AddToCartButton.tsx`).
-  - `filters/` — Handles client filter changes. Must map inputs directly into URL Query Strings.
-  - `product-size-calculator/` — Independent size form orchestrating math inputs via callbacks.
-  - `wishlist/`, `search/`, `checkout/`, `auth/`.
-- `entities/` — Layer 5: Pure domain business models, lightweight data transformations, and basic presentation dumb-cards.
-  - `product/` — Holds clean relative components (`ui/ProductCard.tsx`), TS types (`model/types.ts`), and data requests (`api/getProducts.ts`).
-  - `category/`, `order/`, `user/`.
-- `shared/` — Layer 6: Reusable infrastructure, generic UI primitives (Shadcn kit), cross-domain utilities, and global assets (`api/supabase`, `ui`, `lib`, `types`).
+#### `app/` — Layer 1: Routing and application configuration
+
+Contains Next.js App Router configuration, layouts, route handlers, global styles, and metadata.
+
+- `(shop)/` — Storefront routing boundary.
+- Route pages should be lightweight entry points that delegate page composition to the `views/` layer.
+- Route components may unwrap route parameters and pass them to views.
+- Do not place business logic, complex UI composition, or feature state management inside route files.
+
+#### `views/` — Layer 2: Full-page compositions
+
+Views combine widgets and features into complete pages.
+
+Current structure:
+
+- `about/` — About page.
+- `blog/` — Blog page.
+- `cart/` — Cart page.
+- `catalog/` — Catalog page and server-side data orchestration.
+- `checkout/` — Checkout page composition.
+- `home/` — Home page.
+- `product-details/` — Product details page.
+
+Each view should expose its public API through `index.ts`.
+
+#### `widgets/` — Layer 3: Composite UI sections
+
+Widgets combine entities, features, and shared UI into reusable page sections.
+
+Current structure:
+
+- `cart/` — Cart interface.
+- `catalog-view/` — Interactive catalog layout.
+- `checkout-form/` — Checkout form and order summary.
+- `discount-banner/` — Discount banner section.
+- `footer/` — Global footer.
+- `header/` — Global header.
+- `hero-slider/` — Hero slider.
+- `product-card/` — Product card composition.
+- `product-details-block/` — Product details composition.
+- `product-grid/` — Product grid.
+- `product-size-guide/` — Product size guide.
+- `promo-look/` — Promotional look section.
+- `reviews/` — Reviews section.
+
+Each widget should expose its public API through `index.ts`.
+
+#### `features/` — Layer 4: User interactions and business actions
+
+Features implement interactions that provide distinct business value.
+
+Current structure:
+
+- `cart/` — Cart state and add-to-cart interaction.
+- `checkout/` — Checkout calculations, validation, order payload construction, submission, and delivery integration.
+- `filters/` — Catalog filtering and sorting.
+- `product-quick-view/` — Product quick-view interaction.
+- `product-size-calculator/` — Product size calculation.
+- `search/` — Search functionality.
+- `wishlist/` — Wishlist functionality.
+
+Feature state and business logic must remain inside the corresponding feature.
+
+Global catalog filters must be URL-driven rather than stored in local React state or Zustand.
+
+Each feature should expose its cross-layer public API through `index.ts`.
+
+#### `entities/` — Layer 5: Domain models and data access
+
+Entities contain domain types, data access, transformations, and reusable domain-level UI.
+
+Current structure:
+
+- `cart/` — Cart item model and types.
+- `category/` — Category model, API, and category UI.
+- `hero-slide/` — Hero slide model and API.
+- `order/` — Order model and order creation API.
+- `product/` — Product model, types, UI, and product data access.
+- `user/` — User domain.
+
+**Product entity API boundaries:**
+
+- `@/entities/product` (`index.ts`) exports client-safe domain types and UI components.
+- `@/entities/product/server` (`server.ts`) exports server-side product data access, including product queries and server-only types.
+- Do not import server-only product API through the client-safe `index.ts`.
+- Do not import internal entity modules directly from other layers when a public API entry point exists.
+
+Other entities should expose their cross-layer API through `index.ts`.
+
+#### `shared/` — Layer 6: Infrastructure and reusable primitives
+
+Contains reusable infrastructure, generic UI components, utilities, and shared types.
+
+Current structure includes:
+
+- `api/` — Shared API infrastructure, including Supabase and Nova Poshta integrations.
+- `lib/` — Generic utility functions.
+- `types/` — Shared TypeScript types.
+- `ui/` — Reusable UI primitives and components.
+
+Shared modules must not depend on higher FSD layers or application-specific business features.
+
+---
 
 ### 2. Isolation, Cross-Imports & Public APIs
 
-- **Strict Imports Direction:** Higher layers can import from lower layers, but lower layers **MUST NEVER** cross-import from higher layers (e.g., components under `entities/` cannot import anything from `features/` or `widgets/`).
-- **Same-Layer Isolation:** Slices inside the same layer cannot cross-import from each other (e.g., `features/checkout` cannot directly import hooks/selectors from `features/cart`). Interactions must be orchestrated from the layer above (`widgets/` or `views/`).
-- **Public API Enforcement:** Cross-importing modules across layers is **ONLY** allowed through their respective slice entry point (`index.ts`). Deep reference patterns like `@/shared/ui/button.tsx` are forbidden. Use `@/shared/ui` instead.
-- **Path Aliases:** Use tsconfig mapped paths (`@/app/*`, `@/views/*`, `@/widgets/*`, `@/features/*`, `@/entities/*`, `@/shared/*`).
+- **Strict Import Direction:** Higher layers can import from lower layers, but lower layers MUST NEVER import from higher layers.
+  - `shared` must not import from `entities`, `features`, `widgets`, or `views`.
+  - `entities` must not import from `features`, `widgets`, or `views`.
+  - `features` must not import from `widgets` or `views`.
+  - `widgets` must not import from `views`.
+- **Same-Layer Isolation:** Slices inside the same layer must not cross-import from each other unless an explicitly justified architectural exception exists.
+- **Public API Enforcement:** Cross-slice imports must use the corresponding slice public API (`index.ts`).
+- **Server API Exception:** The product entity exposes server-only functionality through `@/entities/product/server`. This is an intentional public entry point, not a deep import.
+- **No Deep Imports:** Avoid importing internal modules across slice boundaries.
+  - Incorrect: `@/features/cart/model/cartStore`
+  - Correct: `@/features/cart`
+  - Incorrect: `@/widgets/header/ui/Header`
+  - Correct: `@/widgets/header`
+  - Incorrect: `@/entities/product/api/getProducts`
+  - Correct: `@/entities/product/server`
+- Internal imports within the same slice may use relative paths.
+- Use configured TypeScript path aliases for cross-layer imports.
 
 ---
 
 ## 💾 State Management & Next.js Hydration Rules (Zustand)
 
-Global state stores like Redux are completely forbidden. Client interaction state must be decentralized into local feature stores using **Zustand**.
+Global state stores such as Redux are not used in this project. Client interaction state should be decentralized into local feature stores using Zustand when shared state is required.
 
-### 1. Cart Zustand Store Schema (`@/features/cart/model/cartStore.ts`)
+### 1. Cart Zustand Store
 
-The shopping cart utilizes Zustand's `persist` middleware to safely isolate data syncing into `localStorage` under the name `'cart-storage'`.
+The shopping cart uses Zustand's `persist` middleware to synchronize cart data with `localStorage` under the name `'cart-storage'`.
+
+The cart domain model is defined in:
+
+`@/entities/cart`
+
+The cart store is implemented in:
+
+`@/features/cart`
+
+Expected cart item structure:
 
 ```typescript
 export interface CartItem {
@@ -59,7 +167,11 @@ export interface CartItem {
   color?: string;
   size?: string;
 }
+```
 
+Cart state:
+
+```typescript
 interface CartState {
   items: CartItem[];
   addToCart: (item: CartItem) => void;
@@ -71,57 +183,94 @@ interface CartState {
 
 ### 2. Next.js Hydration Mismatch Guard
 
-- **The Risk:** Since Zustand's `persist` reads from `localStorage` on the client side, initial Server-Side Render (SSR) HTML will always output an empty state while the client has items stored, throwing a Next.js Hydration Mismatch crash.
-- **The Rule:** Any client component or widget reading from the cart store (e.g., `AddToCartButton.tsx`, or cart badges in `Header.tsx`) **MUST** use a client-side gate (e.g., `useEffect` or a custom `isMounted` state tracking flag) to guarantee that localStorage-dependent values are only evaluated and rendered after mounting on the client.
+- **The Risk:** Zustand's `persist` middleware reads from `localStorage` on the client. The server-rendered HTML may contain an empty cart while the browser already has persisted cart items.
+- **The Rule:** Components that read localStorage-dependent cart values must prevent server/client hydration mismatches.
+- Use a client-side mounting or hydration strategy where necessary.
+- Do not render persisted values in a way that causes the initial server and client renders to differ.
 
 ### 3. URL-Driven Global Filters Strategy
 
-- **The Rule:** Global filtering parameters (e.g., inside `CatalogFilters.tsx`) must never be written to local React states or Zustand. To ensure 100% SEO-shareable state indexation, all filters **MUST** be written directly into URL Query Strings (`?size=M&color=Black`) via Next.js `useRouter` and navigation states.
+Catalog filters must be represented in URL query parameters.
+
+Examples:
+
+- `?size=M`
+- `?color=Black`
+- `?size=M&color=Black&sort=price-asc`
+
+Use Next.js navigation APIs (`useRouter`, `useSearchParams`, and related APIs) to read and update filter parameters.
+
+Do not duplicate URL-driven filter state in local React state or Zustand unless there is a clearly justified temporary UI state.
 
 ---
 
-## 🎨 Design Tokens & Styling (Tailwind v4 Strict Standards)
+## 🎨 Design Tokens & Styling (Tailwind CSS v4)
 
-We use **Tailwind v4** driven by the central CSS-only configuration directive in `src/app/globals.css` via the `@theme` rule.
+The project uses **Tailwind CSS v4**, configured through CSS-first directives in `src/app/globals.css`.
 
-- **NO LEGACY CONFIGS:** Never generate or seek `tailwind.config.js` or `postcss.config.js`. Tailwind v4 compiles directly from CSS.
-- **NO HARDCODED COLORS OR RAW HEX:** Never use raw utility overrides (`bg-black`, `text-pink-600`) or explicit strings (`bg-[#C31F5C]`). Always use the standardized semantic theme tokens.
-- **NO ILLEGAL HEIGHT ARBITRARY VALUES:** Avoid arbitrary layouts that crash the v4 pipeline (`max-h-[500px]`). Always translate sizes to native spacing-scale metrics or exact token definitions:
-  - Use **`max-h-125`** instead of `max-h-[500px]` (500px / 4 = 125)
-  - Use **`w-21.25`** instead of `w-[85px]` (85px / 4 = 21.25)
-  - Use **`w-27.5`** instead of `w-[110px]` (110px / 4 = 27.5)
-- **V4 GRADIENTS SYNTAX:** Use pure modern directives: `bg-linear-to-r` or `bg-linear-to-br`.
+- Do not introduce legacy Tailwind configuration files unless the project architecture explicitly requires them.
+- Avoid hardcoded colors and raw hexadecimal values.
+- Prefer semantic theme tokens defined in the global CSS theme.
+- Use the existing spacing scale and project conventions.
+- Use modern Tailwind v4 gradient syntax, such as `bg-linear-to-r` and `bg-linear-to-br`.
 
-### Core UI Semantic Tokens Mapped in `globals.css`
+### Core UI Semantic Tokens
 
-- `bg-background` / `text-foreground` — Base viewport background and high-contrast text layout.
-- `bg-card` / `text-card-foreground` — Presentation components background elements.
-- `bg-primary` / `bg-accent` / `text-accent-foreground` — Luxury brand identity highlights and text context indicators.
+- `bg-background` / `text-foreground` — Base viewport background and text.
+- `bg-card` / `text-card-foreground` — Card surfaces.
+- `bg-primary` — Primary brand color.
+- `bg-accent` / `text-accent-foreground` — Accent surfaces and text.
 
-### Multi-Tenant Extended Product Colors (E-commerce Swatches)
-Available values mapped via CSS theme config:
+### Extended Product Colors
+
+Available product color tokens include:
+
 - `white`, `smoky-white`, `lavender`, `creamy-yellow`, `creamy`, `creamy-velvet`, `peach`
 - `cotton-candy`, `pale-purple`, `eggplant`, `cherry`, `dark-violet`, `plum`
 - `ruby`, `wine-red`, `magenta`, `red`, `mahogany-brown`
 - `magic-mint`, `emerald`, `pearl-green`, `azure-blue`, `denim-blue`, `midnight-blue`
 - `raw-umber`, `dark`, `black`
 
+Always verify that a token exists in `globals.css` before using it.
+
 ### Typography & Price Formatting
 
-- **Font Family:** `Manrope` (`font-sans`) is applied globally. No alternative serif systems allowed.
-- **Price & Locale Hydration:** Enforce standard localization when string-formatting prices (`price.toLocaleString('uk-UA')`) and apply `suppressHydrationWarning` on the text wrapper node when necessary to prevent SSR/CSR validation discrepancies.
+- **Font Family:** `Manrope` (`font-sans`) is applied globally.
+- Use consistent typography and existing project conventions.
+- Format prices with the Ukrainian locale where appropriate:
+
+```typescript
+price.toLocaleString("uk-UA");
+```
+
+- Use `suppressHydrationWarning` only when there is a known and justified server/client formatting difference. Do not use it to hide unrelated hydration errors.
 
 ---
 
-## ⚙️ Relational Data Models & Static Caching (Supabase Integration)
+## ⚙️ Relational Data Models & Supabase Integration
 
-All product-related interfaces strictly follow a relational data model where prices and presentation swatches are unboxed from variants and nested image sub-arrays. Integration is managed via `@supabase/ssr` using separated server and browser clients.
+Product data follows a relational model where prices and presentation swatches are stored in variants, and images are associated with products and optionally with variants.
 
-### 1. Supabase Clients (`@/shared/api/supabase/`)
-- `browserClient.ts`: Exports `createSupabaseBrowserClient()` initialized with public environment variables.
-- `serverClient.ts`: Exports asynchronous `createSupabaseServerClient()` supporting Next.js header-based cookie manipulation.
+Supabase integration uses `@supabase/ssr` with separate server and browser clients.
 
-### 2. Product Interface Schema (`@/entities/product/model/types.ts`)
+### 1. Supabase Clients
+
+Located in `src/shared/api/supabase/`:
+
+- `browserClient.ts` — Exports `createSupabaseBrowserClient()` initialized with public environment variables.
+- `serverClient.ts` — Exports asynchronous `createSupabaseServerClient()` and supports Next.js cookie handling.
+
+Use the appropriate client depending on the execution environment.
+
+- Never expose service-role credentials to the browser.
+- Never import server-only Supabase functionality into Client Components.
+- Keep database access and server-only logic within the appropriate server-side modules.
+
+### 2. Product Interface Schema
+
+The canonical product model is defined in:
+
+`src/entities/product/model/types.ts`
 
 ```typescript
 export type ProductColor =
@@ -185,3 +334,23 @@ export interface Product {
   images: ProductImage[];
 }
 ```
+
+Always treat the actual TypeScript definitions in the repository as the source of truth. Update this documentation when the domain model changes.
+
+---
+
+## 🧭 General Development Guidelines
+
+1. **Preserve Existing Behavior:** Refactoring must not change business behavior unless explicitly requested.
+2. **Small, Focused Changes:** Prefer incremental changes over large rewrites.
+3. **Type Safety:** Avoid `any`. Use explicit types and narrow unknown values safely.
+4. **Server/Client Boundaries:** Keep server-only modules separate from Client Components. Add `"use client"` only when required.
+5. **Public APIs:** Update slice `index.ts` files when exposing functionality across layers.
+6. **No Unnecessary Abstractions:** Introduce abstractions only when they improve reuse, clarity, or separation of responsibilities.
+7. **Verify Changes:** Run relevant checks after modifications:
+   - `npm run lint`
+   - `npx tsc --noEmit`
+   - `npm run build` when appropriate
+8. **Do Not Claim Checks Passed Unless They Were Actually Run:** Report failures and warnings honestly.
+9. **Keep Documentation Current:** Update this file when the directory structure, public APIs, or architectural conventions change.
+10. **Avoid Unrelated Changes:** Do not combine architectural refactoring with unrelated styling or business-logic changes.
