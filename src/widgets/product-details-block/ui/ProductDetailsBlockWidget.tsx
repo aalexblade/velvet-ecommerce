@@ -1,8 +1,11 @@
 "use client";
 
 import * as React from "react";
-import { ProductDetailsBlock, type Product } from "@/entities/product";
-import type { ProductAddToCartPayload } from "@/entities/product/ui/ProductDetailsBlock";
+import {
+  ProductDetailsBlock,
+  type Product,
+  type ProductAddToCartPayload,
+} from "@/entities/product";
 import { useCartStore } from "@/features/cart";
 import { SizeCalculatorForm } from "@/features/product-size-calculator";
 
