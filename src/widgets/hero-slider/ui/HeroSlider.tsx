@@ -12,7 +12,7 @@ import {
   CarouselItem,
   type CarouselApi,
 } from "@/shared/ui/carousel";
-import { Button } from "@/shared/ui/button";
+import { Button } from "@/shared/ui";
 import { cn } from "@/shared/lib";
 import { getHeroSlides, type HeroSlide } from "@/entities/hero-slide";
 
