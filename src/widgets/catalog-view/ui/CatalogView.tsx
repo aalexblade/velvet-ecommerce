@@ -9,7 +9,7 @@ import { ProductCard } from "@/widgets/product-card";
 import type { Product } from "@/entities/product";
 import { CatalogFilters } from "@/features/filters";
 import { SizeCalculatorForm } from "@/features/product-size-calculator";
-import { Pagination } from "@/shared/ui/Pagination";
+import { Pagination } from "@/shared/ui";
 
 interface Subcategory {
   id: number;
