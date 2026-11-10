@@ -10,7 +10,7 @@ import { cn } from "@/shared/lib";
 
 import type { Product } from "@/entities/product";
 
-import { useCartStore } from "@/features/cart/model/cartStore";
+import { useCartStore } from "@/features/cart";
 import { ProductQuickViewModal } from "@/features/product-quick-view";
 
 import { ProductColorSwatches } from "./ProductColorSwatches";
