@@ -7,4 +7,7 @@ export type {
 } from "./model/types";
 
 // UI Components
-export { ProductDetailsBlock } from "./ui/ProductDetailsBlock";
+export {
+  ProductDetailsBlock,
+  type ProductAddToCartPayload,
+} from "./ui/ProductDetailsBlock";
