@@ -11,7 +11,7 @@ import {
   CarouselContent,
   CarouselItem,
   type CarouselApi,
-} from "@/shared/ui/carousel";
+} from "@/shared/ui";
 import { Button } from "@/shared/ui";
 import { cn } from "@/shared/lib";
 import { getHeroSlides, type HeroSlide } from "@/entities/hero-slide";
