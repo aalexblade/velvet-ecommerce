@@ -6,7 +6,7 @@ import {
   type ProductAddToCartPayload,
 } from "@/entities/product/ui/ProductDetailsBlock";
 import { Product } from "@/entities/product/model/types";
-import { useCartStore } from "@/features/cart/model/cartStore";
+import { useCartStore } from "@/features/cart";
 import { SizeCalculatorForm } from "@/features/product-size-calculator/ui/SizeCalculatorForm";
 
 interface ProductDetailsBlockWidgetProps {
