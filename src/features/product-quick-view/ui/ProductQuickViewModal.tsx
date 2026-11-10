@@ -2,10 +2,9 @@
 
 import * as React from "react";
 import { X } from "lucide-react";
-import { ProductDetailsBlock } from "@/entities/product";
-import { Product } from "@/entities/product/model/types";
+import { ProductDetailsBlock, type Product } from "@/entities/product";
 import { useCartStore } from "@/features/cart";
-import { SizeCalculatorForm } from "@/features/product-size-calculator/ui/SizeCalculatorForm";
+import { SizeCalculatorForm } from "@/features/product-size-calculator";
 
 interface ProductQuickViewModalProps {
   product: Product | null;
