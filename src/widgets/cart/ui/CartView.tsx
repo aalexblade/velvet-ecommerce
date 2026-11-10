@@ -4,7 +4,7 @@ import React, { useMemo } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Trash2, Minus, Plus, ArrowRight, ShoppingBag } from "lucide-react";
-import { useCartStore } from "@/features/cart/model/cartStore";
+import { useCartStore } from "@/features/cart";
 
 export function CartView() {
   const { items, updateQuantity, removeFromCart } = useCartStore();
