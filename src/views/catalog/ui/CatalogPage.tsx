@@ -1,4 +1,5 @@
 import { CatalogView } from "@/widgets/catalog-view";
+import { ProductCard } from "@/widgets/product-card";
 import {
   getProducts,
   getSubcategories,
@@ -54,6 +55,9 @@ export async function CatalogPage({ slug, searchParams }: CatalogPageProps) {
       initialSubcategories={subcategories}
       currentPage={currentPage}
       totalPages={totalPages}
+      productCards={products.map((product) => (
+        <ProductCard key={product.id} product={product} />
+      ))}
     />
   );
 }
