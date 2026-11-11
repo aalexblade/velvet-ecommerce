@@ -8,10 +8,11 @@ import useEmblaCarousel from "embla-carousel-react";
 import { Heart, ShoppingBag, ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/shared/lib";
 
-import type { Product } from "@/entities/product";
+import type { Product, ProductAddToCartPayload } from "@/entities/product";
 
 import { useCartStore } from "@/features/cart";
 import { ProductQuickViewModal } from "@/features/product-quick-view";
+import { SizeCalculatorForm } from "@/features/product-size-calculator";
 
 import { ProductColorSwatches } from "./ProductColorSwatches";
 
@@ -260,6 +261,28 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         initialGroupId={activeGroup?.id}
         isOpen={isQuickViewOpen}
         onClose={() => setIsQuickViewOpen(false)}
+        onAddToCart={(payload: ProductAddToCartPayload) => {
+          addToCart(payload);
+        }}
+        sizeCalculatorSlot={({
+          availableSizes,
+          onSelectSize,
+          onCloseModal,
+        }) => (
+          <SizeCalculatorForm
+            onSizeCalculated={(calculatedSize) => {
+              if (availableSizes.includes(calculatedSize)) {
+                onSelectSize(calculatedSize);
+              }
+            }}
+            onApplyFilter={(size) => {
+              if (availableSizes.includes(size)) {
+                onSelectSize(size);
+              }
+              onCloseModal();
+            }}
+          />
+        )}
       />
     </>
   );
