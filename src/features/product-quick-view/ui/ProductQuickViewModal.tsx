@@ -2,25 +2,31 @@
 
 import * as React from "react";
 import { X } from "lucide-react";
-import { ProductDetailsBlock, type Product } from "@/entities/product";
-import { useCartStore } from "@/features/cart";
-import { SizeCalculatorForm } from "@/features/product-size-calculator";
+import {
+  ProductDetailsBlock,
+  type Product,
+  type ProductAddToCartPayload,
+} from "@/entities/product";
 
 interface ProductQuickViewModalProps {
   product: Product | null;
   isOpen: boolean;
   onClose: () => void;
+  onAddToCart: (payload: ProductAddToCartPayload) => void;
   initialGroupId?: number | string;
+  sizeCalculatorSlot?: React.ComponentProps<
+    typeof ProductDetailsBlock
+  >["sizeCalculatorSlot"];
 }
 
 export const ProductQuickViewModal: React.FC<ProductQuickViewModalProps> = ({
   product,
   isOpen,
   onClose,
+  onAddToCart,
   initialGroupId,
+  sizeCalculatorSlot,
 }) => {
-  const addToCart = useCartStore((state) => state.addToCart);
-
   if (!isOpen || !product) return null;
 
   return (
@@ -43,26 +49,8 @@ export const ProductQuickViewModal: React.FC<ProductQuickViewModalProps> = ({
         <ProductDetailsBlock
           product={product}
           initialGroupId={initialGroupId}
-          onAddToCart={addToCart}
-          sizeCalculatorSlot={({
-            availableSizes,
-            onSelectSize,
-            onCloseModal,
-          }) => (
-            <SizeCalculatorForm
-              onSizeCalculated={(calculatedSize) => {
-                if (availableSizes.includes(calculatedSize)) {
-                  onSelectSize(calculatedSize);
-                }
-              }}
-              onApplyFilter={(size) => {
-                if (availableSizes.includes(size)) {
-                  onSelectSize(size);
-                }
-                onCloseModal();
-              }}
-            />
-          )}
+          onAddToCart={onAddToCart}
+          sizeCalculatorSlot={sizeCalculatorSlot}
         />
       </div>
     </div>
