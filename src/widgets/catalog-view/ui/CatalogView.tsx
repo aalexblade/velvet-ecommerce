@@ -1,11 +1,10 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, type ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { ChevronRight, X } from "lucide-react";
-import { ProductCard } from "@/widgets/product-card";
 import type { Product } from "@/entities/product";
 import { CatalogFilters } from "@/features/filters";
 import { SizeCalculatorForm } from "@/features/product-size-calculator";
@@ -25,6 +24,7 @@ interface CatalogViewProps {
   initialSubcategories: Subcategory[];
   currentPage?: number;
   totalPages?: number;
+  productCards: ReactNode[];
 }
 
 export function CatalogView({
@@ -33,6 +33,7 @@ export function CatalogView({
   initialSubcategories,
   currentPage = 1,
   totalPages = 1,
+  productCards,
 }: CatalogViewProps) {
   const router = useRouter();
   const pathname = usePathname();
@@ -156,9 +157,7 @@ export function CatalogView({
             </div>
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-8">
-              {products.map((product) => (
-                <ProductCard key={product.id} product={product} />
-              ))}
+              {productCards}
             </div>
           )}
 
