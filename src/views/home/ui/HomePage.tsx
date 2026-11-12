@@ -4,14 +4,21 @@ import { PromoLook } from "@/widgets/promo-look";
 import { Reviews } from "@/widgets/reviews";
 import { DiscountBanner } from "@/widgets/discount-banner";
 import { SizeCalculator, SizeHowTo } from "@/widgets/product-size-guide";
-import {
-  ProductCard,
-  ProductCardSkeleton,
-} from "@/widgets/product-card";
+import { ProductCard, ProductCardSkeleton } from "@/widgets/product-card";
 import { getBestsellers } from "@/entities/product/server";
 
 export async function HomePage() {
   const bestsellers = await getBestsellers();
+
+  const productCards = bestsellers.map((product, idx) => (
+    <div key={`${product.id}-${idx}`} className="w-full max-w-55">
+      <ProductCard product={product} />
+    </div>
+  ));
+
+  const skeletonCards = Array.from({ length: 4 }).map((_, index) => (
+    <ProductCardSkeleton key={`skeleton-${index}`} />
+  ));
 
   return (
     <main className="flex flex-col min-h-screen">
@@ -19,14 +26,11 @@ export async function HomePage() {
 
       <div className="w-full flex flex-col">
         <ProductGrid
-          products={bestsellers}
           title="Бестселери"
           description="Найпопулярніші моделі сезону, які обирають наші клієнти найчастіше."
           showPromo={true}
-          renderProductCard={(product) => (
-            <ProductCard product={product} />
-          )}
-          renderProductSkeleton={() => <ProductCardSkeleton />}
+          productCards={productCards}
+          skeletonCards={skeletonCards}
         />
         <PromoLook />
         <DiscountBanner />
