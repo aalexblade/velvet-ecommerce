@@ -13,69 +13,29 @@ import {
 } from "@/shared/ui/carousel";
 import { cn } from "@/shared/lib";
 
-import type {
-  Product,
-  ProductColorGroup,
-  ProductImage,
-} from "@/entities/product";
-
 export interface ProductGridProps {
-  products: Product[];
   title?: string;
   description?: string;
   showPromo?: boolean;
   promoImageUrl?: string;
   isLoading?: boolean;
   skeletonCount?: number;
-  renderProductCard: (product: Product) => ReactNode;
-  renderProductSkeleton: () => ReactNode;
+  productCards: ReactNode[];
+  skeletonCards: ReactNode[];
 }
 
 export const ProductGrid: React.FC<ProductGridProps> = ({
-  products,
   title,
   description,
   showPromo = false,
   promoImageUrl = "https://mylhoikievakodeutzsi.supabase.co/storage/v1/object/public/products/bestsellers-promo.jpg",
   isLoading = false,
   skeletonCount = 4,
-  renderProductCard,
-  renderProductSkeleton,
+  productCards,
+  skeletonCards,
 }) => {
   const [api, setApi] = React.useState<CarouselApi>();
   const [current, setCurrent] = React.useState(0);
-
-  const displayProducts = React.useMemo<Product[]>(() => {
-    if (!products || products.length === 0) return [];
-
-    return products.flatMap((product) => {
-      const colorGroups = product.product_color_groups || [];
-
-      if (colorGroups.length <= 1) {
-        return [product];
-      }
-
-      return colorGroups.map((group: ProductColorGroup) => {
-        const groupImages = (product.images || []).filter(
-          (img: ProductImage) => img.color_group_id === group.id,
-        );
-
-        const reorderedGroups: ProductColorGroup[] = [
-          { ...group, is_main: true },
-          ...colorGroups
-            .filter((g: ProductColorGroup) => g.id !== group.id)
-            .map((g: ProductColorGroup) => ({ ...g, is_main: false })),
-        ];
-
-        return {
-          ...product,
-          id: product.id,
-          images: groupImages.length > 0 ? groupImages : product.images,
-          product_color_groups: reorderedGroups,
-        };
-      });
-    });
-  }, [products]);
 
   const autoplayPlugin = React.useMemo(
     () =>
@@ -106,12 +66,18 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
   }, [api]);
 
   React.useEffect(() => {
-    if (api && displayProducts.length > 0) {
+    if (api && productCards.length > 0) {
       api.reInit();
     }
-  }, [api, displayProducts]);
+  }, [api, productCards]);
 
-  const skeletonItems = Array.from({ length: skeletonCount });
+  const fallbackSkeletons = Array.from({ length: skeletonCount }).map(
+    (_, index) => (
+      <React.Fragment key={`desktop-skeleton-${index}`}>
+        {skeletonCards[index] || null}
+      </React.Fragment>
+    ),
+  );
 
   return (
     <section className="w-full py-6 lg:py-10">
@@ -169,20 +135,7 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
                     : "grid-cols-2 lg:grid-cols-4",
                 )}
               >
-                {isLoading
-                  ? skeletonItems.map((_, index) => (
-                      <React.Fragment key={`desktop-skeleton-${index}`}>
-                        {renderProductSkeleton()}
-                      </React.Fragment>
-                    ))
-                  : displayProducts.map((product, idx) => (
-                      <div
-                        key={`${product.id}-${idx}`}
-                        className="w-full max-w-55"
-                      >
-                        {renderProductCard(product)}
-                      </div>
-                    ))}
+                {isLoading ? fallbackSkeletons : productCards}
               </div>
 
               {/* MOBILE & TABLET CAROUSEL */}
@@ -199,28 +152,28 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
                 >
                   <CarouselContent className="-ml-3">
                     {isLoading
-                      ? skeletonItems.map((_, index) => (
+                      ? skeletonCards.map((skeleton, index) => (
                           <CarouselItem
                             key={`mobile-skeleton-${index}`}
                             className="pl-3 basis-4/5 sm:basis-[40%] md:basis-[40%]"
                           >
-                            {renderProductSkeleton()}
+                            {skeleton}
                           </CarouselItem>
                         ))
-                      : displayProducts.map((product, idx) => (
+                      : productCards.map((card, idx) => (
                           <CarouselItem
-                            key={`${product.id}-${idx}`}
+                            key={`mobile-card-${idx}`}
                             className="pl-3 basis-4/5 sm:basis-[40%] md:basis-[40%]"
                           >
-                            {renderProductCard(product)}
+                            {card}
                           </CarouselItem>
                         ))}
                   </CarouselContent>
 
                   {/* Navigation Dots */}
-                  {!isLoading && displayProducts.length > 0 && (
+                  {!isLoading && productCards.length > 0 && (
                     <div className="flex justify-center gap-1.5 mt-4">
-                      {displayProducts.map((_, index) => (
+                      {productCards.map((_, index) => (
                         <button
                           key={index}
                           type="button"
