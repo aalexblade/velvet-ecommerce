@@ -5,9 +5,9 @@ import Image from "next/image";
 import {
   fetchAdminOrders,
   updateOrderStatus,
-  AdminOrder,
-  AdminOrderItem,
-} from "@/entities/order/api/adminOrderService";
+  type AdminOrder,
+  type AdminOrderItem,
+} from "@/entities/order";
 import {
   Loader2,
   ChevronDown,
