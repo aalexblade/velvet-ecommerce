@@ -4,6 +4,10 @@ import { PromoLook } from "@/widgets/promo-look";
 import { Reviews } from "@/widgets/reviews";
 import { DiscountBanner } from "@/widgets/discount-banner";
 import { SizeCalculator, SizeHowTo } from "@/widgets/product-size-guide";
+import {
+  ProductCard,
+  ProductCardSkeleton,
+} from "@/widgets/product-card";
 import { getBestsellers } from "@/entities/product/server";
 
 export async function HomePage() {
@@ -19,6 +23,10 @@ export async function HomePage() {
           title="Бестселери"
           description="Найпопулярніші моделі сезону, які обирають наші клієнти найчастіше."
           showPromo={true}
+          renderProductCard={(product) => (
+            <ProductCard product={product} />
+          )}
+          renderProductSkeleton={() => <ProductCardSkeleton />}
         />
         <PromoLook />
         <DiscountBanner />
