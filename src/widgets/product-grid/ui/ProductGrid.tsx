@@ -4,7 +4,7 @@ import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import Autoplay from "embla-carousel-autoplay";
-import { ProductCard, ProductCardSkeleton } from "@/widgets/product-card";
+import type { ReactNode } from "react";
 import {
   Carousel,
   CarouselContent,
@@ -27,6 +27,8 @@ export interface ProductGridProps {
   promoImageUrl?: string;
   isLoading?: boolean;
   skeletonCount?: number;
+  renderProductCard: (product: Product) => ReactNode;
+  renderProductSkeleton: () => ReactNode;
 }
 
 export const ProductGrid: React.FC<ProductGridProps> = ({
@@ -37,6 +39,8 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
   promoImageUrl = "https://mylhoikievakodeutzsi.supabase.co/storage/v1/object/public/products/bestsellers-promo.jpg",
   isLoading = false,
   skeletonCount = 4,
+  renderProductCard,
+  renderProductSkeleton,
 }) => {
   const [api, setApi] = React.useState<CarouselApi>();
   const [current, setCurrent] = React.useState(0);
@@ -167,14 +171,16 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
               >
                 {isLoading
                   ? skeletonItems.map((_, index) => (
-                      <ProductCardSkeleton key={`desktop-skeleton-${index}`} />
+                      <React.Fragment key={`desktop-skeleton-${index}`}>
+                        {renderProductSkeleton()}
+                      </React.Fragment>
                     ))
                   : displayProducts.map((product, idx) => (
                       <div
                         key={`${product.id}-${idx}`}
                         className="w-full max-w-55"
                       >
-                        <ProductCard product={product} />
+                        {renderProductCard(product)}
                       </div>
                     ))}
               </div>
@@ -198,7 +204,7 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
                             key={`mobile-skeleton-${index}`}
                             className="pl-3 basis-4/5 sm:basis-[40%] md:basis-[40%]"
                           >
-                            <ProductCardSkeleton />
+                            {renderProductSkeleton()}
                           </CarouselItem>
                         ))
                       : displayProducts.map((product, idx) => (
@@ -206,7 +212,7 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
                             key={`${product.id}-${idx}`}
                             className="pl-3 basis-4/5 sm:basis-[40%] md:basis-[40%]"
                           >
-                            <ProductCard product={product} />
+                            {renderProductCard(product)}
                           </CarouselItem>
                         ))}
                   </CarouselContent>
