@@ -87,7 +87,7 @@ export const HeroSlider = () => {
               key={slide.id}
               className="pl-0 h-full w-full relative basis-full"
             >
-              {/* 1. Десктопна картинка */}
+              {/* 1.Desctop cart*/}
               <div className="absolute inset-0 hidden sm:block h-full w-full">
                 <Image
                   src={slide.image_url}
@@ -99,7 +99,7 @@ export const HeroSlider = () => {
                 />
               </div>
 
-              {/* 2. Мобільна картинка */}
+              {/* 2. Mobail cart */}
               <div className="absolute inset-0 block sm:hidden h-full w-full">
                 <Image
                   src={slide.mobile_image_url || slide.image_url}
