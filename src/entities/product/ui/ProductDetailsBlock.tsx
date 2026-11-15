@@ -6,7 +6,7 @@ import Image from "next/image";
 import useEmblaCarousel from "embla-carousel-react";
 import { Heart, Minus, Plus, Star, Ruler, Check, X } from "lucide-react";
 import { cn } from "@/shared/lib";
-import { Product } from "@/entities/product/model/types";
+import { Product } from "../model/types";
 
 export interface ProductAddToCartPayload {
   variantId: string;
