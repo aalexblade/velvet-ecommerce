@@ -1,8 +1,9 @@
 import { createSupabaseBrowserClient } from "@/shared/api/supabase/browserClient";
 import type { AdminOrder } from "../model/adminTypes";
-const supabase = createSupabaseBrowserClient();
 
 export async function fetchAdminOrders(): Promise<AdminOrder[]> {
+  const supabase = createSupabaseBrowserClient();
+
   const { data, error } = await supabase
     .from("orders")
     .select(
@@ -14,24 +15,26 @@ export async function fetchAdminOrders(): Promise<AdminOrder[]> {
     .order("created_at", { ascending: false });
 
   if (error) {
-    console.error("Помилка завантаження замовлень для адмінки:", error);
+    console.error("Error fetching admin orders:", error);
     throw new Error(error.message);
   }
 
-  return data as AdminOrder[];
+  return (data || []) as AdminOrder[];
 }
 
 export async function updateOrderStatus(
   orderId: string,
-  status: AdminOrder["status"],
+  status: string,
 ): Promise<void> {
+  const supabase = createSupabaseBrowserClient();
+
   const { error } = await supabase
     .from("orders")
     .update({ status })
     .eq("id", orderId);
 
   if (error) {
-    console.error(`Помилка оновлення статусу замовлення ${orderId}:`, error);
+    console.error("Error updating order status:", error);
     throw new Error(error.message);
   }
 }
