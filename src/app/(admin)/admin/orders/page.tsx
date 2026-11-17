@@ -2,12 +2,8 @@
 
 import React, { useEffect, useState, useMemo } from "react";
 import Image from "next/image";
-import {
-  fetchAdminOrders,
-  updateOrderStatus,
-  type AdminOrder,
-  type AdminOrderItem,
-} from "@/entities/order";
+import { fetchAdminOrders, updateOrderStatus } from "@/entities/order/client";
+import type { AdminOrder, AdminOrderItem } from "@/entities/order";
 import {
   Loader2,
   ChevronDown,
