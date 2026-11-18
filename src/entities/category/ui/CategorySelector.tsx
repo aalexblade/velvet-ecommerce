@@ -23,7 +23,7 @@ export const CategorySelector: React.FC<CategorySelectorProps> = ({ categories, 
           <Link
             key={category.id}
             href={category.href}
-            className="flex-shrink-0 w-32 flex flex-col items-center text-center gap-2 group"
+            className="shrink-0 w-32 flex flex-col items-center text-center gap-2 group"
           >
             <div className="relative w-24 h-24 bg-card border border-border/40 rounded-2xl overflow-hidden shadow-sm group-hover:shadow-md transition-all">
               <Image
