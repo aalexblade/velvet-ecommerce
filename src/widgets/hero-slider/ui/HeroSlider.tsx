@@ -14,7 +14,8 @@ import {
 } from "@/shared/ui";
 import { Button } from "@/shared/ui";
 import { cn } from "@/shared/lib";
-import { getHeroSlides, type HeroSlide } from "@/entities/hero-slide";
+import { getHeroSlides } from "@/entities/hero-slide/client";
+import type { HeroSlide } from "@/entities/hero-slide";
 
 export const HeroSlider = () => {
   const [slides, setSlides] = React.useState<HeroSlide[]>([]);
