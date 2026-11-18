@@ -15,7 +15,8 @@ import {
 } from "lucide-react";
 import { cn } from "@/shared/lib";
 import { useCartStore } from "@/features/cart";
-import { getCategories, type Category } from "@/entities/category";
+import { getCategories } from "@/entities/category/client";
+import type { Category } from "@/entities/category";
 
 const STATIC_NAV_LINKS = [
   { label: "Новинки", href: "/catalog/novynky", slug: "novynky" },
