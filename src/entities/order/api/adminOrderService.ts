@@ -24,7 +24,7 @@ export async function fetchAdminOrders(): Promise<AdminOrder[]> {
 
 export async function updateOrderStatus(
   orderId: string,
-  status: string,
+  status: AdminOrder["status"],
 ): Promise<void> {
   const supabase = createSupabaseBrowserClient();
 
