@@ -1,10 +1,10 @@
 import { createSupabaseBrowserClient } from "./supabase/browserClient";
-import { AboutSection, Article } from "@/shared/types";
+import type { AboutSection, Article } from "@/shared/types";
 
 export const getAboutContent = async (): Promise<AboutSection[]> => {
   const supabase = createSupabaseBrowserClient();
   const { data, error } = await supabase
-    .from<string, AboutSection>("about_page")
+    .from("about_page")
     .select("*")
     .order("id", { ascending: true });
 
@@ -13,13 +13,13 @@ export const getAboutContent = async (): Promise<AboutSection[]> => {
     return [];
   }
 
-  return (data as AboutSection[]) || [];
+  return (data as unknown as AboutSection[]) || [];
 };
 
 export const getArticles = async (): Promise<Article[]> => {
   const supabase = createSupabaseBrowserClient();
   const { data, error } = await supabase
-    .from<string, Article>("articles")
+    .from("articles")
     .select("*")
     .order("id", { ascending: true });
 
@@ -28,5 +28,5 @@ export const getArticles = async (): Promise<Article[]> => {
     return [];
   }
 
-  return (data as Article[]) || [];
+  return (data as unknown as Article[]) || [];
 };
