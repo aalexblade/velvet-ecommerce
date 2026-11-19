@@ -4,8 +4,8 @@ import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowUpRight, Loader2 } from "lucide-react";
-import { getArticles } from "@/shared/api/contentApi";
-import { Article } from "@/shared/types";
+import { getArticles } from "@/entities/article/client";
+import type { Article } from "@/entities/article";
 
 export default function BlogPage() {
   const [articles, setArticles] = useState<Article[]>([]);
@@ -53,7 +53,9 @@ export default function BlogPage() {
           Блог Velvet Secrets
         </h1>
         <p className="text-xs md:text-sm text-zinc-500 font-light leading-relaxed max-w-xl mx-auto">
-          Наш блог — це простір для справжніх поціновувачок жіночності та стилю. Тут ми ділимося корисним контентом, який допомагає вам почуватися впевнено і стильно щодня.
+          Наш блог — це простір для справжніх поціновувачок жіночності та стилю.
+          Тут ми ділимося корисним контентом, який допомагає вам почуватися
+          впевнено і стильно щодня.
         </p>
       </div>
 
@@ -111,7 +113,13 @@ export default function BlogPage() {
         {/* ТЕКСТОВИЙ ПІДВАЛ БЛОГУ */}
         <div className="mt-16 text-center">
           <p className="text-xs md:text-sm text-zinc-500 font-light leading-relaxed max-w-2xl mx-auto">
-            Блог <strong className="font-semibold text-zinc-800">Velvet Secrets</strong> демонструє нашу експертність і допомагає вам завжди залишатися на хвилі моди та комфорту. Повертаючись сюди регулярно, ви знайдете нові ідеї та секрети жіночої впевненості.
+            Блог{" "}
+            <strong className="font-semibold text-zinc-800">
+              Velvet Secrets
+            </strong>{" "}
+            демонструє нашу експертність і допомагає вам завжди залишатися на
+            хвилі моди та комфорту. Повертаючись сюди регулярно, ви знайдете
+            нові ідеї та секрети жіночої впевненості.
           </p>
         </div>
       </div>

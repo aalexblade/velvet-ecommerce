@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Loader2 } from "lucide-react";
-import { getAboutContent } from "@/shared/api/contentApi";
+import { getAboutContent } from "@/entities/about/client";
 import type { AboutSection } from "@/entities/about";
 
 export default function AboutPage() {
