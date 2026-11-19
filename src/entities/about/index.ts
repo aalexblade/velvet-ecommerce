@@ -1,0 +1,1 @@
+export type { AboutSection, AboutSectionContent } from "./model/types";

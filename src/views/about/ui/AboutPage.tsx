@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Loader2 } from "lucide-react";
 import { getAboutContent } from "@/shared/api/contentApi";
-import { AboutSection } from "@/shared/types";
+import type { AboutSection } from "@/entities/about";
 
 export default function AboutPage() {
   const [aboutSections, setAboutSections] = useState<AboutSection[]>([]);
