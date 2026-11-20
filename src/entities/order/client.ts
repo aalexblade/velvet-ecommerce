@@ -1,6 +1,4 @@
-"client-only";
+import "client-only";
 
-export {
-  fetchAdminOrders,
-  updateOrderStatus,
-} from "./api/adminOrderService";
+export { createOrder } from "./api/createOrder";
+export { fetchAdminOrders, updateOrderStatus } from "./api/adminOrderService";
