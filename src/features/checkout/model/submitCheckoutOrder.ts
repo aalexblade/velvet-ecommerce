@@ -1,4 +1,4 @@
-import { createOrder } from "@/entities/order";
+import { createOrder } from "@/entities/order/client";
 import type {
   CreateOrderItemPayload,
   CreateOrderPayload,
