@@ -5,10 +5,9 @@ export interface AboutSectionContent {
 
 export interface AboutSection {
   id: number;
+  section_key: string;
   title?: string;
   subtitle?: string;
-  description?: string;
   image_url?: string;
   content?: AboutSectionContent;
-  display_order?: number;
 }
