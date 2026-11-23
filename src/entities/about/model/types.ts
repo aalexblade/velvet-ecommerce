@@ -11,3 +11,6 @@ export interface AboutSection {
   image_url?: string;
   content?: AboutSectionContent;
 }
+
+
+//model interface
