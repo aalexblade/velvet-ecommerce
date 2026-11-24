@@ -13,4 +13,3 @@ export interface AboutSection {
 }
 
 
-//model interface
