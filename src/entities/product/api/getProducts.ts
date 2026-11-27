@@ -318,22 +318,32 @@ export async function getProducts(
       );
     }
 
-    if (filters.minPrice !== undefined && filters.minPrice !== "") {
-      const min = Number(filters.minPrice);
-      if (!isNaN(min)) {
-        products = products.filter((product) =>
-          product.variants?.some((v) => v.price >= min),
-        );
-      }
-    }
+    const parsedMin =
+      filters.minPrice !== undefined && filters.minPrice !== ""
+        ? Number(filters.minPrice)
+        : undefined;
+    const parsedMax =
+      filters.maxPrice !== undefined && filters.maxPrice !== ""
+        ? Number(filters.maxPrice)
+        : undefined;
 
-    if (filters.maxPrice !== undefined && filters.maxPrice !== "") {
-      const max = Number(filters.maxPrice);
-      if (!isNaN(max)) {
-        products = products.filter((product) =>
-          product.variants?.some((v) => v.price <= max),
-        );
-      }
+    const min =
+      parsedMin !== undefined && !Number.isNaN(parsedMin)
+        ? parsedMin
+        : undefined;
+    const max =
+      parsedMax !== undefined && !Number.isNaN(parsedMax)
+        ? parsedMax
+        : undefined;
+
+    if (min !== undefined || max !== undefined) {
+      products = products.filter((product) =>
+        product.variants?.some((v) => {
+          const matchesMin = min === undefined || v.price >= min;
+          const matchesMax = max === undefined || v.price <= max;
+          return matchesMin && matchesMax;
+        }),
+      );
     }
 
     if (filters.sortBy) {
@@ -356,6 +366,24 @@ export async function getProducts(
             new Date(b.created_at || 0).getTime() -
             new Date(a.created_at || 0).getTime(),
         );
+      } else if (sort === "popular") {
+        products.sort((a, b) => {
+          const stockA = (a.variants || []).reduce(
+            (acc, v) => acc + (v.stock ?? 0),
+            0,
+          );
+          const stockB = (b.variants || []).reduce(
+            (acc, v) => acc + (v.stock ?? 0),
+            0,
+          );
+          if (stockB !== stockA) {
+            return stockB - stockA;
+          }
+          return (
+            new Date(b.created_at || 0).getTime() -
+            new Date(a.created_at || 0).getTime()
+          );
+        });
       }
     }
   }
