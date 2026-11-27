@@ -254,11 +254,46 @@ export async function getProducts(
     }
   }
 
+  const parsedMin =
+    filters?.minPrice !== undefined && filters.minPrice !== ""
+      ? Number(filters.minPrice)
+      : undefined;
+  const parsedMax =
+    filters?.maxPrice !== undefined && filters.maxPrice !== ""
+      ? Number(filters.maxPrice)
+      : undefined;
+
+  const min =
+    parsedMin !== undefined && !Number.isNaN(parsedMin) ? parsedMin : undefined;
+  const max =
+    parsedMax !== undefined && !Number.isNaN(parsedMax) ? parsedMax : undefined;
+
+  const cleanSizes = filters?.size
+    ? (Array.isArray(filters.size) ? filters.size : [filters.size])
+        .map((s) => s.trim())
+        .filter(Boolean)
+    : [];
+
+  const hasVariantFilter =
+    cleanSizes.length > 0 || min !== undefined || max !== undefined;
+
+  const selectQuery = hasVariantFilter
+    ? `
+      *,
+      categories (id, slug, parent_id),
+      product_color_groups!inner (
+        *,
+        colors!fk_product_color_groups_colors (*),
+        product_images (*),
+        product_variants!inner (*)
+      )
+    `
+    : SELECT_QUERY;
+
   let query = supabase
     .from("products")
-    .select(SELECT_QUERY)
-    .eq("is_active", true)
-    .order("id", { ascending: true });
+    .select(selectQuery, { count: "exact" })
+    .eq("is_active", true);
 
   if (currentSlug) {
     if (targetCategoryIds.length > 0) {
@@ -268,7 +303,54 @@ export async function getProducts(
     }
   }
 
-  const { data, error } = await query;
+  if (filters?.search) {
+    const searchTerms = Array.isArray(filters.search)
+      ? filters.search.map((s) => s.trim()).filter(Boolean)
+      : [filters.search.trim()].filter(Boolean);
+
+    if (searchTerms.length === 1) {
+      query = query.ilike("title", `%${searchTerms[0]}%`);
+    } else if (searchTerms.length > 1) {
+      query = query.or(
+        searchTerms.map((term) => `title.ilike.%${term}%`).join(","),
+      );
+    }
+  }
+
+  if (cleanSizes.length > 0) {
+    query = query.in("product_color_groups.product_variants.size", cleanSizes);
+  }
+
+  if (min !== undefined) {
+    query = query.gte("product_color_groups.product_variants.price", min);
+  }
+
+  if (max !== undefined) {
+    query = query.lte("product_color_groups.product_variants.price", max);
+  }
+
+  if (filters?.sortBy === "newest") {
+    query = query.order("created_at", { ascending: false });
+  } else {
+    query = query.order("id", { ascending: true });
+  }
+
+  const requiresInMemoryPostProcess =
+    Boolean(filters?.color) ||
+    (min !== undefined && max !== undefined) ||
+    filters?.sortBy === "price_asc" ||
+    filters?.sortBy === "price-asc" ||
+    filters?.sortBy === "price_desc" ||
+    filters?.sortBy === "price-desc" ||
+    filters?.sortBy === "popular";
+
+  const startIndex = Math.max(0, (page - 1) * limit);
+
+  if (!requiresInMemoryPostProcess) {
+    query = query.range(startIndex, startIndex + limit - 1);
+  }
+
+  const { data, error, count } = await query;
 
   if (error || !data) {
     console.error("Supabase getProducts execution failure details:", {
@@ -283,118 +365,76 @@ export async function getProducts(
 
   let products: Product[] = normalizeQueryRows(data).map(mapDBProductToProduct);
 
-  if (filters) {
-    if (filters.search) {
-      const searchTerms = Array.isArray(filters.search)
-        ? filters.search.map((s) => s.toLowerCase())
-        : [filters.search.toLowerCase()];
+  if (filters?.color) {
+    const colors = Array.isArray(filters.color)
+      ? filters.color.map((c) => c.toLowerCase())
+      : [filters.color.toLowerCase()];
 
-      products = products.filter((product) =>
-        searchTerms.some((term) => product.title.toLowerCase().includes(term)),
-      );
-    }
+    products = products.filter((product) =>
+      product.variants?.some(
+        (v) => v.color && colors.includes(v.color.toLowerCase()),
+      ),
+    );
+  }
 
-    if (filters.color) {
-      const colors = Array.isArray(filters.color)
-        ? filters.color.map((c) => c.toLowerCase())
-        : [filters.color.toLowerCase()];
+  if (min !== undefined && max !== undefined) {
+    products = products.filter((product) =>
+      product.variants?.some((v) => v.price >= min && v.price <= max),
+    );
+  }
 
-      products = products.filter((product) =>
-        product.variants?.some(
-          (v) => v.color && colors.includes(v.color.toLowerCase()),
-        ),
-      );
-    }
-
-    if (filters.size) {
-      const sizes = Array.isArray(filters.size)
-        ? filters.size.map((s) => s.toLowerCase())
-        : [filters.size.toLowerCase()];
-
-      products = products.filter((product) =>
-        product.variants?.some(
-          (v) => v.size && sizes.includes(v.size.toLowerCase()),
-        ),
-      );
-    }
-
-    const parsedMin =
-      filters.minPrice !== undefined && filters.minPrice !== ""
-        ? Number(filters.minPrice)
-        : undefined;
-    const parsedMax =
-      filters.maxPrice !== undefined && filters.maxPrice !== ""
-        ? Number(filters.maxPrice)
-        : undefined;
-
-    const min =
-      parsedMin !== undefined && !Number.isNaN(parsedMin)
-        ? parsedMin
-        : undefined;
-    const max =
-      parsedMax !== undefined && !Number.isNaN(parsedMax)
-        ? parsedMax
-        : undefined;
-
-    if (min !== undefined || max !== undefined) {
-      products = products.filter((product) =>
-        product.variants?.some((v) => {
-          const matchesMin = min === undefined || v.price >= min;
-          const matchesMax = max === undefined || v.price <= max;
-          return matchesMin && matchesMax;
-        }),
-      );
-    }
-
-    if (filters.sortBy) {
-      const sort = filters.sortBy;
-      if (sort === "price_asc" || sort === "price-asc") {
-        products.sort((a, b) => {
-          const minA = Math.min(...(a.variants?.map((v) => v.price) || [0]));
-          const minB = Math.min(...(b.variants?.map((v) => v.price) || [0]));
-          return minA - minB;
-        });
-      } else if (sort === "price_desc" || sort === "price-desc") {
-        products.sort((a, b) => {
-          const minA = Math.min(...(a.variants?.map((v) => v.price) || [0]));
-          const minB = Math.min(...(b.variants?.map((v) => v.price) || [0]));
-          return minB - minA;
-        });
-      } else if (sort === "newest") {
-        products.sort(
-          (a, b) =>
-            new Date(b.created_at || 0).getTime() -
-            new Date(a.created_at || 0).getTime(),
+  if (filters?.sortBy) {
+    const sort = filters.sortBy;
+    if (sort === "price_asc" || sort === "price-asc") {
+      products.sort((a, b) => {
+        const minA = Math.min(...(a.variants?.map((v) => v.price) || [0]));
+        const minB = Math.min(...(b.variants?.map((v) => v.price) || [0]));
+        return minA - minB;
+      });
+    } else if (sort === "price_desc" || sort === "price-desc") {
+      products.sort((a, b) => {
+        const minA = Math.min(...(a.variants?.map((v) => v.price) || [0]));
+        const minB = Math.min(...(b.variants?.map((v) => v.price) || [0]));
+        return minB - minA;
+      });
+    } else if (sort === "popular") {
+      products.sort((a, b) => {
+        const stockA = (a.variants || []).reduce(
+          (acc, v) => acc + (v.stock ?? 0),
+          0,
         );
-      } else if (sort === "popular") {
-        products.sort((a, b) => {
-          const stockA = (a.variants || []).reduce(
-            (acc, v) => acc + (v.stock ?? 0),
-            0,
-          );
-          const stockB = (b.variants || []).reduce(
-            (acc, v) => acc + (v.stock ?? 0),
-            0,
-          );
-          if (stockB !== stockA) {
-            return stockB - stockA;
-          }
-          return (
-            new Date(b.created_at || 0).getTime() -
-            new Date(a.created_at || 0).getTime()
-          );
-        });
-      }
+        const stockB = (b.variants || []).reduce(
+          (acc, v) => acc + (v.stock ?? 0),
+          0,
+        );
+        if (stockB !== stockA) {
+          return stockB - stockA;
+        }
+        return (
+          new Date(b.created_at || 0).getTime() -
+          new Date(a.created_at || 0).getTime()
+        );
+      });
     }
   }
 
-  const totalCount = products.length;
+  if (requiresInMemoryPostProcess) {
+    const totalCount = products.length;
+    const totalPages = Math.ceil(totalCount / limit) || 1;
+    const paginatedProducts = products.slice(startIndex, startIndex + limit);
+
+    return {
+      products: paginatedProducts,
+      totalCount,
+      totalPages,
+    };
+  }
+
+  const totalCount = count ?? products.length;
   const totalPages = Math.ceil(totalCount / limit) || 1;
-  const startIndex = (page - 1) * limit;
-  const paginatedProducts = products.slice(startIndex, startIndex + limit);
 
   return {
-    products: paginatedProducts,
+    products,
     totalCount,
     totalPages,
   };
