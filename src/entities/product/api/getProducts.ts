@@ -1,4 +1,5 @@
 import { createSupabaseServerClient } from "@/shared/api/supabase/serverClient";
+import type { Tables } from "@/shared/api/supabase/database.types";
 import {
   Product,
   ProductColorGroup,
@@ -24,21 +25,23 @@ export interface ProductFilters {
   collection?: string | string[];
 }
 
-interface DBProductResponse {
-  id: number;
-  title: string;
-  slug: string;
-  description: string | null;
-  category_id: number;
-  is_active: boolean;
-  created_at: string;
-  categories?: {
-    id: number;
-    slug: string;
-    parent_id: number | null;
-  } | null;
-  product_color_groups: ProductColorGroup[];
-}
+type ColorRow = Tables<"colors">;
+type ProductImageRow = Tables<"product_images">;
+type ProductVariantRow = Tables<"product_variants">;
+type ProductColorGroupRow = Tables<"product_color_groups">;
+type CategoryRow = Tables<"categories">;
+type ProductRow = Tables<"products">;
+
+type ProductColorGroupQueryRow = ProductColorGroupRow & {
+  colors: ColorRow | null;
+  product_images: ProductImageRow[];
+  product_variants: ProductVariantRow[];
+};
+
+type ProductQueryRow = ProductRow & {
+  categories: Pick<CategoryRow, "id" | "slug" | "parent_id"> | null;
+  product_color_groups: ProductColorGroupQueryRow[];
+};
 
 export interface GetProductsResult {
   products: Product[];
@@ -46,8 +49,80 @@ export interface GetProductsResult {
   totalPages: number;
 }
 
-function mapDBProductToProduct(prod: DBProductResponse): Product {
-  const colorGroups = prod.product_color_groups || [];
+function isProductQueryRow(item: unknown): item is ProductQueryRow {
+  if (!item || typeof item !== "object") {
+    return false;
+  }
+
+  const candidate = item as Record<string, unknown>;
+  return (
+    typeof candidate.id === "number" &&
+    typeof candidate.title === "string" &&
+    typeof candidate.is_active === "boolean" &&
+    typeof candidate.created_at === "string"
+  );
+}
+
+function normalizeQueryRows(rows: unknown[] | null): ProductQueryRow[] {
+  if (!rows) {
+    return [];
+  }
+
+  return rows.filter(isProductQueryRow);
+}
+
+function mapColorGroupToDomain(
+  group: ProductColorGroupQueryRow,
+): ProductColorGroup {
+  const images: ProductImage[] = (group.product_images || []).map((img) => ({
+    id: img.id,
+    product_id: img.product_id ?? undefined,
+    color_group_id: img.color_group_id ?? group.id,
+    color: img.color,
+    url: img.url,
+    is_main: img.is_main ?? undefined,
+    sort_order: img.sort_order ?? undefined,
+    created_at: img.created_at,
+  }));
+
+  const variants: ProductVariant[] = (group.product_variants || []).map(
+    (v) => ({
+      id: v.id,
+      product_id: v.product_id ?? undefined,
+      color_group_id: v.color_group_id ?? group.id,
+      sku: v.sku,
+      color: v.color,
+      size: v.size,
+      price: Number(v.price),
+      old_price: v.old_price !== null ? Number(v.old_price) : null,
+      stock: v.stock ?? undefined,
+      created_at: v.created_at,
+    }),
+  );
+
+  return {
+    id: group.id,
+    product_id: group.product_id,
+    color_slug: group.color_slug,
+    is_main: group.is_main ?? undefined,
+    created_at: group.created_at ?? undefined,
+    colors: group.colors
+      ? {
+          slug: group.colors.slug,
+          name_uk: group.colors.name_uk,
+          hex: group.colors.hex,
+          tailwind_class: group.colors.tailwind_class,
+        }
+      : undefined,
+    product_images: images,
+    product_variants: variants,
+  };
+}
+
+function mapDBProductToProduct(prod: ProductQueryRow): Product {
+  const colorGroups = (prod.product_color_groups || []).map(
+    mapColorGroupToDomain,
+  );
 
   const allVariants: ProductVariant[] = [];
   const allImages: ProductImage[] = [];
@@ -88,7 +163,7 @@ function mapDBProductToProduct(prod: DBProductResponse): Product {
     title: prod.title,
     slug: prod.slug,
     description: prod.description || "",
-    category_id: prod.category_id,
+    category_id: prod.category_id ?? undefined,
     is_active: prod.is_active,
     created_at: prod.created_at,
     product_color_groups: sortedColorGroups,
@@ -99,7 +174,7 @@ function mapDBProductToProduct(prod: DBProductResponse): Product {
 
 const SELECT_QUERY = `
   *,
-  categories (*),
+  categories (id, slug, parent_id),
   product_color_groups (
     *,
     colors!fk_product_color_groups_colors (*),
@@ -129,8 +204,7 @@ export async function getBestsellers(): Promise<Product[]> {
     return [];
   }
 
-  const rawProducts = data as unknown as DBProductResponse[];
-  return rawProducts.map(mapDBProductToProduct);
+  return normalizeQueryRows(data).map(mapDBProductToProduct);
 }
 
 export async function getProducts(
@@ -141,7 +215,6 @@ export async function getProducts(
 ): Promise<GetProductsResult> {
   const supabase = await createSupabaseServerClient();
 
-  // 1. Отримуємо всі категорії для аналізу ієрархії
   const { data: allCategories, error: catError } = await supabase
     .from("categories")
     .select("id, slug, parent_id");
@@ -169,7 +242,6 @@ export async function getProducts(
     if (matchedCategory) {
       targetCategoryIds.push(matchedCategory.id);
 
-      // Рекурсивно додаємо підкатегорії
       const addChildren = (parentId: number) => {
         const children = allCategories.filter((c) => c.parent_id === parentId);
         children.forEach((child) => {
@@ -182,7 +254,6 @@ export async function getProducts(
     }
   }
 
-  // 2. Запит до Supabase
   let query = supabase
     .from("products")
     .select(SELECT_QUERY)
@@ -210,10 +281,8 @@ export async function getProducts(
     return { products: [], totalCount: 0, totalPages: 1 };
   }
 
-  const rawProducts = data as unknown as DBProductResponse[];
-  let products: Product[] = rawProducts.map(mapDBProductToProduct);
+  let products: Product[] = normalizeQueryRows(data).map(mapDBProductToProduct);
 
-  // IN-MEMORY FILTERING
   if (filters) {
     if (filters.search) {
       const searchTerms = Array.isArray(filters.search)
@@ -291,7 +360,6 @@ export async function getProducts(
     }
   }
 
-  // IN-MEMORY PAGINATION
   const totalCount = products.length;
   const totalPages = Math.ceil(totalCount / limit) || 1;
   const startIndex = (page - 1) * limit;
